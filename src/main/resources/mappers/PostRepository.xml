@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="org.example.demo.repository.PostRepository">
+
+    <insert id="writePost" parameterType="map">
+        INSERT INTO post
+        SET regDate = NOW(),
+		updateDate = NOW(),
+		title = #{title},
+            body = #{body}
+    </insert>
+
+    <delete id="deletePost" parameterType="int">
+        DELETE FROM post
+        WHERE id = #{id}
+    </delete>
+
+    <update id="modifyPost" parameterType="map">
+        UPDATE post
+        SET updateDate = NOW(),
+            title = #{title},
+            body = #{body}
+        WHERE id = #{id}
+    </update>
+
+    <select id="getPostById" parameterType="int" resultType="org.example.demo.vo.Post">
+        SELECT * FROM post
+        WHERE id = #{id}
+    </select>
+
+    <select id="getPosts" resultType="org.example.demo.vo.Post">
+        SELECT * FROM post
+        ORDER BY id DESC
+    </select>
+</mapper>
