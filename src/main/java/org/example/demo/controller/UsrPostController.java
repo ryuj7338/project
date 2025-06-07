@@ -50,7 +50,7 @@ public class UsrPostController {
 
     @RequestMapping("/usr/post/doWrite")
     @ResponseBody
-    public ResultData<List<Post>> doWrite(String title, String body) {
+    public ResultData doWrite(String title, String body) {
 
         if(Ut.isEmptyOrNull(title)){
             return ResultData.from("F-1", "제목을 입력하세요");
@@ -60,18 +60,18 @@ public class UsrPostController {
             return ResultData.from("F-2", "내용을 입력하세요");
         }
 
-        ResultData doWriteRd = postService.writePost(title, body);
+        ResultData writePostRd = postService.writePost(title, body);
 
-        int id = (int) doWriteRd.getData1();
+        int id = (int) writePostRd.getData1();
 
         Post post = postService.getPostById(id);
 
-        return ResultData.from(doWriteRd.getResultCode(), doWriteRd.getMsg(), post);
+        return ResultData.from(writePostRd.getResultCode(), writePostRd.getMsg(), post);
     }
 
     @RequestMapping("/usr/post/getPost")
     @ResponseBody
-    public ResultData<List<Post>> getPost(int id) {
+    public ResultData getPost(int id) {
 
         Post post = postService.getPostById(id);
 

@@ -1,5 +1,6 @@
 package org.example.demo.controller;
 
+import jakarta.servlet.http.HttpSession;
 import org.example.demo.service.MemberService;
 import org.example.demo.util.Ut;
 import org.example.demo.vo.Member;
@@ -14,6 +15,42 @@ public class UsrMemberController {
 
     @Autowired
     private MemberService memberService;
+
+
+    @RequestMapping("/usr/member/doLogin")
+    @ResponseBody
+    public ResultData<Integer> doLogin(HttpSession session, String loginId, String loginPw) {
+
+        boolean isLogined = false;
+
+        if(session.getAttribute("loginedMemberId") != null) {
+            isLogined = true;
+        }
+        if(isLogined) {
+            return ResultData.from("F-A", "이미 로그인중입니다.");
+        }
+        if(Ut.isEmptyOrNull(loginId)){
+            return ResultData.from("F-1", "아이디를 입력하세요");
+        }
+        if(Ut.isEmptyOrNull(loginPw)){
+            return ResultData.from("F-1", "비밀번호를 입력하세요");
+        }
+
+        Member member = memberService.getMemberByLoginId(loginId);
+
+        if(member == null) {
+            return ResultData.from("F-3", Ut.f("%s는(은) 없는 아이디입니다.", loginId));
+        }
+
+        if(member.getLoginPw().equals(loginPw) == false) {
+            return ResultData.from("F-4", "비밀번호가 일치하지 않습니다.");
+        }
+
+        session.setAttribute("loginedMemberId", member.getId());
+
+        return ResultData.from("loginedMemberId", Ut.f("%님 환영합니다.", member.getNickname()));
+    }
+
 
     @RequestMapping("usr/member/doJoin")
     @ResponseBody
