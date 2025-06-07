@@ -18,4 +18,6 @@ public interface PostRepository {
 
     public List<Post> getPosts();
 
+    public int getLastInsertId();
+
 }

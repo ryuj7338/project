@@ -26,6 +26,10 @@
         WHERE id = #{id}
     </update>
 
+    <select id="getLastInsertId" parameterType="int">
+        SELECT LAST_INSERT_ID()
+    </select>
+
     <select id="getPostById" parameterType="int" resultType="org.example.demo.vo.Post">
         SELECT * FROM post
         WHERE id = #{id}

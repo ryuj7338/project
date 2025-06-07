@@ -1,7 +1,9 @@
 package org.example.demo.controller;
 
 import org.example.demo.service.PostService;
+import org.example.demo.util.Ut;
 import org.example.demo.vo.Post;
+import org.example.demo.vo.ResultData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -18,57 +20,74 @@ public class UsrPostController {
 
     @RequestMapping("/usr/post/doModify")
     @ResponseBody
-    public Object doModify(int id, String title, String body) {
+    public ResultData doModify(int id, String title, String body) {
 
         Post post = postService.getPostById(id);
 
         if(post == null) {
-            return id + "번 글은 없습니다.";
+            return ResultData.from("F-1", Ut.f("%d번 게시글은 없습니다.", id));
         }
 
         postService.modifyPost(id, title, body);
 
-        return post;
+        return ResultData.from("S-1", Ut.f("%d번 글이 수정되었습니다.", id), post);
     }
 
     @RequestMapping("/usr/post/doDelete")
     @ResponseBody
-    public String doDelete(int id) {
+    public ResultData doDelete(int id) {
 
         Post post = postService.getPostById(id);
 
         if(post == null) {
-            return id + "번 글은 없습니다.";
+            return ResultData.from("F-1", Ut.f("%d번 게시글은 없습니다.", id));
         }
 
         postService.deletePost(id);
 
-        return id + "번 글이 삭제되었습니다.";
+        return ResultData.from("S-1", Ut.f("%d번 글이 삭제되었습니다.", id));
     }
 
     @RequestMapping("/usr/post/doWrite")
     @ResponseBody
-    public Post doWrite(String title, String body) {
-        return postService.writePost(title, body);
+    public ResultData<List<Post>> doWrite(String title, String body) {
+
+        if(Ut.isEmptyOrNull(title)){
+            return ResultData.from("F-1", "제목을 입력하세요");
+        }
+
+        if(Ut.isEmptyOrNull(body)){
+            return ResultData.from("F-2", "내용을 입력하세요");
+        }
+
+        ResultData doWriteRd = postService.writePost(title, body);
+
+        int id = (int) doWriteRd.getData1();
+
+        Post post = postService.getPostById(id);
+
+        return ResultData.from(doWriteRd.getResultCode(), doWriteRd.getMsg(), post);
     }
 
     @RequestMapping("/usr/post/getPost")
     @ResponseBody
-    public Object getPost(int id) {
+    public ResultData<List<Post>> getPost(int id) {
 
         Post post = postService.getPostById(id);
 
         if(post == null) {
-            return id + "번 글은 없습니다.";
+            return ResultData.from("F-1", Ut.f("%d번 게시글은 없습니다."), id);
         }
 
-        return post;
+        return ResultData.from("S-1", Ut.f("%d번 게시글입니다.", id));
     }
 
     @RequestMapping("/usr/post/getPosts")
     @ResponseBody
-    public List<Post> getPosts() {
+    public ResultData<List<Post>> getPosts() {
 
-        return postService.getPosts();
+        List<Post> posts = postService.getPosts();
+
+        return ResultData.from("S-1", "Post List", posts);
     }
 }

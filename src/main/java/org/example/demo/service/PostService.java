@@ -1,7 +1,9 @@
 package org.example.demo.service;
 
 import org.example.demo.repository.PostRepository;
+import org.example.demo.util.Ut;
 import org.example.demo.vo.Post;
+import org.example.demo.vo.ResultData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -36,11 +38,13 @@ public class PostService {
         postRepository.deletePost(id);
     }
 
-    public Post writePost(String title, String body) {
+    public ResultData writePost(String title, String body) {
 
         postRepository.writePost(title, body);
 
-        return new Post(title, body);
+        int id = postRepository.getLastInsertId();
+
+        return ResultData.from("S-1", Ut.f("%d번 글이 등록되었습니다.", id), id);
     }
 
     public Post getPostById(int id) {
