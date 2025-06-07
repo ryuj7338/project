@@ -13,15 +13,11 @@ import java.time.LocalDateTime;
 @Builder
 public class Post {
 
-    public Post(String title, String body) {
-        this.title = title;
-        this.body = body;
-    }
-
     private int id;
     private LocalDateTime regDate;
     private LocalDateTime updateDate;
     private String title;
     private String body;
+    private int memberId;
 }
 

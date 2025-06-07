@@ -19,7 +19,7 @@ public class UsrMemberController {
 
     @RequestMapping("/usr/member/doLogin")
     @ResponseBody
-    public ResultData<Integer> doLogin(HttpSession session, String loginId, String loginPw) {
+    public ResultData<Member> doLogin(HttpSession session, String loginId, String loginPw) {
 
         boolean isLogined = false;
 
@@ -48,13 +48,41 @@ public class UsrMemberController {
 
         session.setAttribute("loginedMemberId", member.getId());
 
-        return ResultData.from("loginedMemberId", Ut.f("%님 환영합니다.", member.getNickname()));
+        return ResultData.from("loginedMemberId", Ut.f("S-1", "%s님 환영합니다.", member.getNickname()), "로그인한 회원", member);
+    }
+
+    @RequestMapping("/usr/member/doLogout")
+    @ResponseBody
+    public ResultData<Integer> doLogout(HttpSession session, String loginId, String loginPw) {
+
+        boolean isLogined = false;
+
+        if(session.getAttribute("loginedMemberId") != null) {
+            isLogined = true;
+        }
+        if(!isLogined) {
+            return ResultData.from("F-A", "이미 로그아웃되었습니다.");
+        }
+
+        session.removeAttribute("loginedMemberId");
+
+        return ResultData.from("S-1", Ut.f("로그아웃 되었습니다."));
     }
 
 
     @RequestMapping("usr/member/doJoin")
     @ResponseBody
-    public ResultData<Integer> doJoin(String loginId, String loginPw, String name, String nickname, String email, String cellphone) {
+    public ResultData<Member> doJoin(HttpSession session, String loginId, String loginPw, String name, String nickname, String email, String cellphone) {
+
+        boolean isLogined = false;
+
+        if(session.getAttribute("loginedMemberId") != null) {
+            isLogined = true;
+        }
+
+        if(isLogined) {
+            return ResultData.from("F-A", "이미 로그인중입니다.");
+        }
 
         if(Ut.isEmptyOrNull(loginId)) {
             return ResultData.from("F-1", "아이디를 입력하세요");
@@ -81,6 +109,6 @@ public class UsrMemberController {
 
         Member member = memberService.getMemberById((int) doJoinRd.getData1());
 
-        return ResultData.newData(doJoinRd, member);
+        return ResultData.newData(doJoinRd, "새로 생성된 member", member);
     }
 }

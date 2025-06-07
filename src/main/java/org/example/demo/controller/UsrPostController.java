@@ -1,5 +1,6 @@
 package org.example.demo.controller;
 
+import jakarta.servlet.http.HttpSession;
 import org.example.demo.service.PostService;
 import org.example.demo.util.Ut;
 import org.example.demo.vo.Post;
@@ -20,7 +21,15 @@ public class UsrPostController {
 
     @RequestMapping("/usr/post/doModify")
     @ResponseBody
-    public ResultData doModify(int id, String title, String body) {
+    public ResultData doModify(HttpSession session, int id, String title, String body) {
+
+        boolean isLogined = false;
+        int loginedMemberId = 0;
+
+        if(session.getAttribute("loginedMemberId") != null) {
+            isLogined = true;
+            loginedMemberId = (int) session.getAttribute("loginedMemberId");
+        }
 
         Post post = postService.getPostById(id);
 
@@ -28,19 +37,35 @@ public class UsrPostController {
             return ResultData.from("F-1", Ut.f("%d번 게시글은 없습니다.", id));
         }
 
+        ResultData loginedMemberCanModifyRd = postService.loginedMemberCanModify(loginedMemberId, post);
+
         postService.modifyPost(id, title, body);
 
-        return ResultData.from("S-1", Ut.f("%d번 글이 수정되었습니다.", id), post);
+        post = postService.getPostById(id);
+
+        return ResultData.from(loginedMemberCanModifyRd.getResultCode(), loginedMemberCanModifyRd.getMsg(), "수정된 글",  post);
     }
 
     @RequestMapping("/usr/post/doDelete")
     @ResponseBody
-    public ResultData doDelete(int id) {
+    public ResultData doDelete(HttpSession session, int id) {
+
+        boolean isLogined = false;
+        int loginedMemberId = 0;
+
+        if(session.getAttribute("loginedMemberId") != null) {
+            isLogined = true;
+            loginedMemberId = (int) session.getAttribute("loginedMemberId");
+        }
 
         Post post = postService.getPostById(id);
 
         if(post == null) {
             return ResultData.from("F-1", Ut.f("%d번 게시글은 없습니다.", id));
+        }
+
+        if(post.getMemberId() != loginedMemberId) {
+            return ResultData.from("F-A", "권한이 없습니다.");
         }
 
         postService.deletePost(id);
@@ -50,7 +75,19 @@ public class UsrPostController {
 
     @RequestMapping("/usr/post/doWrite")
     @ResponseBody
-    public ResultData doWrite(String title, String body) {
+    public ResultData doWrite(HttpSession session, String title, String body) {
+
+        boolean isLogined = false;
+        int loginedMemberId = 0;
+
+        if(session.getAttribute("loginedMemberId") != null) {
+            isLogined = true;
+            loginedMemberId = (int) session.getAttribute("loginedMemberId");
+        }
+
+        if(isLogined == false) {
+            return ResultData.from("F-A", "로그인이 필요합니다.");
+        }
 
         if(Ut.isEmptyOrNull(title)){
             return ResultData.from("F-1", "제목을 입력하세요");
@@ -60,13 +97,13 @@ public class UsrPostController {
             return ResultData.from("F-2", "내용을 입력하세요");
         }
 
-        ResultData writePostRd = postService.writePost(title, body);
+        ResultData doWriteRd = postService.writePost(loginedMemberId, title, body);
 
-        int id = (int) writePostRd.getData1();
+        int id = (int) doWriteRd.getData1();
 
         Post post = postService.getPostById(id);
 
-        return ResultData.from(writePostRd.getResultCode(), writePostRd.getMsg(), post);
+        return ResultData.newData(doWriteRd, "새로 작성된 게시글", post);
     }
 
     @RequestMapping("/usr/post/getPost")
@@ -76,10 +113,10 @@ public class UsrPostController {
         Post post = postService.getPostById(id);
 
         if(post == null) {
-            return ResultData.from("F-1", Ut.f("%d번 게시글은 없습니다."), id);
+            return ResultData.from("F-1", Ut.f("%d번 게시글은 없습니다.", id));
         }
 
-        return ResultData.from("S-1", Ut.f("%d번 게시글입니다.", id));
+        return ResultData.from("S-1", Ut.f("%d번 게시글입니다.", id), "게시글 1row", post);
     }
 
     @RequestMapping("/usr/post/getPosts")
@@ -88,6 +125,6 @@ public class UsrPostController {
 
         List<Post> posts = postService.getPosts();
 
-        return ResultData.from("S-1", "Post List", posts);
+        return ResultData.from("S-1", "Post List", "게시글 리스트", posts);
     }
 }

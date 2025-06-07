@@ -9,8 +9,9 @@
         INSERT INTO post
         SET regDate = NOW(),
 		updateDate = NOW(),
+		memberId = #{memberId}
 		title = #{title},
-            body = #{body}
+        body = #{body}
     </insert>
 
     <delete id="deletePost" parameterType="int">
@@ -21,8 +22,8 @@
     <update id="modifyPost" parameterType="map">
         UPDATE post
         SET updateDate = NOW(),
-            title = #{title},
-            body = #{body}
+        title = #{title},
+        body = #{body}
         WHERE id = #{id}
     </update>
 
