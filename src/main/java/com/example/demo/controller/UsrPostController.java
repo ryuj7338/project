@@ -1,10 +1,10 @@
-package org.example.demo.controller;
+package com.example.demo.controller;
 
 import jakarta.servlet.http.HttpSession;
-import org.example.demo.service.PostService;
-import org.example.demo.util.Ut;
-import org.example.demo.vo.Post;
-import org.example.demo.vo.ResultData;
+import com.example.demo.service.PostService;
+import com.example.demo.util.Ut;
+import com.example.demo.vo.Post;
+import com.example.demo.vo.ResultData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;

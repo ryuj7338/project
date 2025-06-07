@@ -1,7 +1,7 @@
-package org.example.demo.repository;
+package com.example.demo.repository;
 
 import org.apache.ibatis.annotations.Mapper;
-import org.example.demo.vo.Post;
+import com.example.demo.vo.Post;
 
 import java.util.List;
 

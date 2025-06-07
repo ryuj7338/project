@@ -1,8 +1,8 @@
-package org.example.demo.repository;
+package com.example.demo.repository;
 
 
 import org.apache.ibatis.annotations.Mapper;
-import org.example.demo.vo.Member;
+import com.example.demo.vo.Member;
 
 @Mapper
 public interface MemberRepository {

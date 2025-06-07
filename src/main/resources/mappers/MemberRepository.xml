@@ -3,7 +3,7 @@
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<mapper namespace="org.example.demo.repository.MemberRepository">
+<mapper namespace="com.example.demo.repository.MemberRepository">
 
     <insert id="doJoin" parameterType="map">
         INSERT INTO `member`
@@ -20,17 +20,17 @@
 
 
     <select id="getMemberById" parameterType="int"
-            resultType="org.example.demo.vo.Member">
+            resultType="com.example.demo.vo.Member">
         SELECT * FROM `member`
         WHERE id = #{id}
     </select>
 
-    <select id="getMemberByLoginId" parameterType="string" resultType="org.example.demo.vo.Member">
+    <select id="getMemberByLoginId" parameterType="string" resultType="com.example.demo.vo.Member">
         SELECT * FROM `member`
         WHERE loginId = #{loginId}
     </select>
 
-    <select id="getMemberByNicknameAndEmail" parameterType="string" resultType="org.example.demo.vo.Member">
+    <select id="getMemberByNicknameAndEmail" parameterType="string" resultType="com.example.demo.vo.Member">
         SELECT * FROM `member`
         WHERE nickname = #{nickname}
         AND email = #{email}

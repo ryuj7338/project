@@ -1,10 +1,10 @@
-package org.example.demo.service;
+package com.example.demo.service;
 
 
-import org.example.demo.repository.MemberRepository;
-import org.example.demo.util.Ut;
-import org.example.demo.vo.Member;
-import org.example.demo.vo.ResultData;
+import com.example.demo.repository.MemberRepository;
+import com.example.demo.util.Ut;
+import com.example.demo.vo.Member;
+import com.example.demo.vo.ResultData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -43,7 +43,7 @@ public class MemberService {
 
         int id = memberRepository.getLastInsertId();
 
-        return ResultData.from("S-1", "회원가입을 성공하였습니다.");
+        return ResultData.from("S-1", "회원가입을 성공하였습니다.", "가입 성공 id", id);
     }
 
     public Member getMemberByNicknameAndEmail(String nickname, String email) {

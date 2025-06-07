@@ -1,9 +1,9 @@
-package org.example.demo.service;
+package com.example.demo.service;
 
-import org.example.demo.repository.PostRepository;
-import org.example.demo.util.Ut;
-import org.example.demo.vo.Post;
-import org.example.demo.vo.ResultData;
+import com.example.demo.repository.PostRepository;
+import com.example.demo.util.Ut;
+import com.example.demo.vo.Post;
+import com.example.demo.vo.ResultData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

@@ -1,4 +1,4 @@
-package org.example.demo.vo;
+package com.example.demo.vo;
 
 
 import lombok.AllArgsConstructor;
