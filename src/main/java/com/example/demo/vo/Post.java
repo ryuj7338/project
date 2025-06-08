@@ -18,10 +18,14 @@ public class Post {
     private String title;
     private String body;
     private int memberId;
+    private int hit;
 
     private String extra__writer;
 
     private boolean userCanModify;
     private boolean userCanDelete;
+
+    private String searchKeyword;
+    private String searchType;
 }
 

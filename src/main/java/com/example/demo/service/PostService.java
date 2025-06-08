@@ -46,16 +46,16 @@ public class PostService {
         return postRepository.getPosts();
     }
 
-    public List<Post> getForPrintPosts(int boardId, int itemsInAPage, int page) {
+    public List<Post> getForPosts(int boardId, int itemsInAPage, int page, String searchKeyword, String searchType) {
 
         int limitFrom = (page - 1) * itemsInAPage;
         int limitTake = itemsInAPage;
 
-        return postRepository.getForPrintPosts(boardId, limitFrom, limitTake);
+        return postRepository.getForPosts(boardId, limitFrom, limitTake, searchKeyword, searchType);
     }
 
-    public int getPostCount(int boardId) {
-        return postRepository.getPostCount(boardId);
+    public int getPostCount(int boardId, String searchKeyword, String searchType) {
+        return postRepository.getPostCount(boardId, searchKeyword, searchType);
     }
 
     public ResultData userCanModify(int loginedMemberId, Post post) {
@@ -97,5 +97,21 @@ public class PostService {
         post.setUserCanDelete(userDeleteRd.isSuccess());
     }
 
+    public ResultData increaseHitCount(int id) {
+
+        int affectedRow = postRepository.increaseHitCount(id);
+
+        System.out.println(affectedRow);
+        if(affectedRow == 0) {
+            return ResultData.from("F-1", "해당 게시글은 없습니다.", "id", id);
+        }
+
+        return ResultData.from("S-1", "조회수 증가", "id", id);
+    }
+
+    public Object getPostHitCount(int id) {
+
+        return postRepository.getPostHitCount(id);
+    }
 }
 

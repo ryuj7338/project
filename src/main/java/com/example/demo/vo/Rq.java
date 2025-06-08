@@ -61,6 +61,13 @@ public class Rq {
         System.err.println("initBeforeActionInterceptor 실행됨");
     }
 
+    public String historyBackOnView(String msg){
+
+        req.setAttribute("msg", msg);
+        req.setAttribute("historyBack", true);
+        return "/usr/common/js";
+    }
+
     private void println(String str) throws IOException {
 
         print(str + "\n");

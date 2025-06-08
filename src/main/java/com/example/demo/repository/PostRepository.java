@@ -24,5 +24,11 @@ public interface PostRepository {
 
     public List<Post> getForPrintPosts(int boardId, int limitFrom, int limitTake);
 
-    public int getPostCount(int boardId);
+    public int getPostCount(int boardId, String searchKeyword, String searchType);
+
+    public List<Post> getForPosts(int boardId, int itemsInAPage, int page, String searchKeyword, String searchType);
+
+    public int increaseHitCount(int id);
+
+    public int getPostHitCount(int id);
 }

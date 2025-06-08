@@ -150,9 +150,21 @@ public class UsrPostController {
         return "/usr/post/detail";
     }
 
+    @RequestMapping("/usr/post/doIncreaseHitCountRd")
+    @ResponseBody
+    public ResultData doIncreaseHitCount(int id){
+
+        ResultData increaseHitCountRd = postService.increaseHitCount(id);
+
+        if(increaseHitCountRd.isFail()){
+            return increaseHitCountRd;
+        }
+        return ResultData.newData(increaseHitCountRd, "hitCount", postService.getPostHitCount(id));
+    }
+
     @RequestMapping("/usr/post/list")
     @ResponseBody
-    public String showList(HttpServletRequest req, Model model, @RequestParam(defaultValue = "0") int boardId, @RequestParam(defaultValue = "1") int page) {
+    public String showList(HttpServletRequest req, Model model, @RequestParam(defaultValue = "0") int boardId, @RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "") String searchKeyword, @RequestParam(defaultValue = "title") String searchType) {
 
         Rq rq = (Rq) req.getAttribute("rq");
 
@@ -162,18 +174,21 @@ public class UsrPostController {
             return rq.historyBackOnView("존재하지 않는 게시판입니다.");
         }
 
-        int postsCount = postService.getPostCount(boardId);
+        int postsCount = postService.getPostCount(boardId, searchKeyword, searchType);
         int itemsInAPage = 10;
 
         int pagesCount = (int) Math.ceil(postsCount / (double) itemsInAPage);
 
-        List<Post> posts = postService.getForPrintPosts(boardId, itemsInAPage, page);
+        List<Post> posts = postService.getForPosts(boardId, itemsInAPage, page, searchKeyword, searchType);
 
+        model.addAttribute("searchKeyword", searchKeyword);
+        model.addAttribute("searchType", searchType);
         model.addAttribute("pagesCount", pagesCount);
         model.addAttribute("postsCount", postsCount);
         model.addAttribute("posts", posts);
+        model.addAttribute("boardId", boardId);
         model.addAttribute("board", board);
-
+        model.addAttribute("page", page);
         return "/usr/post/list";
     }
 }

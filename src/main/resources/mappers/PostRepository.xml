@@ -10,6 +10,7 @@
         SET regDate = NOW(),
 		updateDate = NOW(),
 		memberId = #{memberId},
+        boardId = #{boardId},
 		title = #{title},
         body = #{body}
     </insert>
@@ -36,7 +37,57 @@
         <if test="boardId != 0">
             AND boardId = #{boardId}
         </if>
+        <if test="searchKeyword != ''">
+            <choose>
+                <when test="searchType == 'title'">
+                    AND title LIKE CONCAT('%', #{searchKeyword}, '%')
+                </when>
+                <when test="searchType == 'body'">
+                    AND title LIKE CONCAT('%', #{searchKeyword}, '%')
+                </when>
+                <otherwise>
+                    AND title LIKE CONCAT('%', #{searchKeyword}, '%')
+                    OR `body` LIKE CONCAT('%', #{searchKeyword}, '%')
+                </otherwise>
+            </choose>
+        </if>
     </select>
+
+    <select id="getForPosts"  resultType="com.example.demo.vo.Post">
+        SELECT P.*, M.nickname AS extra__writer
+        FROM post AS P
+        INNER JOIN
+        `member` AS M
+        ON P.memberId = M.id
+        WHERE 1
+        <if test="boardId != 0">
+            AND P.boardId = #{boardId}
+        </if>
+        <if test="searchKeyword != '' and searchKeyword != null">
+            <choose>
+                <when test="searchType == 'title'">
+                    AND P.title LIKE CONCAT('%', #{searchKeyword}, '%')
+                </when>
+                <when test="searchType == 'body'">
+                    AND P.`body` LIKE CONCAT('%', #{searchKeyword}, '%')
+                </when>
+                <when test="searchType == 'nickname'">
+                    AND M.nickname LIKE CONCAT('%', #{searchKeyword}, '%')
+                </when>
+                <otherwise>
+                    AND (
+                    P.title LIKE CONCAT('%', #{searchKeyword}, '%')
+                    OR P.`body` LIKE CONCAT('%', #{searchKeyword}, '%')
+                    OR M.nickname LIKE CONCAT('%', #{searchKeyword}, '%')
+                    )
+                </otherwise>
+
+            </choose>
+        </if>
+        ORDER BY P.id DESC
+        LIMIT #{limitFrom}, #{limitTake}
+    </select>
+
     <select id="getLastInsertId" parameterType="int">
         SELECT LAST_INSERT_ID()
     </select>
@@ -77,4 +128,16 @@
         ON P.memberId = M.id
         ORDER BY P.id DESC
     </select>
+
+    <select id="getPostHitCount" parameterType="int">
+       SELECT hit
+       FROM post
+       WHERE id = #{id}
+    </select>
+
+    <update id="increaseHitCount" parameterType="int">
+        UPDATE post
+        SET hit = hit + 1
+        WHERE id =#{id}
+    </update>
 </mapper>
