@@ -7,6 +7,7 @@ import com.example.demo.vo.Post;
 import com.example.demo.vo.ResultData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
@@ -26,14 +27,14 @@ public class UsrPostController {
         boolean isLogined = false;
         int loginedMemberId = 0;
 
-        if(session.getAttribute("loginedMemberId") != null) {
+        if (session.getAttribute("loginedMemberId") != null) {
             isLogined = true;
             loginedMemberId = (int) session.getAttribute("loginedMemberId");
         }
 
         Post post = postService.getPostById(id);
 
-        if(post == null) {
+        if (post == null) {
             return ResultData.from("F-1", Ut.f("%d번 게시글은 없습니다.", id));
         }
 
@@ -43,7 +44,7 @@ public class UsrPostController {
 
         post = postService.getPostById(id);
 
-        return ResultData.from(loginedMemberCanModifyRd.getResultCode(), loginedMemberCanModifyRd.getMsg(), "수정된 글",  post);
+        return ResultData.from(loginedMemberCanModifyRd.getResultCode(), loginedMemberCanModifyRd.getMsg(), "수정된 글", post);
     }
 
     @RequestMapping("/usr/post/doDelete")
@@ -53,18 +54,18 @@ public class UsrPostController {
         boolean isLogined = false;
         int loginedMemberId = 0;
 
-        if(session.getAttribute("loginedMemberId") != null) {
+        if (session.getAttribute("loginedMemberId") != null) {
             isLogined = true;
             loginedMemberId = (int) session.getAttribute("loginedMemberId");
         }
 
         Post post = postService.getPostById(id);
 
-        if(post == null) {
+        if (post == null) {
             return ResultData.from("F-1", Ut.f("%d번 게시글은 없습니다.", id));
         }
 
-        if(post.getMemberId() != loginedMemberId) {
+        if (post.getMemberId() != loginedMemberId) {
             return ResultData.from("F-A", "권한이 없습니다.");
         }
 
@@ -80,20 +81,20 @@ public class UsrPostController {
         boolean isLogined = false;
         int loginedMemberId = 0;
 
-        if(session.getAttribute("loginedMemberId") != null) {
+        if (session.getAttribute("loginedMemberId") != null) {
             isLogined = true;
             loginedMemberId = (int) session.getAttribute("loginedMemberId");
         }
 
-        if(isLogined == false) {
+        if (isLogined == false) {
             return ResultData.from("F-A", "로그인이 필요합니다.");
         }
 
-        if(Ut.isEmptyOrNull(title)){
+        if (Ut.isEmptyOrNull(title)) {
             return ResultData.from("F-1", "제목을 입력하세요");
         }
 
-        if(Ut.isEmptyOrNull(body)){
+        if (Ut.isEmptyOrNull(body)) {
             return ResultData.from("F-2", "내용을 입력하세요");
         }
 
@@ -106,25 +107,25 @@ public class UsrPostController {
         return ResultData.newData(doWriteRd, "새로 작성된 게시글", post);
     }
 
-    @RequestMapping("/usr/post/getPost")
+    @RequestMapping("/usr/post/detail")
     @ResponseBody
-    public ResultData getPost(int id) {
+    public String showDetail(Model model, int id) {
 
         Post post = postService.getPostById(id);
 
-        if(post == null) {
-            return ResultData.from("F-1", Ut.f("%d번 게시글은 없습니다.", id));
-        }
+        model.addAttribute("post", post);
 
-        return ResultData.from("S-1", Ut.f("%d번 게시글입니다.", id), "게시글 1row", post);
+        return "/usr/post/detail";
     }
 
-    @RequestMapping("/usr/post/getPosts")
+    @RequestMapping("/usr/post/list")
     @ResponseBody
-    public ResultData<List<Post>> getPosts() {
+    public String showList(Model model) {
 
         List<Post> posts = postService.getPosts();
 
-        return ResultData.from("S-1", "Post List", "게시글 리스트", posts);
+        model.addAttribute("posts", posts);
+
+        return "/usr/post/list";
     }
 }
