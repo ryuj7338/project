@@ -21,7 +21,7 @@ public class Ut {
         }
 
         if (obj instanceof Map) {
-            return ((Map<?,?>) obj).isEmpty();
+            return ((Map<?, ?>) obj).isEmpty();
         }
 
         if (obj.getClass().isArray()) {
@@ -32,5 +32,50 @@ public class Ut {
 
     public static String f(String string, Object... args) {
         return String.format(string, args);
+    }
+
+    public static String jsReplace(String resultCode, String msg, String replaceUri) {
+
+        if (resultCode == null) {
+            resultCode = "";
+        }
+        if (msg == null) {
+            msg = "";
+        }
+        if (replaceUri == null) {
+            replaceUri = "/";
+        }
+
+        String resultMsg = resultCode + "/" + msg;
+
+        return Ut.f("""
+                <script> let resultMsg = '%s'.trim();
+                if(resultMsg.length > 0){
+                alert(resultMsg);
+                }
+                location.replace('%s');
+                </script>
+                """, resultMsg, replaceUri);
+    }
+
+    public static String jsHistoryBack(String resultCode, String msg){
+
+        if (resultCode == null) {
+            resultCode = "";
+        }
+        if (msg == null) {
+            msg = "";
+        }
+
+        String resultMsg = resultCode + "/" + msg;
+
+        return Ut.f("""
+                <script> let resultMsg = '%s'.trim();
+                if(resultMsg.length > 0){
+                alert(resultMsg);
+                }
+                history.back();
+                </script>
+                """, resultMsg);
     }
 }

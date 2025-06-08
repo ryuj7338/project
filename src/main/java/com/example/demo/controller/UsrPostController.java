@@ -57,7 +57,7 @@ public class UsrPostController {
 
     @RequestMapping("/usr/post/doDelete")
     @ResponseBody
-    public ResultData doDelete(HttpSession session, int id) {
+    public String doDelete(HttpSession session, int id) {
 
         boolean isLogined = false;
         int loginedMemberId = 0;
@@ -68,16 +68,20 @@ public class UsrPostController {
         }
 
         if (isLogined == false) {
-            return ResultData.from("F-A", "로그인이 필요합니다.");
+            return Ut.jsReplace("F-A", "로그인 후 이용하세요", "../member/login");
         }
 
         Post post = postService.getPostById(id);
 
         if (post == null) {
-            return ResultData.from("F-1", Ut.f("%d번 게시글은 없습니다.", id));
+            return Ut.jsHistoryBack("F-1", Ut.f("%d번 게시글은 없습니다.", id));
         }
 
         ResultData userCanDeleteRd = postService.userCanDelete(loginedMemberId, post);
+
+        if(userCanDeleteRd.isFail()){
+            return Ut.jsHistoryBack(userCanDeleteRd.getResultCode(), userCanDeleteRd.getMsg());
+        }
 
         if(userCanDeleteRd.isSuccess()){
             postService.deletePost(id);
@@ -85,7 +89,7 @@ public class UsrPostController {
 
         postService.deletePost(id);
 
-        return ResultData.from(userCanDeleteRd.getResultCode(), userCanDeleteRd.getMsg(), "입력한 id", id);
+        return Ut.jsReplace(userCanDeleteRd.getResultCode(), userCanDeleteRd.getMsg(), "../post/list");
     }
 
     @RequestMapping("/usr/post/doWrite")
