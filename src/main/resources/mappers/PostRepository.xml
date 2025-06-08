@@ -33,12 +33,17 @@
         SELECT LAST_INSERT_ID()
     </select>
 
-    <select id="getPostById" parameterType="int" resultType="com.example.demo.vo.Post">
+    <select id="getForPrintPost" parameterType="int" resultType="com.example.demo.vo.Post">
         SELECT P.*, M.nickname AS extra__writer
         FROM post AS P
         INNER JOIN `member` AS M
         ON P.memberId = M.id
         WHERE P.id = #{id}
+    </select>
+
+    <select id="getPostById" parameterType="int" resultType="com.example.demo.vo.Post">
+        SELECT * FROM post
+        WHERE id = #{id}
     </select>
 
     <select id="getPosts" resultType="com.example.demo.vo.Post">

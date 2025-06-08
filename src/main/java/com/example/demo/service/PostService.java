@@ -46,12 +46,44 @@ public class PostService {
         return postRepository.getPosts();
     }
 
-    public ResultData loginedMemberCanModify(int loginedMemberId, Post post) {
+    public ResultData userCanModify(int loginedMemberId, Post post) {
 
         if(post.getMemberId() != loginedMemberId) {
             return ResultData.from("F-A", Ut.f("%d번 게시글에 대한 권한이 없습니다.", post.getId()));
         }
+
         return ResultData.from("S-1", Ut.f("%d번 게시글을 수정하였습니다.", post.getId()));
     }
+
+    public ResultData userCanDelete(int loginedMemberId, Post post) {
+
+        if(post.getMemberId() != loginedMemberId) {
+            return ResultData.from("F-A", Ut.f("%d번 게시글에 대한 삭제 권한이 없습니다.", post.getId()));
+        }
+
+        return ResultData.from("S-1", Ut.f("%d번 게시글이 삭제되었습니다.", post.getId()));
+    }
+
+    public Post getForPrintPost(int loginedMemberId, int id) {
+
+        Post post = postRepository.getForPrintPost(id);
+
+        controlForPrintData(loginedMemberId, post);
+
+        return post;
+    }
+
+    private void controlForPrintData(int loginedMemberId, Post post) {
+
+        if(post == null) {
+            return;
+        }
+
+        ResultData userCanModifyRd = userCanModify(loginedMemberId, post);
+        post.setUserCanModify(userCanModifyRd.isSuccess());
+        ResultData userDeleteRd = userCanDelete(loginedMemberId, post);
+        post.setUserCanDelete(userDeleteRd.isSuccess());
+    }
+
 }
 

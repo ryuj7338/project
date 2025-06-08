@@ -20,5 +20,8 @@ public class Post {
     private int memberId;
 
     private String extra__writer;
+
+    private boolean userCanModify;
+    private boolean userCanDelete;
 }
 

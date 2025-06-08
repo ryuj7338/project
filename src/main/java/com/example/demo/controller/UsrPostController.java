@@ -32,19 +32,27 @@ public class UsrPostController {
             loginedMemberId = (int) session.getAttribute("loginedMemberId");
         }
 
+        if (isLogined == false) {
+            return ResultData.from("F-A", "로그인이 필요합니다.");
+        }
+
         Post post = postService.getPostById(id);
 
         if (post == null) {
-            return ResultData.from("F-1", Ut.f("%d번 게시글은 없습니다.", id));
+            return ResultData.from("F-1", Ut.f("%d번 게시글은 없습니다.", id), "없는 글의 id", id);
         }
 
-        ResultData loginedMemberCanModifyRd = postService.loginedMemberCanModify(loginedMemberId, post);
+        ResultData userCanModifyRd = postService.userCanModify(loginedMemberId, post);
+
+        if(userCanModifyRd.isFail()){
+            return userCanModifyRd;
+        }
 
         postService.modifyPost(id, title, body);
 
         post = postService.getPostById(id);
 
-        return ResultData.from(loginedMemberCanModifyRd.getResultCode(), loginedMemberCanModifyRd.getMsg(), "수정된 글", post);
+        return ResultData.from(userCanModifyRd.getResultCode(), userCanModifyRd.getMsg(), "수정된 글", post);
     }
 
     @RequestMapping("/usr/post/doDelete")
@@ -59,19 +67,25 @@ public class UsrPostController {
             loginedMemberId = (int) session.getAttribute("loginedMemberId");
         }
 
+        if (isLogined == false) {
+            return ResultData.from("F-A", "로그인이 필요합니다.");
+        }
+
         Post post = postService.getPostById(id);
 
         if (post == null) {
             return ResultData.from("F-1", Ut.f("%d번 게시글은 없습니다.", id));
         }
 
-        if (post.getMemberId() != loginedMemberId) {
-            return ResultData.from("F-A", "권한이 없습니다.");
+        ResultData userCanDeleteRd = postService.userCanDelete(loginedMemberId, post);
+
+        if(userCanDeleteRd.isSuccess()){
+            postService.deletePost(id);
         }
 
         postService.deletePost(id);
 
-        return ResultData.from("S-1", Ut.f("%d번 글이 삭제되었습니다.", id));
+        return ResultData.from(userCanDeleteRd.getResultCode(), userCanDeleteRd.getMsg(), "입력한 id", id);
     }
 
     @RequestMapping("/usr/post/doWrite")
@@ -109,9 +123,17 @@ public class UsrPostController {
 
     @RequestMapping("/usr/post/detail")
     @ResponseBody
-    public String showDetail(Model model, int id) {
+    public String showDetail(HttpSession session, Model model, int id) {
 
-        Post post = postService.getPostById(id);
+        boolean isLogined = false;
+        int loginedMemberId = 0;
+
+        if (session.getAttribute("loginedMemberId") != null) {
+            isLogined = true;
+            loginedMemberId = (int) session.getAttribute("loginedMemberId");
+        }
+
+        Post post = postService.getForPrintPost(loginedMemberId, id);
 
         model.addAttribute("post", post);
 
