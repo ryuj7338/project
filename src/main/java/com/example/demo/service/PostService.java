@@ -46,6 +46,10 @@ public class PostService {
         return postRepository.getPosts();
     }
 
+    public List<Post> getPosts(int boardId) {
+        return postRepository.getForPrintPosts(boardId);
+    }
+
     public ResultData userCanModify(int loginedMemberId, Post post) {
 
         if(post.getMemberId() != loginedMemberId) {

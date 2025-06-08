@@ -1,5 +1,8 @@
 package com.example.demo.controller;
 
+import com.example.demo.interceptor.BeforeActionInterceptor;
+import com.example.demo.service.BoardService;
+import com.example.demo.vo.Board;
 import com.example.demo.vo.Rq;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -12,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.util.List;
@@ -20,30 +24,53 @@ import java.util.List;
 public class UsrPostController {
 
     @Autowired
+    private final BeforeActionInterceptor beforeActionInterceptor;
+
+    @Autowired
+    private BoardService boardService;
+
+    @Autowired
     private PostService postService;
 
+    @Autowired
+    private Rq rq;
+
+    UsrPostController(BeforeActionInterceptor beforeActionInterceptor) {
+        this.beforeActionInterceptor = beforeActionInterceptor;
+    }
 
     @RequestMapping("/usr/post/modify")
-    public String showModify(){
+    public String showModify(HttpServletRequest req, Model model, int id){
+
+        Rq rq = (Rq) req.getAttribute("rq");
+
+        Post post = postService.getForPrintPost(rq.getLoginedMemberId(), id);
+
+        if(post == null){
+            return Ut.jsHistoryBack("F-1", Ut.f("%d번 게시글은 없습니다.", id));
+        }
+
+        model.addAttribute("post", post);
+
         return "/usr/post/modify";
     }
 
     @RequestMapping("/usr/post/doModify")
     @ResponseBody
-    public ResultData doModify(HttpServletRequest req, int id, String title, String body) {
+    public String doModify(HttpServletRequest req, int id, String title, String body) {
 
         Rq rq = (Rq) req.getAttribute("rq");
 
         Post post = postService.getPostById(id);
 
         if (post == null) {
-            return ResultData.from("F-1", Ut.f("%d번 게시글은 없습니다.", id), "없는 글의 id", id);
+            return Ut.jsReplace("F-1", Ut.f("%d번 게시글은 없습니다.", id), "../post/list");
         }
 
         ResultData userCanModifyRd = postService.userCanModify(rq.getLoginedMemberId(), post);
 
         if(userCanModifyRd.isFail()){
-            return userCanModifyRd;
+            return Ut.jsHistoryBack(userCanModifyRd.getResultCode(), userCanModifyRd.getMsg());
         }
         if(userCanModifyRd.isSuccess()){
             postService.modifyPost(id, title, body);
@@ -51,7 +78,7 @@ public class UsrPostController {
 
         post = postService.getPostById(id);
 
-        return ResultData.from(userCanModifyRd.getResultCode(), userCanModifyRd.getMsg(), "수정된 글", post);
+        return Ut.jsReplace(userCanModifyRd.getResultCode(), userCanModifyRd.getMsg(), "../post/detail?id=" + id);
     }
 
     @RequestMapping("/usr/post/doDelete")
@@ -81,18 +108,23 @@ public class UsrPostController {
         return Ut.jsReplace(userCanDeleteRd.getResultCode(), userCanDeleteRd.getMsg(), "../post/list");
     }
 
+    @RequestMapping("/usr/post/write")
+    public String showWrite(){
+        return "/usr/post/write";
+    }
+
     @RequestMapping("/usr/post/doWrite")
     @ResponseBody
-    public ResultData doWrite(HttpServletRequest req, String title, String body) {
+    public String doWrite(HttpServletRequest req, String title, String body) {
 
         Rq rq = (Rq) req.getAttribute("rq");
 
         if (Ut.isEmptyOrNull(title)) {
-            return ResultData.from("F-1", "제목을 입력하세요");
+            return Ut.jsHistoryBack("F-1", "제목을 입력하세요");
         }
 
         if (Ut.isEmptyOrNull(body)) {
-            return ResultData.from("F-2", "내용을 입력하세요");
+            return Ut.jsHistoryBack("F-2", "내용을 입력하세요");
         }
 
         ResultData doWriteRd = postService.writePost(rq.getLoginedMemberId(), title, body);
@@ -101,7 +133,7 @@ public class UsrPostController {
 
         Post post = postService.getPostById(id);
 
-        return ResultData.newData(doWriteRd, "새로 작성된 게시글", post);
+        return Ut.jsReplace(doWriteRd.getResultCode(), doWriteRd.getMsg(), "../post/list");
     }
 
 
@@ -120,11 +152,17 @@ public class UsrPostController {
 
     @RequestMapping("/usr/post/list")
     @ResponseBody
-    public String showList(Model model) {
+    public String showList(HttpServletRequest req, Model model, @RequestParam(defaultValue = "1") int boardId) {
 
-        List<Post> posts = postService.getPosts();
+        Board board = boardService.getBoardById(boardId);
+
+        if(board == null){
+
+        }
+        List<Post> posts = postService.getForPrintPosts(boardId);
 
         model.addAttribute("posts", posts);
+        model.addAttribute("board", board);
 
         return "/usr/post/list";
     }

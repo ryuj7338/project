@@ -25,7 +25,7 @@ public class MemberService {
     }
 
 
-    public ResultData dojoin(String loginId, String loginPw, String name, String nickname, String email, String cellphone) {
+    public ResultData<Integer> join(String loginId, String loginPw, String name, String nickname, String email, String cellphone) {
 
         Member existsMember = memberRepository.getMemberByLoginId(loginId);
 

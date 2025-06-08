@@ -21,4 +21,6 @@ public interface PostRepository {
     public int getLastInsertId();
 
     public Post getForPrintPost(int loginedMemberId);
+
+    public List<Post> getForPrintPosts(int boardId);
 }
