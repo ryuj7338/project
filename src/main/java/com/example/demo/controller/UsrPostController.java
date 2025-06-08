@@ -1,5 +1,8 @@
 package com.example.demo.controller;
 
+import com.example.demo.vo.Rq;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import com.example.demo.service.PostService;
 import com.example.demo.util.Ut;
@@ -22,17 +25,11 @@ public class UsrPostController {
 
     @RequestMapping("/usr/post/doModify")
     @ResponseBody
-    public ResultData doModify(HttpSession session, int id, String title, String body) {
+    public ResultData doModify(HttpServletRequest req, int id, String title, String body) {
 
-        boolean isLogined = false;
-        int loginedMemberId = 0;
+        Rq rq = new Rq(req);
 
-        if (session.getAttribute("loginedMemberId") != null) {
-            isLogined = true;
-            loginedMemberId = (int) session.getAttribute("loginedMemberId");
-        }
-
-        if (isLogined == false) {
+        if (rq.isLogined() == false) {
             return ResultData.from("F-A", "로그인이 필요합니다.");
         }
 
@@ -42,13 +39,14 @@ public class UsrPostController {
             return ResultData.from("F-1", Ut.f("%d번 게시글은 없습니다.", id), "없는 글의 id", id);
         }
 
-        ResultData userCanModifyRd = postService.userCanModify(loginedMemberId, post);
+        ResultData userCanModifyRd = postService.userCanModify(rq.getLoginedMemberId(), post);
 
         if(userCanModifyRd.isFail()){
             return userCanModifyRd;
         }
-
-        postService.modifyPost(id, title, body);
+        if(userCanModifyRd.isSuccess()){
+            postService.modifyPost(id, title, body);
+        }
 
         post = postService.getPostById(id);
 
@@ -57,17 +55,11 @@ public class UsrPostController {
 
     @RequestMapping("/usr/post/doDelete")
     @ResponseBody
-    public String doDelete(HttpSession session, int id) {
+    public String doDelete(HttpServletRequest req, int id) {
 
-        boolean isLogined = false;
-        int loginedMemberId = 0;
+        Rq rq = new Rq(req);
 
-        if (session.getAttribute("loginedMemberId") != null) {
-            isLogined = true;
-            loginedMemberId = (int) session.getAttribute("loginedMemberId");
-        }
-
-        if (isLogined == false) {
+        if (rq.isLogined() == false) {
             return Ut.jsReplace("F-A", "로그인 후 이용하세요", "../member/login");
         }
 
@@ -77,7 +69,7 @@ public class UsrPostController {
             return Ut.jsHistoryBack("F-1", Ut.f("%d번 게시글은 없습니다.", id));
         }
 
-        ResultData userCanDeleteRd = postService.userCanDelete(loginedMemberId, post);
+        ResultData userCanDeleteRd = postService.userCanDelete(rq.getLoginedMemberId(), post);
 
         if(userCanDeleteRd.isFail()){
             return Ut.jsHistoryBack(userCanDeleteRd.getResultCode(), userCanDeleteRd.getMsg());
@@ -94,17 +86,12 @@ public class UsrPostController {
 
     @RequestMapping("/usr/post/doWrite")
     @ResponseBody
-    public ResultData doWrite(HttpSession session, String title, String body) {
+    public ResultData doWrite(HttpServletRequest req, String title, String body) {
 
-        boolean isLogined = false;
-        int loginedMemberId = 0;
+        Rq rq = new Rq(req);
 
-        if (session.getAttribute("loginedMemberId") != null) {
-            isLogined = true;
-            loginedMemberId = (int) session.getAttribute("loginedMemberId");
-        }
 
-        if (isLogined == false) {
+        if (rq.isLogined() == false) {
             return ResultData.from("F-A", "로그인이 필요합니다.");
         }
 
@@ -116,7 +103,7 @@ public class UsrPostController {
             return ResultData.from("F-2", "내용을 입력하세요");
         }
 
-        ResultData doWriteRd = postService.writePost(loginedMemberId, title, body);
+        ResultData doWriteRd = postService.writePost(rq.getLoginedMemberId(), title, body);
 
         int id = (int) doWriteRd.getData1();
 
@@ -127,17 +114,11 @@ public class UsrPostController {
 
     @RequestMapping("/usr/post/detail")
     @ResponseBody
-    public String showDetail(HttpSession session, Model model, int id) {
+    public String showDetail(HttpServletRequest req, Model model, int id) {
 
-        boolean isLogined = false;
-        int loginedMemberId = 0;
+        Rq rq = new Rq(req);
 
-        if (session.getAttribute("loginedMemberId") != null) {
-            isLogined = true;
-            loginedMemberId = (int) session.getAttribute("loginedMemberId");
-        }
-
-        Post post = postService.getForPrintPost(loginedMemberId, id);
+        Post post = postService.getForPrintPost(rq.getLoginedMemberId(), id);
 
         model.addAttribute("post", post);
 
