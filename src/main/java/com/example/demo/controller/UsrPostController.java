@@ -2,6 +2,7 @@ package com.example.demo.controller;
 
 import com.example.demo.interceptor.BeforeActionInterceptor;
 import com.example.demo.service.BoardService;
+import com.example.demo.service.ReactionService;
 import com.example.demo.vo.Board;
 import com.example.demo.vo.Rq;
 import jakarta.servlet.http.HttpServlet;
@@ -31,6 +32,9 @@ public class UsrPostController {
 
     @Autowired
     private PostService postService;
+
+    @Autowired
+    private ReactionService reactionService;
 
     @Autowired
     private Rq rq;
@@ -145,7 +149,14 @@ public class UsrPostController {
 
         Post post = postService.getForPrintPost(rq.getLoginedMemberId(), id);
 
+        ResultData usersReactionRd = reactionService.usersReaction(rq.getLoginedMemberId(), "post", id);
+
+        if(usersReactionRd.isSuccess()){
+            model.addAttribute("userCanMakeReaction", usersReactionRd.isSuccess());
+        }
         model.addAttribute("post", post);
+        model.addAttribute("usersReaction", usersReactionRd.getData1());
+        model.addAttribute("isAlreadyAddLikeRp", reactionService.isAlreadyAddLikeRp(rq.getLoginedMemberId(), id, "post"));
 
         return "/usr/post/detail";
     }

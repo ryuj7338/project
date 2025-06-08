@@ -27,5 +27,8 @@ public class Post {
 
     private String searchKeyword;
     private String searchType;
+
+    private int like;
+    private int dislike;
 }
 

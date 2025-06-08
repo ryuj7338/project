@@ -140,4 +140,21 @@
         SET hit = hit + 1
         WHERE id =#{id}
     </update>
+
+    <update id="increaseLikeReaction" parameterType="int">
+        UPDATE post
+        SET `like` = `like` + 1
+        WHERE id =#{relId}
+    </update>
+
+    <update id="decreaseLikeReaction" parameterType="int">
+        UPDATE post
+        SET `like` = `like` - 1
+        WHERE id = #{relId}
+    </update>
+
+    <select id="getLike">
+        SELECT `like` FROM post
+        WHERE id = #{relId}
+    </select>
 </mapper>

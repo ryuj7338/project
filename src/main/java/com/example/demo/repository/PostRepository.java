@@ -31,4 +31,9 @@ public interface PostRepository {
     public int increaseHitCount(int id);
 
     public int getPostHitCount(int id);
+
+    public int increaseLikeReaction(int relId);
+    public int decreaseLikeReaction(int relId);
+
+    public int getLike(int relId);
 }

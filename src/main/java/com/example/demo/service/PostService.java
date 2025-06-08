@@ -113,5 +113,31 @@ public class PostService {
 
         return postRepository.getPostHitCount(id);
     }
+
+    public ResultData increaseLikeReaction(int relId) {
+
+        int affectedRow = postRepository.increaseLikeReaction(relId);
+
+        if(affectedRow == 0) {
+            return ResultData.from("F-1", "없는 게시물입니다.");
+        }
+
+        return ResultData.from("S-1", "좋아요 증가", "affectedRow", affectedRow);
+    }
+
+    public ResultData decreaseLikeReaction(int relId) {
+
+        int affectedRow = postRepository.decreaseLikeReaction(relId);
+
+        if(affectedRow == 0) {
+            return ResultData.from("F-1", "없는 게시물입니다.");
+        }
+
+        return ResultData.from("S-1", "좋아요 감소", "affectedRow", affectedRow);
+    }
+
+    public int getLike(int relId) {
+        return postRepository.getLike(relId);
+    }
 }
 
