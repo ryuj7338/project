@@ -23,15 +23,16 @@ public class UsrPostController {
     private PostService postService;
 
 
+    @RequestMapping("/usr/post/modify")
+    public String showModify(){
+        return "/usr/post/modify";
+    }
+
     @RequestMapping("/usr/post/doModify")
     @ResponseBody
     public ResultData doModify(HttpServletRequest req, int id, String title, String body) {
 
-        Rq rq = new Rq(req);
-
-        if (rq.isLogined() == false) {
-            return ResultData.from("F-A", "로그인이 필요합니다.");
-        }
+        Rq rq = (Rq) req.getAttribute("rq");
 
         Post post = postService.getPostById(id);
 
@@ -57,11 +58,7 @@ public class UsrPostController {
     @ResponseBody
     public String doDelete(HttpServletRequest req, int id) {
 
-        Rq rq = new Rq(req);
-
-        if (rq.isLogined() == false) {
-            return Ut.jsReplace("F-A", "로그인 후 이용하세요", "../member/login");
-        }
+        Rq rq = (Rq) req.getAttribute("rq");
 
         Post post = postService.getPostById(id);
 
@@ -88,12 +85,7 @@ public class UsrPostController {
     @ResponseBody
     public ResultData doWrite(HttpServletRequest req, String title, String body) {
 
-        Rq rq = new Rq(req);
-
-
-        if (rq.isLogined() == false) {
-            return ResultData.from("F-A", "로그인이 필요합니다.");
-        }
+        Rq rq = (Rq) req.getAttribute("rq");
 
         if (Ut.isEmptyOrNull(title)) {
             return ResultData.from("F-1", "제목을 입력하세요");
@@ -112,11 +104,12 @@ public class UsrPostController {
         return ResultData.newData(doWriteRd, "새로 작성된 게시글", post);
     }
 
+
     @RequestMapping("/usr/post/detail")
     @ResponseBody
     public String showDetail(HttpServletRequest req, Model model, int id) {
 
-        Rq rq = new Rq(req);
+        Rq rq = (Rq) req.getAttribute("rq");
 
         Post post = postService.getForPrintPost(rq.getLoginedMemberId(), id);
 
