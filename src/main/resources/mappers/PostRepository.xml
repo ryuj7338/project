@@ -29,6 +29,14 @@
         WHERE id = #{id}
     </update>
 
+    <select id="getPostCount" parameterType="int">
+        SELECT COUNT(*) AS cnt
+        FROM post
+        WHERE 1
+        <if test="boardId != 0">
+            AND boardId = #{boardId}
+        </if>
+    </select>
     <select id="getLastInsertId" parameterType="int">
         SELECT LAST_INSERT_ID()
     </select>
@@ -44,6 +52,22 @@
     <select id="getPostById" parameterType="int" resultType="com.example.demo.vo.Post">
         SELECT * FROM post
         WHERE id = #{id}
+    </select>
+
+    <select id="getForPrintPosts" resultType="com.example.demo.vo.Post">
+        SELECT P.*, M.nickname AS extra__writer
+        FROM post P
+        INNER JOIN `member` M
+        ON P.memberId = M.id
+        <where>
+            <if test="boardId != 0 and board != null">
+                AND P.boardId = #{boardId}
+            </if>
+        </where>
+        ORDER BY P.id DESC
+        <if test="limitFrom >= 0">
+            LIMIT #{limitFrom}, #{limitTake}
+        </if>
     </select>
 
     <select id="getPosts" resultType="com.example.demo.vo.Post">

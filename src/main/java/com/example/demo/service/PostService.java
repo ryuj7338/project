@@ -46,8 +46,16 @@ public class PostService {
         return postRepository.getPosts();
     }
 
-    public List<Post> getPosts(int boardId) {
-        return postRepository.getForPrintPosts(boardId);
+    public List<Post> getForPrintPosts(int boardId, int itemsInAPage, int page) {
+
+        int limitFrom = (page - 1) * itemsInAPage;
+        int limitTake = itemsInAPage;
+
+        return postRepository.getForPrintPosts(boardId, limitFrom, limitTake);
+    }
+
+    public int getPostCount(int boardId) {
+        return postRepository.getPostCount(boardId);
     }
 
     public ResultData userCanModify(int loginedMemberId, Post post) {

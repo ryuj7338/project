@@ -152,15 +152,25 @@ public class UsrPostController {
 
     @RequestMapping("/usr/post/list")
     @ResponseBody
-    public String showList(HttpServletRequest req, Model model, @RequestParam(defaultValue = "1") int boardId) {
+    public String showList(HttpServletRequest req, Model model, @RequestParam(defaultValue = "0") int boardId, @RequestParam(defaultValue = "1") int page) {
+
+        Rq rq = (Rq) req.getAttribute("rq");
 
         Board board = boardService.getBoardById(boardId);
 
         if(board == null){
-
+            return rq.historyBackOnView("존재하지 않는 게시판입니다.");
         }
-        List<Post> posts = postService.getForPrintPosts(boardId);
 
+        int postsCount = postService.getPostCount(boardId);
+        int itemsInAPage = 10;
+
+        int pagesCount = (int) Math.ceil(postsCount / (double) itemsInAPage);
+
+        List<Post> posts = postService.getForPrintPosts(boardId, itemsInAPage, page);
+
+        model.addAttribute("pagesCount", pagesCount);
+        model.addAttribute("postsCount", postsCount);
         model.addAttribute("posts", posts);
         model.addAttribute("board", board);
 

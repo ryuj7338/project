@@ -22,5 +22,7 @@ public interface PostRepository {
 
     public Post getForPrintPost(int loginedMemberId);
 
-    public List<Post> getForPrintPosts(int boardId);
+    public List<Post> getForPrintPosts(int boardId, int limitFrom, int limitTake);
+
+    public int getPostCount(int boardId);
 }
