@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper
+        namespace="com.example.demo.repository.CommentRepository">
+
+    <select id="getForPrintComments"
+            resultType="com.example.demo.vo.Comment">
+        SELECT C.*, M.nickname AS extra__writer
+        FROM `comment` AS C
+                 INNER JOIN `member` AS M
+                            ON R.memberId = M.id
+        WHERE relTypeCode = #{relTypeCode}
+          AND relId = #{relId}
+        ORDER BY C.id ASC;
+    </select>
+
+    <insert id="writeComment">
+        INSERT INTO `comment`
+        SET regData = NOW(),
+        updataDate = NOW(),
+        memberId = #{memberId},
+        relTypeCode = #{relTypeCode},
+        relId = #{relId},
+        `body` = #{body}
+    </insert>
+
+    <select id="getLastInsertId" parameterType="int">
+        SELECT LAST_INSERT_ID()
+    </select>
+
+    <select id="getComment" parameterType="int">
+        SELECT C.* FROM `comment` C
+        WHERE C.id = #{id}
+    </select>
+
+    <update id="modifyComment">
+        UPDATE `comment`
+        SET `body` = #{body},
+            updateDate = NOW()
+        WHERE id = #{id}
+    </update>
+</mapper>

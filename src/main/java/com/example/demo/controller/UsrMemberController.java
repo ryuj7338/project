@@ -102,4 +102,65 @@ public class UsrMemberController {
 
         return Ut.jsReplace(joinRd.getResultCode(), joinRd.getMsg(), "../member/login");
     }
+
+    @RequestMapping("/usr/member/myPage")
+    public String showMyPage(){
+        return "/usr/member/myPage";
+    }
+
+    @RequestMapping("/usr/member/checkPw")
+    public String showCheckPw(){
+        return "/usr/member/checkPw";
+    }
+
+    @RequestMapping("/usr/member/doCheckPw")
+    @ResponseBody
+    public String doCheckPw(String loginPw){
+
+        if(Ut.isEmptyOrNull(loginPw)) {
+            return Ut.jsHistoryBack("F-1", "비밀번호를 입력하세요");
+        }
+
+        if(rq.getLoginedMemberId().getLoginPw().equals(loginPw) == false){
+            return Ut.jsHistoryBack("F-2", "비밀번호가 틀렸습니다.");
+        }
+
+        return Ut.jsReplace("S-1", Ut.f("비밀번호 확인 성공"), "modify");
+    }
+
+    @RequestMapping("/usr/member/modify")
+    public String showMyModify(){
+        return "/usr/member/modify";
+    }
+
+    @RequestMapping("/usr/member/doModify")
+    @ResponseBody
+    public String doModify(HttpServletRequest req, String loginPw, String name, String nickname, String cellphone, String email){
+
+        Rq rq = (Rq) req.getAttribute("rq");
+
+//        비번은 안 바꾸는 거 가능(사용자) 비번 null 체크는 x
+        if(Ut.isEmptyOrNull(name)){
+            return Ut.jsHistoryBack("F-3", "name 입력 x");
+        }
+        if(Ut.isEmptyOrNull(nickname)){
+            return Ut.jsHistoryBack("F-4", "nickname 입력 x");
+        }
+        if(Ut.isEmptyOrNull(cellphone)){
+            return Ut.jsHistoryBack("F-5", "cellphone 입력 x");
+        }
+        if(Ut.isEmptyOrNull(email)){
+            return Ut.jsHistoryBack("F-6", "email 입력 x");
+        }
+
+        ResultData modifyRd;
+
+        if(Ut.isEmptyOrNull(loginPw)) {
+            modifyRd = memberService.modifyWithoutPw(rq.getLoginedMemberId(), name, nickname,cellphone, email);
+        }else{
+            modifyRd = memberService.modify(rq.getLoginedMemberId(), loginPw, name, nickname, cellphone, email);
+        }
+
+        return Ut.jsReplace(modifyRd.getResultCode(), modifyRd.getMsg(), "../member/myPage");
+    }
 }

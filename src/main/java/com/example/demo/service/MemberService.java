@@ -55,4 +55,18 @@ public class MemberService {
 
         return memberRepository.getMemberByLoginId(loginId);
     }
+
+    public ResultData modify(int loginedMemberId, String loginPw, String name, String nickname, String cellphone, String email) {
+
+        memberRepository.modify(loginedMemberId, loginPw, name, nickname, cellphone, email);
+
+        return ResultData.from("S-1", "회원정보 수정 완료");
+    }
+
+    public ResultData modifyWithoutPw(int loginedMemberId, String loginPw, String name, String nickname, String cellphone) {
+
+        memberRepository.modifyWithoutPw(loginedMemberId, loginPw, name, nickname, cellphone);
+
+        return ResultData.from("S-1", "회원정보 수정 완료");
+    }
 }

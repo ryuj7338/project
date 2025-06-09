@@ -7,13 +7,17 @@ import com.example.demo.vo.Member;
 @Mapper
 public interface MemberRepository {
 
-    public int doJoin(String loginId, String loginPw, String name, String nickname, String email, String cellphone );
+    int doJoin(String loginId, String loginPw, String name, String nickname, String email, String cellphone );
 
-    public Member getMemberById(int id);
+    Member getMemberById(int id);
 
-    public int getLastInsertId();
+    int getLastInsertId();
 
-    public Member getMemberByLoginId(String loginId);
+    Member getMemberByLoginId(String loginId);
 
-    public Member getMemberByNicknameAndEmail(String nickname, String email);
+    Member getMemberByNicknameAndEmail(String nickname, String email);
+
+    void modify(int loginedMemberId, String loginPw, String name, String nickname, String cellphone, String email);
+
+    void modifyWithoutPw(int loginedMemberId, String loginPw, String name, String nickname, String email);
 }

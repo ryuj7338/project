@@ -1,5 +1,6 @@
 package com.example.demo.vo;
 
+import com.example.demo.service.MemberService;
 import com.example.demo.util.Ut;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -26,7 +27,10 @@ public class Rq {
     private final HttpServletResponse resp;
     private final HttpSession session;
 
-    public Rq(HttpServletRequest req, HttpServletResponse resp) {
+    @Getter
+    private Member loginedMember;
+
+    public Rq(HttpServletRequest req, HttpServletResponse resp, MemberService memberService) {
 
         this.req = req;
         this.resp = resp;
@@ -36,6 +40,7 @@ public class Rq {
         if (session.getAttribute("loginedMemberId") != null) {
             isLogined = true;
             loginedMemberId = (int) session.getAttribute("loginedMemberId");
+            loginedMember = memberService.getMemberById(loginedMemberId);
         }
 
         this.req.setAttribute("rq", this);
@@ -80,11 +85,13 @@ public class Rq {
 
     public void logout(){
         session.removeAttribute("loginedMemberId");
+        session.removeAttribute("loginedMember");
     }
 
     public void login(Member member){
 
         session.setAttribute("loginedMemberId", member.getId());
+        session.setAttribute("loginedMember", member);
     }
 
     public String getcurrentUri(){

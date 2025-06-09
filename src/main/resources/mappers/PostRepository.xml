@@ -54,11 +54,13 @@
     </select>
 
     <select id="getForPosts"  resultType="com.example.demo.vo.Post">
-        SELECT P.*, M.nickname AS extra__writer
+        SELECT P.*, M.nickname AS extra__writer,
+        IFNULL(COUNT(C.id), 0) AS extra__commentsCount
         FROM post AS P
         INNER JOIN
         `member` AS M
         ON P.memberId = M.id
+        LEFT JOIN `comment` C
         WHERE 1
         <if test="boardId != 0">
             AND P.boardId = #{boardId}
@@ -85,7 +87,9 @@
             </choose>
         </if>
         ORDER BY P.id DESC
+        <if test="limitFrom >= 0">
         LIMIT #{limitFrom}, #{limitTake}
+        </if>
     </select>
 
     <select id="getLastInsertId" parameterType="int">

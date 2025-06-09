@@ -2,16 +2,14 @@ package com.example.demo.controller;
 
 import com.example.demo.interceptor.BeforeActionInterceptor;
 import com.example.demo.service.BoardService;
+import com.example.demo.service.CommentService;
 import com.example.demo.service.ReactionService;
-import com.example.demo.vo.Board;
-import com.example.demo.vo.Rq;
+import com.example.demo.vo.*;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import com.example.demo.service.PostService;
 import com.example.demo.util.Ut;
-import com.example.demo.vo.Post;
-import com.example.demo.vo.ResultData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -35,6 +33,9 @@ public class UsrPostController {
 
     @Autowired
     private ReactionService reactionService;
+
+    @Autowired
+    private CommentService commentService;
 
     @Autowired
     private Rq rq;
@@ -154,6 +155,13 @@ public class UsrPostController {
         if(usersReactionRd.isSuccess()){
             model.addAttribute("userCanMakeReaction", usersReactionRd.isSuccess());
         }
+
+        List<Comment> comments = commentService.getForPrintComments(rq.getLoginedMemberId(),"post", id);
+
+        int commentsCount = comments.size();
+
+        model.addAttribute("comments", comments);
+        model.addAttribute("commentsCount", commentsCount);
         model.addAttribute("post", post);
         model.addAttribute("usersReaction", usersReactionRd.getData1());
         model.addAttribute("isAlreadyAddLikeRp", reactionService.isAlreadyAddLikeRp(rq.getLoginedMemberId(), id, "post"));

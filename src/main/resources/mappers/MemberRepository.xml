@@ -35,4 +35,48 @@
         WHERE nickname = #{nickname}
         AND email = #{email}
     </select>
+
+    <update id="modify">
+        UPDATE `member`
+        <set>
+            <if test="loginPw != null">
+                loginPw = #{loginPw},
+            </if>
+            <if test="name != null">
+                name = #{name},
+            </if>
+            <if test="nickname != null">
+                nickname = #{nickname},
+            </if>
+            <if test="cellphone != null">
+                cellphone = #{cellphone},
+            </if>
+            <if test="email != null">
+                email = #{email},
+            </if>
+            updateDate = NOW()
+        </set>
+        WHERE id = #{loginedMemberId}
+    </update>
+
+    <update id="modifyWithoutPw">
+        UPDATE `member`
+        <set>
+            <if test="name != null">
+                name = #{name},
+            </if>
+            <if test="nickname != null">
+                nickname = #{nickname},
+            </if>
+            <if test="cellphone != null">
+                cellphone = #{cellphone},
+            </if>
+            <if test="email != null">
+                email = #{email},
+            </if>
+            updateDate = NOW()
+        </set>
+        WHERE id = #{loginedMemberId}
+    </update>
+
 </mapper>
