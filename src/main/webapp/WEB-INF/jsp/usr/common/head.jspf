@@ -18,58 +18,91 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.1.4/tailwind.min.css">
     <!-- 테일윈드 치트시트 : https://nerdcave.com/tailwind-cheat-sheet -->
 </head>
-<body>
+<body class="bg-gray-800 relative">
 
 <header>
-    <div class="flex h-20 mx-auto items-center text-3x1 bg-indigo-800">
-        <a href="/">LOGO</a>
+    <div class="flex h-16 mx-auto items-center text-3x1 bg-white">
+        <a href="#" class="flex flex-ai-c absolute">
+            <img class="w-16 h-16
+ " src="https://velog.velcdn.com/images/ryuj7338/post/b891e272-de6f-4c1e-b605-b3b733f58f87/image.png" alt="">경호
+        </a>
         <div class="flex-grow"></div>
-        <ul class="flex">
-            <li>
-                <div class="dropdown dropdown-hover">
-                    <a class="hover:underline" href="../post/list">자격</a>
-                </div>
-                <ul class="dropdown-content menu">
-                    <li><a href="../post/list?boardId=1">자격요건</a></li>
-                    <li><a href="../post/list?boardId=2">자격증</a></li>
-                </ul>
-            </li>
-            <li>
-                <div class="dropdown dropdown-hover">
-                    <a class="hover:underline" href="../post/list">안내</a>
-                </div>
-                <ul class="dropdown-content menu">
-                    <li><a href="../post/list?boardId=3">대학교</a></li>
-                    <li><a href="../post/list?boardId=4">경호업체</a></li>
-                </ul>
-            </li>
-            <li>
-                <div class="dropdown dropdown-hover">
-                    <a class="hover:underline" href="../post/list">취업</a>
-                </div>
-                <ul class="dropdown-content menu">
-                    <li><a href="../post/list?boardId=5">면접</a></li>
-                    <li><a href="../post/list?boardId=6">자기소개서</a></li>
-                    <li><a href="../post/list?boardId=7">채용공고</a></li>
-                </ul>
-            </li>
-            <li>
-                <div class="dropdown dropdown-hover">
-                    <a class="hover:underline" href="../post/list">정보</a>
-                </div>
-                <ul class="dropdown-content menu">
-                    <li><a href="../post/list?boardId=5">면접</a></li>
-                    <li><a href="../post/list?boardId=6">자기소개서</a></li>
-                    <li><a href="../post/list?boardId=7">채용공고</a></li>
-                </ul>
-            </li>
-
-            <li><a class="hover:underline" href="../post/list">정보</a></li>
-            <li><a class="hover:underline" href="../post/list">커뮤니티</a></li>
-            <li><a class="hover:underline" href="../post/list">자료실</a></li>
-        </ul>
+        <div class="flex-grow justify-center">
+            <ul class="flex">
+                <li>
+                    <div class="dropdown dropdown-hover">
+                        <div tabindex="0" role="button">
+                            <a class="hover:underline" href="../post/list">자격</a>
+                        </div>
+                    </div>
+                    <ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-1 w-40 p-1 shadow-sm">
+                        <li><a href="../post/list?boardId=1">자격요건</a></li>
+                        <li><a href="../post/list?boardId=2">자격증</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <div class="dropdown dropdown-hover">
+                        <div tabindex="0" role="button">
+                            <a class="hover:underline" href="../post/list">안내</a>
+                        </div>
+                    </div>
+                    <ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-1 w-40 p-1 shadow-sm">
+                        <li><a href="../post/list?boardId=3">대학교</a></li>
+                        <li><a href="../post/list?boardId=4">경호업체</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <div class="dropdown dropdown-hover">
+                        <div tabindex="0" role="button">
+                            <a class="hover:underline" href="../post/list">취업</a>
+                        </div>
+                    </div>
+                    <ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-1 w-40 p-1 shadow-sm">
+                        <li><a href="../post/list?boardId=5">면접</a></li>
+                        <li><a href="../post/list?boardId=6">자기소개서</a></li>
+                        <li><a href="../post/list?boardId=7">채용공고</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <div class="dropdown dropdown-hover">
+                        <div tabindex="0" role="button">
+                            <a class="hover:underline" href="../post/list">정보</a>
+                        </div>
+                    </div>
+                    <ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-1 w-40 p-1 shadow-sm">
+                        <li><a href="../post/list?boardId=8">뉴스</a></li>
+                        <li><a href="../post/list?boardId=9">법률</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <div class="dropdown dropdown-hover">
+                        <div tabindex="0" role="button">
+                            <a class="hover:underline" href="../post/list">커뮤니티</a>
+                        </div>
+                    </div>
+                    <ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-1 w-40 p-1 shadow-sm">
+                        <li><a href="../post/list?boardId=10">Q&A</a></li>
+                        <li><a href="../post/list?boardId=11">정보공유</a></li>
+                        <li><a href="../post/list?boardId=12">후기</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <div class="dropdown dropdown-hover">
+                        <div tabindex="0" role="button">
+                            <a class="hover:underline" href="../post/list">자료실</a>
+                        </div>
+                    </div>
+                    <ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-1 w-52 p-1 shadow-sm">
+                        <li><a href="../post/list?boardId=13">기출문제</a></li>
+                        <li><a href="../post/list?boardId=14">자료공유</a></li>
+                        <li><a href="../post/list?boardId=15">면접자료</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
     </div>
-
+    <div class="bg-white border-black border"></div>
 </header>
 
-<h1>${pageTitle }</h1>
+
+</body>

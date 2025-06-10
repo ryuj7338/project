@@ -24,3 +24,18 @@ li {
 header > div > ul > li > a {
     margin-right: 30px;
 }
+
+/* 2차 메뉴*/
+header > div > ul > li > ul > li {
+    padding-bottom: 30px;
+}
+
+header > div > ul > li > ul {
+    background-color: white;
+    display: none;
+    position: absolute;
+}
+
+header > div > ul > li:hover {
+    display: block;
+}
