@@ -21,7 +21,7 @@
 <body>
 
 <header>
-    <div class="flex h-20 mx-auto items-center text-3x1">
+    <div class="flex h-20 mx-auto items-center text-3x1 bg-indigo-800">
         <a href="/">LOGO</a>
         <div class="flex-grow"></div>
         <ul class="flex">
@@ -29,12 +29,41 @@
                 <div class="dropdown dropdown-hover">
                     <a class="hover:underline" href="../post/list">자격</a>
                 </div>
-                <ul>
-                    <li><a href=""></a></li>
-                    <li><a href=""></a></li></ul>
+                <ul class="dropdown-content menu">
+                    <li><a href="../post/list?boardId=1">자격요건</a></li>
+                    <li><a href="../post/list?boardId=2">자격증</a></li>
+                </ul>
             </li>
-            <li><a class="hover:underline" href="../post/list">안내</a></li>
-            <li><a class="hover:underline" href="../post/list">취업</a></li>
+            <li>
+                <div class="dropdown dropdown-hover">
+                    <a class="hover:underline" href="../post/list">안내</a>
+                </div>
+                <ul class="dropdown-content menu">
+                    <li><a href="../post/list?boardId=3">대학교</a></li>
+                    <li><a href="../post/list?boardId=4">경호업체</a></li>
+                </ul>
+            </li>
+            <li>
+                <div class="dropdown dropdown-hover">
+                    <a class="hover:underline" href="../post/list">취업</a>
+                </div>
+                <ul class="dropdown-content menu">
+                    <li><a href="../post/list?boardId=5">면접</a></li>
+                    <li><a href="../post/list?boardId=6">자기소개서</a></li>
+                    <li><a href="../post/list?boardId=7">채용공고</a></li>
+                </ul>
+            </li>
+            <li>
+                <div class="dropdown dropdown-hover">
+                    <a class="hover:underline" href="../post/list">정보</a>
+                </div>
+                <ul class="dropdown-content menu">
+                    <li><a href="../post/list?boardId=5">면접</a></li>
+                    <li><a href="../post/list?boardId=6">자기소개서</a></li>
+                    <li><a href="../post/list?boardId=7">채용공고</a></li>
+                </ul>
+            </li>
+
             <li><a class="hover:underline" href="../post/list">정보</a></li>
             <li><a class="hover:underline" href="../post/list">커뮤니티</a></li>
             <li><a class="hover:underline" href="../post/list">자료실</a></li>
