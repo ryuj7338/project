@@ -121,7 +121,7 @@ public class UsrMemberController {
             return Ut.jsHistoryBack("F-1", "비밀번호를 입력하세요");
         }
 
-        if(rq.getLoginedMemberId().getLoginPw().equals(loginPw) == false){
+        if(rq.getLoginedMember().getLoginPw().equals(loginPw) == false){
             return Ut.jsHistoryBack("F-2", "비밀번호가 틀렸습니다.");
         }
 

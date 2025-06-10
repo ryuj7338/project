@@ -4,6 +4,7 @@
 <c:set var="pageTitle" value="MAIN PAGE"></c:set>
 <%@ include file="../common/head.jspf"%>
 
+<div></div>
 
 
 <%@ include file="../common/foot.jspf"%>
