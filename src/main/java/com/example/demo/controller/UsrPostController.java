@@ -3,9 +3,7 @@ package com.example.demo.controller;
 import com.example.demo.interceptor.BeforeActionInterceptor;
 import com.example.demo.service.*;
 import com.example.demo.vo.*;
-import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpSession;
 import com.example.demo.util.Ut;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -36,6 +34,9 @@ public class UsrPostController {
 
     @Autowired
     private NewsService newsService;
+
+    @Autowired
+    private EmploymentService employmentService;
 
     @Autowired
     private Rq rq;
@@ -191,9 +192,10 @@ public class UsrPostController {
             return rq.historyBackOnView("존재하지 않는 게시판입니다.");
         }
 
+//      뉴스
         if (boardId == 8) {
             try {
-                List<NewsArticle> newsList = newsService.crawlNews("경호", 1);
+                List<News> newsList = newsService.crawlNews("경호", 1);
                 model.addAttribute("newsList", newsList);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt(); // 스레드 인터럽트 상태 복구
@@ -203,6 +205,20 @@ public class UsrPostController {
             model.addAttribute("board", board);
             return "/usr/post/newslist";
         }
+
+        if (boardId == 7) {
+            try {
+                List<Employement> jobList = employmentService.getJobsByKeyword("경호"); // 또는 다른 직무 키워드
+                model.addAttribute("jobList", jobList);
+            } catch (Exception e) {
+                e.printStackTrace();
+                return rq.historyBackOnView("채용공고를 불러오는 데 실패했습니다.");
+            }
+
+            model.addAttribute("board", board);
+            return "/usr/post/joblist"; // ← joblist.jsp와 연결됨
+        }
+
         int postsCount = postService.getPostCount(boardId, searchKeyword, searchType);
         int itemsInAPage = 10;
 
