@@ -22,7 +22,7 @@
 
 <header>
     <div class="flex h-16 mx-auto items-center text-3x1 bg-white">
-        <a href="#" class="flex flex-ai-c absolute">
+        <a href="/" class="flex flex-ai-c absolute">
             <img class="w-16 h-16
  " src="https://velog.velcdn.com/images/ryuj7338/post/b891e272-de6f-4c1e-b605-b3b733f58f87/image.png" alt="">경호
         </a>
@@ -30,7 +30,7 @@
         <div class="flex-grow justify-center">
             <ul class="flex">
                 <li>
-                    <div class="dropdown dropdown-hover">
+                    <div class="dropdown dropdown-hover ">
                         <div tabindex="0" role="button">
                             <a class="hover:underline" href="../post/list">자격</a>
                         </div>

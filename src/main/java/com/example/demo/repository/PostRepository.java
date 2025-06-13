@@ -26,7 +26,7 @@ public interface PostRepository {
 
     public int getPostCount(int boardId, String searchKeyword, String searchType);
 
-    public List<Post> getForPosts(int boardId, int itemsInAPage, int page, String searchKeyword, String searchType);
+    public List<Post> getForPosts(int boardId, int limitFrom, int limitTake, String searchKeyword, String searchType);
 
     public int increaseHitCount(int id);
 
