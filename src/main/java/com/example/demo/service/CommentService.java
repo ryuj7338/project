@@ -69,7 +69,7 @@ public class CommentService {
             return ResultData.from("F-2", Ut.f("%d번 댓글에 대한 수정 권한이 없습니다", comment.getId()));
         }
 
-        return ResultData.from("S-1", Ut.f("%d번 댓글을 수정했습니다", comment.getId()), "수정된 댓글", reply);
+        return ResultData.from("S-1", Ut.f("%d번 댓글을 수정했습니다", comment.getId()), "수정된 댓글", comment);
     }
 
     public Comment getComment(int id) {

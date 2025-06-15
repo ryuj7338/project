@@ -1,14 +1,9 @@
 package com.example.demo.controller;
 
 import com.example.demo.interceptor.BeforeActionInterceptor;
-import com.example.demo.service.BoardService;
-import com.example.demo.service.CommentService;
-import com.example.demo.service.ReactionService;
+import com.example.demo.service.*;
 import com.example.demo.vo.*;
-import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpSession;
-import com.example.demo.service.PostService;
 import com.example.demo.util.Ut;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -36,6 +31,12 @@ public class UsrPostController {
 
     @Autowired
     private CommentService commentService;
+
+    @Autowired
+    private NewsService newsService;
+
+    @Autowired
+    private JobKoreaService jobKoreaService;
 
     @Autowired
     private Rq rq;
@@ -182,7 +183,6 @@ public class UsrPostController {
     }
 
     @RequestMapping("/usr/post/list")
-    @ResponseBody
     public String showList(HttpServletRequest req, Model model, @RequestParam(defaultValue = "0") int boardId, @RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "") String searchKeyword, @RequestParam(defaultValue = "title") String searchType) {
 
         Rq rq = (Rq) req.getAttribute("rq");
@@ -191,6 +191,33 @@ public class UsrPostController {
 
         if(board == null){
             return rq.historyBackOnView("존재하지 않는 게시판입니다.");
+        }
+
+        //      뉴스
+        if (boardId == 8) {
+            try {
+                List<News> newsList = newsService.crawlNews("경호", 1);
+                model.addAttribute("newsList", newsList);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt(); // 스레드 인터럽트 상태 복구
+                return rq.historyBackOnView("뉴스 데이터를 불러오는데 실패했습니다.");
+            }
+
+            model.addAttribute("board", board);
+            return "/usr/post/newslist";
+        }
+
+        if (boardId == 7) {
+            try {
+                List<JobPosting> jobPostings = jobKoreaService.crawlJobPostings();
+                System.out.println("크롤링된 공고 수: " + jobPostings.size()); // ✅ 로그 찍기
+                model.addAttribute("jobPostings", jobPostings);
+                model.addAttribute("board", board);
+                return "/usr/post/joblist"; // JSP 파일명
+            } catch (Exception e) {
+                e.printStackTrace();
+                return rq.historyBackOnView("공고 데이터를 가져오는 데 실패했습니다.");
+            }
         }
 
         int postsCount = postService.getPostCount(boardId, searchKeyword, searchType);
