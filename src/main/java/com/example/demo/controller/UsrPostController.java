@@ -36,7 +36,11 @@ public class UsrPostController {
     private NewsService newsService;
 
     @Autowired
+<<<<<<< HEAD
     private JobKoreaService jobKoreaService;
+=======
+    private EmploymentService employmentService;
+>>>>>>> 210cdef7314d3c6ed949a19fd8ed1f51df322a8c
 
     @Autowired
     private Rq rq;
@@ -144,7 +148,6 @@ public class UsrPostController {
 
 
     @RequestMapping("/usr/post/detail")
-    @ResponseBody
     public String showDetail(HttpServletRequest req, Model model, int id) {
 
         Rq rq = (Rq) req.getAttribute("rq");
@@ -183,7 +186,11 @@ public class UsrPostController {
     }
 
     @RequestMapping("/usr/post/list")
+<<<<<<< HEAD
     public String showList(HttpServletRequest req, Model model, @RequestParam(defaultValue = "0") int boardId, @RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "") String searchKeyword, @RequestParam(defaultValue = "title") String searchType) {
+=======
+    public String showList(HttpServletRequest req, Model model, @RequestParam(defaultValue = "1") int boardId, @RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "") String searchKeyword, @RequestParam(defaultValue = "title") String searchType) {
+>>>>>>> 210cdef7314d3c6ed949a19fd8ed1f51df322a8c
 
         Rq rq = (Rq) req.getAttribute("rq");
 
@@ -193,6 +200,7 @@ public class UsrPostController {
             return rq.historyBackOnView("존재하지 않는 게시판입니다.");
         }
 
+<<<<<<< HEAD
         //      뉴스
         if (boardId == 8) {
             try {
@@ -216,12 +224,39 @@ public class UsrPostController {
                 model.addAttribute("boardId", boardId);
 
                 return "/usr/post/newslist";
+=======
+//      뉴스
+        if (boardId == 8) {
+            try {
+                List<News> newsList = newsService.crawlNews("경호", 1);
+                model.addAttribute("newsList", newsList);
+>>>>>>> 210cdef7314d3c6ed949a19fd8ed1f51df322a8c
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt(); // 스레드 인터럽트 상태 복구
                 return rq.historyBackOnView("뉴스 데이터를 불러오는데 실패했습니다.");
             }
+<<<<<<< HEAD
         }
 
+=======
+
+            model.addAttribute("board", board);
+            return "/usr/post/newslist";
+        }
+
+//        if (boardId == 7) {
+//            try {
+//                List<Employement> jobList = employmentService.getJobsByKeyword("경호");
+//                model.addAttribute("jobList", jobList);
+//            } catch (Exception e) {
+//                e.printStackTrace();
+//                return rq.historyBackOnView("채용공고를 불러오는 데 실패했습니다.");
+//            }
+//
+//            model.addAttribute("board", board);
+//            return "/usr/post/joblist";
+//        }
+>>>>>>> 210cdef7314d3c6ed949a19fd8ed1f51df322a8c
 
         int postsCount = postService.getPostCount(boardId, searchKeyword, searchType);
         int itemsInAPage = 10;
@@ -238,6 +273,7 @@ public class UsrPostController {
         model.addAttribute("boardId", boardId);
         model.addAttribute("board", board);
         model.addAttribute("page", page);
+
         return "/usr/post/list";
     }
 }

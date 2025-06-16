@@ -1,164 +1,165 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper
-        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
-        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="com.example.demo.repository.PostRepository">
 
-    <insert id="writePost" parameterType="map">
-        INSERT INTO post
-        SET regDate = NOW(),
-		updateDate = NOW(),
-		memberId = #{memberId},
-        boardId = #{boardId},
-		title = #{title},
-        body = #{body}
-    </insert>
+<insert id="writePost" parameterType="map">
+    INSERT INTO post
+    SET regDate = NOW(),
+    updateDate = NOW(),
+    memberId = #{memberId},
+    boardId = #{boardId},
+    title = #{title},
+    body = #{body}
+</insert>
 
-    <delete id="deletePost" parameterType="int">
-        DELETE FROM post
-        WHERE id = #{id}
-    </delete>
+<delete id="deletePost" parameterType="int">
+    DELETE FROM post
+    WHERE id = #{id}
+</delete>
 
-    <update id="modifyPost" parameterType="map">
-        UPDATE post
-        <set>
-            <if test="title != null and title != ''">title = #{title},</if>
-            <if test="body != null and body != ''">`body` = #{body},</if>
-            updateDate = NOW()
-        </set>
-        WHERE id = #{id}
-    </update>
+<update id="modifyPost" parameterType="map">
+    UPDATE post
+    <set>
+        <if test="title != null and title != ''">title = #{title},</if>
+        <if test="body != null and body != ''">`body` = #{body},</if>
+        updateDate = NOW()
+    </set>
+    WHERE id = #{id}
+</update>
 
-    <select id="getPostCount" parameterType="int">
-        SELECT COUNT(*) AS cnt
-        FROM post
-        WHERE 1
-        <if test="boardId != 0">
-            AND boardId = #{boardId}
-        </if>
-        <if test="searchKeyword != ''">
-            <choose>
-                <when test="searchType == 'title'">
-                    AND title LIKE CONCAT('%', #{searchKeyword}, '%')
-                </when>
-                <when test="searchType == 'body'">
-                    AND title LIKE CONCAT('%', #{searchKeyword}, '%')
-                </when>
-                <otherwise>
-                    AND title LIKE CONCAT('%', #{searchKeyword}, '%')
-                    OR `body` LIKE CONCAT('%', #{searchKeyword}, '%')
-                </otherwise>
-            </choose>
-        </if>
-    </select>
+<select id="getPostCount" parameterType="int">
+    SELECT COUNT(*) AS cnt
+    FROM post
+    WHERE 1
+    <if test="boardId != 0">
+        AND boardId = #{boardId}
+    </if>
+    <if test="searchKeyword != ''">
+        <choose>
+            <when test="searchType == 'title'">
+                AND title LIKE CONCAT('%', #{searchKeyword}, '%')
+            </when>
+            <when test="searchType == 'body'">
+                AND title LIKE CONCAT('%', #{searchKeyword}, '%')
+            </when>
+            <otherwise>
+                AND title LIKE CONCAT('%', #{searchKeyword}, '%')
+                OR `body` LIKE CONCAT('%', #{searchKeyword}, '%')
+            </otherwise>
+        </choose>
+    </if>
+</select>
 
-    <select id="getForPosts"  resultType="com.example.demo.vo.Post">
-        SELECT P.*, M.nickname AS extra__writer,
-        IFNULL(COUNT(C.id), 0) AS extra__commentsCount
-        FROM post AS P
-        INNER JOIN
-        `member` AS M
-        ON P.memberId = M.id
-        LEFT JOIN `comment` C
-        WHERE 1
-        <if test="boardId != 0">
+<select id="getForPosts"  resultType="com.example.demo.vo.Post">
+    SELECT P.*, M.nickname AS extra__writer,
+    IFNULL(COUNT(C.id), 0) AS extra__commentsCount
+    FROM post AS P
+    INNER JOIN
+    `member` AS M
+    ON P.memberId = M.id
+    LEFT JOIN `comment` C
+    ON P.id = C.relId
+    WHERE 1
+    <if test="boardId != 0">
+        AND P.boardId = #{boardId}
+    </if>
+    <if test="searchKeyword != '' and searchKeyword != null">
+        <choose>
+            <when test="searchType == 'title'">
+                AND P.title LIKE CONCAT('%', #{searchKeyword}, '%')
+            </when>
+            <when test="searchType == 'body'">
+                AND P.`body` LIKE CONCAT('%', #{searchKeyword}, '%')
+            </when>
+            <when test="searchType == 'nickname'">
+                AND M.nickname LIKE CONCAT('%', #{searchKeyword}, '%')
+            </when>
+            <otherwise>
+                AND (
+                P.title LIKE CONCAT('%', #{searchKeyword}, '%')
+                OR P.`body` LIKE CONCAT('%', #{searchKeyword}, '%')
+                OR M.nickname LIKE CONCAT('%', #{searchKeyword}, '%')
+                )
+            </otherwise>
+
+        </choose>
+    </if>
+    ORDER BY P.id DESC
+    <if test="limitFrom >= 0">
+        LIMIT #{limitFrom}, #{limitTake}
+    </if>
+</select>
+
+<select id="getLastInsertId" parameterType="int">
+    SELECT LAST_INSERT_ID()
+</select>
+
+<select id="getForPrintPost" parameterType="int" resultType="com.example.demo.vo.Post">
+    SELECT P.*, M.nickname AS extra__writer
+    FROM post AS P
+    INNER JOIN `member` AS M
+    ON P.memberId = M.id
+    WHERE P.id = #{id}
+</select>
+
+<select id="getPostById" parameterType="int" resultType="com.example.demo.vo.Post">
+    SELECT * FROM post
+    WHERE id = #{id}
+</select>
+
+<select id="getForPrintPosts" resultType="com.example.demo.vo.Post">
+    SELECT P.*, M.nickname AS extra__writer
+    FROM post P
+    INNER JOIN `member` M
+    ON P.memberId = M.id
+    <where>
+        <if test="boardId != 0 and board != null">
             AND P.boardId = #{boardId}
         </if>
-        <if test="searchKeyword != '' and searchKeyword != null">
-            <choose>
-                <when test="searchType == 'title'">
-                    AND P.title LIKE CONCAT('%', #{searchKeyword}, '%')
-                </when>
-                <when test="searchType == 'body'">
-                    AND P.`body` LIKE CONCAT('%', #{searchKeyword}, '%')
-                </when>
-                <when test="searchType == 'nickname'">
-                    AND M.nickname LIKE CONCAT('%', #{searchKeyword}, '%')
-                </when>
-                <otherwise>
-                    AND (
-                    P.title LIKE CONCAT('%', #{searchKeyword}, '%')
-                    OR P.`body` LIKE CONCAT('%', #{searchKeyword}, '%')
-                    OR M.nickname LIKE CONCAT('%', #{searchKeyword}, '%')
-                    )
-                </otherwise>
-
-            </choose>
-        </if>
-        ORDER BY P.id DESC
-        <if test="limitFrom >= 0">
+    </where>
+    ORDER BY P.id DESC
+    <if test="limitFrom >= 0">
         LIMIT #{limitFrom}, #{limitTake}
-        </if>
-    </select>
+    </if>
+</select>
 
-    <select id="getLastInsertId" parameterType="int">
-        SELECT LAST_INSERT_ID()
-    </select>
+<select id="getPosts" resultType="com.example.demo.vo.Post">
+    SELECT P.*, M.nickname AS extra__writer
+    FROM post AS P
+    INNER JOIN `member` AS M
+    ON P.memberId = M.id
+    ORDER BY P.id DESC
+</select>
 
-    <select id="getForPrintPost" parameterType="int" resultType="com.example.demo.vo.Post">
-        SELECT P.*, M.nickname AS extra__writer
-        FROM post AS P
-        INNER JOIN `member` AS M
-        ON P.memberId = M.id
-        WHERE P.id = #{id}
-    </select>
+<select id="getPostHitCount" parameterType="int">
+   SELECT hit
+   FROM post
+   WHERE id = #{id}
+</select>
 
-    <select id="getPostById" parameterType="int" resultType="com.example.demo.vo.Post">
-        SELECT * FROM post
-        WHERE id = #{id}
-    </select>
+<update id="increaseHitCount" parameterType="int">
+    UPDATE post
+    SET hit = hit + 1
+    WHERE id =#{id}
+</update>
 
-    <select id="getForPrintPosts" resultType="com.example.demo.vo.Post">
-        SELECT P.*, M.nickname AS extra__writer
-        FROM post P
-        INNER JOIN `member` M
-        ON P.memberId = M.id
-        <where>
-            <if test="boardId != 0 and board != null">
-                AND P.boardId = #{boardId}
-            </if>
-        </where>
-        ORDER BY P.id DESC
-        <if test="limitFrom >= 0">
-            LIMIT #{limitFrom}, #{limitTake}
-        </if>
-    </select>
+<update id="increaseLikeReaction" parameterType="int">
+    UPDATE post
+    SET `like` = `like` + 1
+    WHERE id =#{relId}
+</update>
 
-    <select id="getPosts" resultType="com.example.demo.vo.Post">
-        SELECT P.*, M.nickname AS extra__writer
-        FROM post AS P
-        INNER JOIN `member` AS M
-        ON P.memberId = M.id
-        ORDER BY P.id DESC
-    </select>
+<update id="decreaseLikeReaction" parameterType="int">
+    UPDATE post
+    SET `like` = `like` - 1
+    WHERE id = #{relId}
+</update>
 
-    <select id="getPostHitCount" parameterType="int">
-       SELECT hit
-       FROM post
-       WHERE id = #{id}
-    </select>
-
-    <update id="increaseHitCount" parameterType="int">
-        UPDATE post
-        SET hit = hit + 1
-        WHERE id =#{id}
-    </update>
-
-    <update id="increaseLikeReaction" parameterType="int">
-        UPDATE post
-        SET `like` = `like` + 1
-        WHERE id =#{relId}
-    </update>
-
-    <update id="decreaseLikeReaction" parameterType="int">
-        UPDATE post
-        SET `like` = `like` - 1
-        WHERE id = #{relId}
-    </update>
-
-    <select id="getLike">
-        SELECT `like` FROM post
-        WHERE id = #{relId}
-    </select>
+<select id="getLike">
+    SELECT `like` FROM post
+    WHERE id = #{relId}
+</select>
 </mapper>

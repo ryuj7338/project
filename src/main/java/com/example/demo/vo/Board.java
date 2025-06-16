@@ -16,6 +16,7 @@ public class Board {
     private int id;
     private LocalDateTime regDate;
     private LocalDateTime updateDate;
+    private int parent_id;
     private String code;
     private String name;
     private boolean delStatus;

@@ -17,8 +17,12 @@ import java.util.List;
 public class NewsService {
 
     public List<News> crawlNews(String query, int numPages) throws InterruptedException {
+<<<<<<< HEAD
         String driverPath = System.getProperty("user.dir") + "\\src\\main\\resources\\driver\\chromedriver.exe";
         System.setProperty("webdriver.chrome.driver", driverPath);
+=======
+        System.setProperty("webdriver.chrome.driver", "C:\\Users\\admin\\Downloads\\chromedriver-win64\\chromedriver.exe");
+>>>>>>> 210cdef7314d3c6ed949a19fd8ed1f51df322a8c
 
         ChromeOptions options = new ChromeOptions();
         options.addArguments("--headless", "--disable-gpu");
@@ -35,8 +39,11 @@ public class NewsService {
             Thread.sleep(2000); // 간단한 대기
 
             Document doc = Jsoup.parse(driver.getPageSource());
+<<<<<<< HEAD
 
             // 이미지가 있는 뉴스 블록 기준으로 순회
+=======
+>>>>>>> 210cdef7314d3c6ed949a19fd8ed1f51df322a8c
             Elements articleBlocks = doc.select("div.sds-comps-base-layout");
 
             for (Element block : articleBlocks) {
@@ -44,6 +51,7 @@ public class NewsService {
                 Element summaryTag = block.selectFirst("span.sds-comps-text-type-body1");
                 Element imgTag = block.selectFirst("img");
 
+<<<<<<< HEAD
                 // 조상 요소: 뉴스 전체 박스
                 Element newsBox = block.parent();  // 일반적으로 바로 위 부모 div
 
@@ -53,16 +61,23 @@ public class NewsService {
                 // 날짜: sds-comps-profile-info-subtext 내부의 span
                 Element dateTag = newsBox.selectFirst("span.sds-comps-profile-info-subtext span.sds-comps-text-type-body2.sds-comps-text-weight-sm");
 
+=======
+>>>>>>> 210cdef7314d3c6ed949a19fd8ed1f51df322a8c
                 String title = titleTag != null ? titleTag.text() : "";
                 String link = (titleTag != null && titleTag.parent() != null) ? titleTag.parent().attr("href") : "";
                 String summary = summaryTag != null ? summaryTag.text() : "";
                 String image = imgTag != null ? imgTag.attr("src") : "";
 
+<<<<<<< HEAD
                 String press = pressTag != null ? pressTag.text() : "언론사 없음";
                 String date = dateTag != null ? dateTag.text() : "날짜 없음";
 
                 if (!title.isEmpty()) {
                     newsList.add(new News(title, link, summary, image, press, date));
+=======
+                if (!title.isEmpty()) {
+                    newsList.add(new News(title, link, summary, image));
+>>>>>>> 210cdef7314d3c6ed949a19fd8ed1f51df322a8c
                 }
             }
         }
@@ -70,4 +85,8 @@ public class NewsService {
         driver.quit();
         return newsList;
     }
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 210cdef7314d3c6ed949a19fd8ed1f51df322a8c

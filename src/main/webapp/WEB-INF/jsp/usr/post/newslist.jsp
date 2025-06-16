@@ -2,6 +2,7 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 <html>
 <head>
+<<<<<<< HEAD
     <title>뉴스 게시판</title>
 </head>
 <body>
@@ -31,3 +32,21 @@
 
 </body>
 </html>
+=======
+<title>뉴스 게시판</title>
+</head>
+<body>
+<h2>뉴스 목록</h2>
+<c:forEach var="news" items="${newsList}">
+  <div>
+  <a href="${news.link}" target="_blank">${news.title}</a><br/>
+  <span>${news.summary}</span><br/>
+  <c:if test="${not empty news.image}">
+    <img src="${news.image}" width="200"/>
+  </c:if>
+  <hr/>
+  </div>
+</c:forEach>
+</body>
+</html>
+>>>>>>> 210cdef7314d3c6ed949a19fd8ed1f51df322a8c
