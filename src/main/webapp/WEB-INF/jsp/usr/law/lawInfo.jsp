@@ -7,7 +7,14 @@
 <body>
 <h1>법령 정보 목록</h1>
 
-<c:if test="${not empty lawList}">
+<!-- 검색창 -->
+<form method="get" action="/usr/law/lawInfo">
+  <input type="text" name="keyword" value="${keyword}" placeholder="법령명을 입력하세요" />
+  <button type="submit">검색</button>
+</form>
+
+<!-- 법령 목록 출력 -->
+
   <table border="1">
     <thead>
     <tr>
@@ -32,24 +39,24 @@
     </c:forEach>
     </tbody>
   </table>
-</c:if>
 
-<c:if test="${empty lawList}">
-  <p>조회된 법령 정보가 없습니다.</p>
-</c:if>
+
+<!-- 페이징 처리 -->
 <div style="margin-top: 20px;">
   <c:if test="${pageNo > 1}">
-    <a href="?query=${query}&pageNo=${pageNo - 1}&numOfRows=${numOfRows}">이전</a>
+    <a href="?keyword=${keyword}&pageNo=${pageNo - 1}&numOfRows=${numOfRows}">이전</a>
   </c:if>
 
   <c:forEach begin="1" end="${pagesCount}" var="i">
-    <a href="?query=${query}&pageNo=${i}&numOfRows=${numOfRows}"
-       style="${i == pageNo ? 'font-weight: bold; text-decoration: underline;' : ''}">${i}</a>
+    <a href="?keyword=${keyword}&pageNo=${i}&numOfRows=${numOfRows}"
+       style="${i == pageNo ? 'font-weight: bold;' : ''}">${i}</a>
   </c:forEach>
 
   <c:if test="${pageNo < pagesCount}">
-    <a href="?query=${query}&pageNo=${pageNo + 1}&numOfRows=${numOfRows}">다음</a>
+    <a href="?keyword=${keyword}&pageNo=${pageNo + 1}&numOfRows=${numOfRows}">다음</a>
   </c:if>
+</div>
+
 </div>
 
 </body>
