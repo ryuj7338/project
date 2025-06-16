@@ -12,7 +12,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Controller
 public class UsrPostController {
@@ -36,10 +38,7 @@ public class UsrPostController {
     private NewsService newsService;
 
     @Autowired
-    private JobKoreaService jobKoreaService;
-
-    @Autowired
-    private EmploymentService employmentService;
+    private LawService lawService;
 
 
     @Autowired
@@ -185,8 +184,9 @@ public class UsrPostController {
         return ResultData.newData(increaseHitCountRd, "hitCount", postService.getPostHitCount(id));
     }
 
-    @RequestMapping("/usr/post/list")
 
+
+    @RequestMapping("/usr/post/list")
     public String showList(HttpServletRequest req, Model model, @RequestParam(defaultValue = "0") int boardId, @RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "") String searchKeyword, @RequestParam(defaultValue = "title") String searchType) {
 
         Rq rq = (Rq) req.getAttribute("rq");
@@ -197,8 +197,49 @@ public class UsrPostController {
             return rq.historyBackOnView("존재하지 않는 게시판입니다.");
         }
 
+        // 법률 게시판 처리
+        if (boardId == 7) {
+            List<String> queries = List.of(
+                    "경비업법",
+                    "청원경찰법", "국가공무원법", "군인사법",
+                    "헌법", "민법", "형법", "형사소송법", "행정법",
+                    "소방기본법", "소방시설공사업법", "위험물안전관리법"
+            );
 
-        //      뉴스
+            List<Map<String, String>> allLaws = new ArrayList<>();
+
+            for (String query : queries) {
+                List<Map<String, String>> result = lawService.getLawInfoList(query);
+                for (Map<String, String> item : result) {
+                    if (item.get("법령명") == null) continue;
+
+                    String lawName = item.get("법령명");
+                    if (searchKeyword.isBlank() || lawName.contains(searchKeyword)) {
+                        allLaws.add(item);
+                    }
+                }
+            }
+
+            // 페이징 처리
+            int numOfRows = 10;
+            int totalCount = allLaws.size();
+            int pagesCount = (int) Math.ceil((double) totalCount / numOfRows);
+            int fromIndex = Math.min((page - 1) * numOfRows, totalCount);
+            int toIndex = Math.min(fromIndex + numOfRows, totalCount);
+            List<Map<String, String>> pagedLaws = allLaws.subList(fromIndex, toIndex);
+
+            // 모델에 전달
+            model.addAttribute("lawList", pagedLaws);
+            model.addAttribute("pageNo", page);
+            model.addAttribute("pagesCount", pagesCount);
+            model.addAttribute("numOfRows", numOfRows);
+            model.addAttribute("keyword", searchKeyword);
+            model.addAttribute("board", board);
+
+            return "/usr/post/lawlist"; // JSP 파일명
+        }
+
+        //  뉴스
         if (boardId == 8) {
             try {
                 List<News> allNews = newsService.crawlNews("경호", 3); // 전체 뉴스 가져오기

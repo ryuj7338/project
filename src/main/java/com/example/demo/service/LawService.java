@@ -12,6 +12,23 @@ import java.util.*;
 @Service
 public class LawService {
 
+    // 제외 항목
+    private static final List<String> EXCLUDED_KEYWORDS = List.of(
+            "난민법",
+            "데이터기반행정",
+            "헌법재판소 규칙"
+    );
+
+    private boolean shouldExclude(String lawName) {
+        for (String keyword : EXCLUDED_KEYWORDS) {
+            if (lawName.contains(keyword)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+
     // 단일 법령명 처리
     public List<Map<String, String>> getLawInfoList(String query) {
         List<Map<String, String>> resultList = new ArrayList<>();
@@ -49,8 +66,12 @@ public class LawService {
                 if (nNode.getNodeType() == Node.ELEMENT_NODE) {
                     Element eElement = (Element) nNode;
 
+                    String lawName = getTagValue("법령명한글", eElement);
+
+                    if (lawName == null || shouldExclude(lawName)) continue;
+
                     Map<String, String> map = new HashMap<>();
-                    map.put("법령명", getTagValue("법령명한글", eElement));
+                    map.put("법령명", lawName);
                     map.put("공포일자", getTagValue("공포일자", eElement));
                     map.put("공포번호", getTagValue("공포번호", eElement));
                     map.put("시행일자", getTagValue("시행일자", eElement));
