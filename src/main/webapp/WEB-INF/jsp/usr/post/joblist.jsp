@@ -2,55 +2,86 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <html>
 <head>
-    <title>실시간 채용공고</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 40px;
-        }
-        .job-box {
-            border: 1px solid #ccc;
-            padding: 16px;
-            margin-bottom: 20px;
-            border-radius: 8px;
-        }
-        .job-box h2 {
-            margin: 0 0 10px 0;
-        }
-        .job-box p {
-            margin: 4px 0;
-        }
-    </style>
+    <title>채용공고</title>
 </head>
 <body>
-<h1>실시간 JobKorea 채용공고</h1>
 
-<c:if test="${empty jobPostings}">
-    <p style="color: red;">채용공고가 없습니다. 😢</p>
+<h1>채용공고 목록</h1>
+
+<!-- ✅ alert 메시지 표시 -->
+<c:if test="${not empty message}">
+    <script>
+        alert("${message}");
+    </script>
 </c:if>
 
-<c:forEach var="job" items="${jobPostings}">
-    <div class="job-box">
-        <h2>공고번호: ${job.gno}</h2>
-        <p><strong>직무 코드:</strong> ${job.duty}</p>
-        <p><strong>카테고리:</strong> ${job.dutyCtgr}</p>
-        <p><strong>시작일:</strong> ${job.startDate}</p>
-        <p><strong>마감일:</strong> ${job.deadline}</p>
-        <p><strong>우대 자격증:</strong>
-            <c:choose>
-                <c:when test="${not empty job.certificates}">
-                    <c:forEach var="cert" items="${job.certificates}">
-                        ${cert}<c:if test="${!cert.equals(job.certificates[job.certificates.size() - 1])}">, </c:if>
-                    </c:forEach>
-                </c:when>
-                <c:otherwise>없음</c:otherwise>
-            </c:choose>
-        </p>
-        <p><a href="${job.link}" target="_blank">공고 보러가기 🔗</a></p>
-    </div>
-</c:forEach>
+<!-- 검색 폼 -->
+<form method="get" action="/usr/post/list">
+    <input type="hidden" name="boardId" value="7" />
+    <select name="searchType">
+        <option value="title" ${searchType == 'title' ? 'selected' : ''}>공고 제목</option>
+        <option value="companyName" ${searchType == 'companyName' ? 'selected' : ''}>회사 이름</option>
+    </select>
+    <input type="text" name="keyword" value="${keyword}" placeholder="검색어 입력" />
+    <button type="submit">검색</button>
+</form>
 
+<hr/>
 
+<!--  채용공고 목록 테이블 -->
+<table border="1" width="100%">
+    <thead>
+    <tr>
+        <th>공고 제목</th>
+        <th>회사명</th>
+        <th>시작일</th>
+        <th>마감일</th>
+        <th>우대자격증</th>
+    </tr>
+    </thead>
+    <tbody>
+    <c:forEach var="job" items="${jobPostings}">
+        <tr>
+            <td>${job.title}</td>
+            <td>${job.companyName}</td>
+            <td>${job.startDate}</td>
+            <td>${job.endDate}</td>
+            <td>${job.certificate}</td>
+        </tr>
+    </c:forEach>
+    </tbody>
+</table>
 
+<!-- 페이징 처리 -->
+<div style="margin-top: 20px;">
+
+    <!-- ◀ 이전 -->
+    <c:if test="${hasPrev}">
+        <a href="/usr/post/list?boardId=7&page=${prevPage}
+        <c:if test='${not empty keyword}'> &amp;searchType=${searchType}&amp;keyword=${keyword} </c:if>">
+            ◀ 이전
+        </a>
+        &nbsp;
+    </c:if>
+
+    <!-- 페이지 숫자 -->
+    <c:forEach var="i" begin="${startPage}" end="${endPage}">
+        <a href="/usr/post/list?boardId=7&page=${i}
+        <c:if test='${not empty keyword}'> &amp;searchType=${searchType}&amp;keyword=${keyword} </c:if>"
+           style="${i == page ? 'font-weight:bold; color:red;' : ''}">
+                ${i}
+        </a>
+        &nbsp;
+    </c:forEach>
+
+    <!-- 다음 ▶ -->
+    <c:if test="${hasNext}">
+        <a href="/usr/post/list?boardId=7&page=${nextPage}
+        <c:if test='${not empty keyword}'> &amp;searchType=${searchType}&amp;keyword=${keyword} </c:if>">
+            다음 ▶
+        </a>
+    </c:if>
+
+</div>
 </body>
 </html>

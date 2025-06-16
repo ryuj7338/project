@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Controller
 public class UsrPostController {
@@ -40,6 +41,8 @@ public class UsrPostController {
     @Autowired
     private LawService lawService;
 
+    @Autowired
+    private JobPostingService jobPostingService;
 
     @Autowired
     private Rq rq;
@@ -197,50 +200,86 @@ public class UsrPostController {
             return rq.historyBackOnView("존재하지 않는 게시판입니다.");
         }
 
-        // 법률 게시판 처리
+        // 채용공고 게시판 - 엑셀 읽어서 보여주기
         if (boardId == 7) {
-            List<String> queries = List.of(
-                    "경비업법",
-                    "청원경찰법", "국가공무원법", "군인사법",
-                    "헌법", "민법", "형법", "형사소송법", "행정법",
-                    "소방기본법", "소방시설공사업법", "위험물안전관리법"
-            );
-
-            List<Map<String, String>> allLaws = new ArrayList<>();
-
-            for (String query : queries) {
-                List<Map<String, String>> result = lawService.getLawInfoList(query);
-                for (Map<String, String> item : result) {
-                    if (item.get("법령명") == null) continue;
-
-                    String lawName = item.get("법령명");
-                   if (keyword == null || keyword.isBlank()){
-                       allLaws.add(item);
-                   }
-                   else if (lawName.contains(keyword)){
-                       allLaws.add(item);
-                   }
-
-                }
+            try {
+                jobPostingService.saveFromExcel("src/main/resources/jobkorea_requirements.xlsx");
+            } catch (Exception e) {
+                e.printStackTrace();
             }
 
+            List<JobPosting> allJobs = jobPostingService.getAll();
+            List<JobPosting> filteredJobs = new ArrayList<>();
+
+            // 메시지 전달용 변수
+            String message = null;
+
+            String keywordParam = req.getParameter("keyword"); // 실제 요청에 포함됐는지 확인
+
+            if (keywordParam != null) { // 사용자가 검색을 시도한 경우
+                if (keyword != null && !keyword.trim().isBlank()) {
+                    String trimmedKeyword = keyword.trim();
+
+                    if ("title".equals(searchType)) {
+                        filteredJobs = allJobs.stream()
+                                .filter(job -> job.getTitle().contains(trimmedKeyword))
+                                .collect(Collectors.toList());
+                    } else if ("companyName".equals(searchType)) {
+                        filteredJobs = allJobs.stream()
+                                .filter(job -> job.getCompanyName().contains(trimmedKeyword))
+                                .collect(Collectors.toList());
+                    }
+
+                    if (filteredJobs.isEmpty()) {
+                        message = "검색 결과가 없습니다.";
+                    }
+                } else {
+                    // 검색창에 아무것도 안 쓰고 검색 버튼만 눌렀을 때
+                    message = "검색어를 입력하세요.";
+                    filteredJobs = allJobs;
+                }
+            } else {
+                // 검색을 시도하지 않은 경우 (페이지 넘기기 등)
+                filteredJobs = allJobs;
+            }
             // 페이징 처리
-            int numOfRows = 10;
-            int totalCount = allLaws.size();
-            int pagesCount = (int) Math.ceil((double) totalCount / numOfRows);
-            int fromIndex = Math.min((page - 1) * numOfRows, totalCount);
-            int toIndex = Math.min(fromIndex + numOfRows, totalCount);
-            List<Map<String, String>> pagedLaws = allLaws.subList(fromIndex, toIndex);
+            int itemsPerPage = 10;
+            int totalItems = filteredJobs.size();
+            int pagesCount = (int) Math.ceil((double) totalItems / itemsPerPage);
+            int fromIndex = Math.min((page - 1) * itemsPerPage, totalItems);
+            int toIndex = Math.min(fromIndex + itemsPerPage, totalItems);
+            List<JobPosting> pagedJobs = filteredJobs.subList(fromIndex, toIndex);
 
-            // 모델에 전달
-            model.addAttribute("lawList", pagedLaws);
-            model.addAttribute("pageNo", page);
-            model.addAttribute("pagesCount", pagesCount);
-            model.addAttribute("numOfRows", numOfRows);
-            model.addAttribute("keyword", searchKeyword);
+            //  페이지 블록 처리 추가
+            int pageBlockSize = 10;
+            int currentBlock = (int) Math.ceil((double) page / pageBlockSize);
+            int startPage = (currentBlock - 1) * pageBlockSize + 1;
+            int endPage = Math.min(startPage + pageBlockSize - 1, pagesCount);
+
+            boolean hasPrev = startPage > 1;
+            boolean hasNext = endPage < pagesCount;
+            int prevPage = startPage - 1;
+            int nextPage = endPage + 1;
+
+            // 모델 전달
+            model.addAttribute("jobPostings", pagedJobs);
             model.addAttribute("board", board);
+            model.addAttribute("page", page);
+            model.addAttribute("pagesCount", pagesCount);
+            model.addAttribute("keyword", keyword);        // 검색창 유지용
+            model.addAttribute("searchType", searchType);  // 검색타입 유지용
+            model.addAttribute("message", message);        // 알림 메시지
 
-            return "/usr/post/lawlist"; // JSP 파일명
+            // 페이지 블록 관련 변수 추가
+            model.addAttribute("startPage", startPage);
+            model.addAttribute("endPage", endPage);
+            model.addAttribute("hasPrev", hasPrev);
+            model.addAttribute("hasNext", hasNext);
+            model.addAttribute("prevPage", prevPage);
+            model.addAttribute("nextPage", nextPage);
+
+            return "/usr/post/joblist";
+
         }
 
         //  뉴스
