@@ -206,18 +206,18 @@ public class UsrPostController {
             return "/usr/post/newslist";
         }
 
-        if (boardId == 7) {
-            try {
-                List<Employement> jobList = employmentService.getJobsByKeyword("경호"); // 또는 다른 직무 키워드
-                model.addAttribute("jobList", jobList);
-            } catch (Exception e) {
-                e.printStackTrace();
-                return rq.historyBackOnView("채용공고를 불러오는 데 실패했습니다.");
-            }
-
-            model.addAttribute("board", board);
-            return "/usr/post/joblist"; // ← joblist.jsp와 연결됨
-        }
+//        if (boardId == 7) {
+//            try {
+//                List<Employement> jobList = employmentService.getJobsByKeyword("경호");
+//                model.addAttribute("jobList", jobList);
+//            } catch (Exception e) {
+//                e.printStackTrace();
+//                return rq.historyBackOnView("채용공고를 불러오는 데 실패했습니다.");
+//            }
+//
+//            model.addAttribute("board", board);
+//            return "/usr/post/joblist";
+//        }
 
         int postsCount = postService.getPostCount(boardId, searchKeyword, searchType);
         int itemsInAPage = 10;
