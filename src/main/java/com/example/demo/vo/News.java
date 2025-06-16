@@ -11,4 +11,6 @@ public class News {
     private String link;
     private String summary;
     private String image;
+    private String press;
+    private String date;
 }

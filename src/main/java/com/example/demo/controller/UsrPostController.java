@@ -196,29 +196,32 @@ public class UsrPostController {
         //      뉴스
         if (boardId == 8) {
             try {
-                List<News> newsList = newsService.crawlNews("경호", 1);
-                model.addAttribute("newsList", newsList);
+                List<News> allNews = newsService.crawlNews("경호", 3); // 전체 뉴스 가져오기
+
+                int itemsInAPage = 5; // 한 페이지당 몇 개씩 보여줄지
+                int totalNewsCount = allNews.size();
+                int pagesCount = (int) Math.ceil((double) totalNewsCount / itemsInAPage);
+
+                int fromIndex = (page - 1) * itemsInAPage;
+                int toIndex = Math.min(fromIndex + itemsInAPage, totalNewsCount);
+
+                // 실제 보여줄 뉴스 리스트
+                List<News> pagedNews = allNews.subList(fromIndex, toIndex);
+
+                // JSP에 넘길 값들
+                model.addAttribute("newsList", pagedNews);
+                model.addAttribute("pagesCount", pagesCount);
+                model.addAttribute("page", page);
+                model.addAttribute("board", board);
+                model.addAttribute("boardId", boardId);
+
+                return "/usr/post/newslist";
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt(); // 스레드 인터럽트 상태 복구
                 return rq.historyBackOnView("뉴스 데이터를 불러오는데 실패했습니다.");
             }
-
-            model.addAttribute("board", board);
-            return "/usr/post/newslist";
         }
 
-        if (boardId == 7) {
-            try {
-                List<JobPosting> jobPostings = jobKoreaService.crawlJobPostings();
-                System.out.println("크롤링된 공고 수: " + jobPostings.size()); // ✅ 로그 찍기
-                model.addAttribute("jobPostings", jobPostings);
-                model.addAttribute("board", board);
-                return "/usr/post/joblist"; // JSP 파일명
-            } catch (Exception e) {
-                e.printStackTrace();
-                return rq.historyBackOnView("공고 데이터를 가져오는 데 실패했습니다.");
-            }
-        }
 
         int postsCount = postService.getPostCount(boardId, searchKeyword, searchType);
         int itemsInAPage = 10;
