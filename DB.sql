@@ -105,16 +105,17 @@ CREATE TABLE university(
 );
 
 
-# 채용공고 테이블
-CREATE TABLE jobs(
-                     id INT(10) UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
-                     title VARCHAR(200) NOT NULL,
-                     `body` TEXT NOT NULL,
-                     category CHAR(50) NOT NULL COMMENT '경찰, 경호, 소방, 군인',
-                     url VARCHAR(500) NOT NULL,
-                     regDate DATETIME NOT NULL,
-                     deadline DATE NOT NULL
+# 채용정보 테이블
+CREATE TABLE job_posting(
+                            id INT(10) UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
+                            title VARCHAR(255) NOT NULL,
+                            company_name VARCHAR(255) NOT NULL,
+                            certificate TEXT NOT NULL,
+                            start_date VARCHAR(50) NOT NULL,
+                            end_date VARCHAR(50) NOT NULL
 );
+
+SELECT * FROM job_posting;
 
 SELECT * FROM board;
 
@@ -311,3 +312,5 @@ WHERE id  = 3;
 UPDATE post
 SET memberId = 5
 WHERE id = 4;
+
+SELECT * FROM board;
