@@ -187,7 +187,7 @@ public class UsrPostController {
 
 
     @RequestMapping("/usr/post/list")
-    public String showList(HttpServletRequest req, Model model, @RequestParam(defaultValue = "0") int boardId, @RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "") String searchKeyword, @RequestParam(defaultValue = "title") String searchType) {
+    public String showList(HttpServletRequest req, Model model,@RequestParam(required = false) String keyword, @RequestParam(defaultValue = "0") int boardId, @RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "") String searchKeyword, @RequestParam(defaultValue = "title") String searchType) {
 
         Rq rq = (Rq) req.getAttribute("rq");
 
@@ -214,9 +214,13 @@ public class UsrPostController {
                     if (item.get("법령명") == null) continue;
 
                     String lawName = item.get("법령명");
-                    if (searchKeyword.isBlank() || lawName.contains(searchKeyword)) {
-                        allLaws.add(item);
-                    }
+                   if (keyword == null || keyword.isBlank()){
+                       allLaws.add(item);
+                   }
+                   else if (lawName.contains(keyword)){
+                       allLaws.add(item);
+                   }
+
                 }
             }
 
