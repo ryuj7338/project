@@ -7,12 +7,6 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -25,12 +19,18 @@ public class APITest {
     private LawService lawService;
 
     @RequestMapping("/usr/law/lawInfo")
-    public String showLawInfo(@RequestParam(defaultValue = "1") int pageNo, @RequestParam(defaultValue = "10") int numOfRows, Model model) {
+    public String showLawInfo(@RequestParam String type, @RequestParam(defaultValue = "1") int pageNo, @RequestParam(defaultValue = "10") int numOfRows, Model model) {
 
-        List<String> queries = Arrays.asList("대한민국 헌법", "상법", "민법", "경비업법", "형법", "형사소송법", "민사소송법", "사회법");
+        Map<String, List<String>> lawCategories = Map.of(
+                "경호학", List.of("경비업법", "경비업법 시행령", "경비업법 시행규칙", "청원경찰법", "국가공무원법", "군인사법"),
+                "소방학", List.of("소방기본법", "소방시설공사업법", "위험물안전관리법"),
+                "법학", List.of("헌법", "민법", "형법", "형사소송법", "행정법")
+        );
+
+        List<String> queries = lawCategories.getOrDefault(type, List.of());
         List<Map<String, String>> allLaws = new ArrayList<>();
-        for (String query : queries) {
-            allLaws.addAll(lawService.getLawInfoList(query));
+        for (String q : queries) {
+            allLaws.addAll(lawService.getLawInfoList(q));
         }
 
         // 3. 페이지에 맞는 부분 추출
@@ -45,6 +45,7 @@ public class APITest {
         model.addAttribute("pageNo", pageNo);
         model.addAttribute("pagesCount", pagesCount);
         model.addAttribute("numOfRows", numOfRows);
+        model.addAttribute("type", type);
         return "/usr/law/lawInfo";
 
     }
