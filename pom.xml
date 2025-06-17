@@ -47,7 +47,7 @@
             <scope>runtime</scope>
             <optional>true</optional>
         </dependency>
-<<<<<<< HEAD
+
         <dependency>
             <groupId>com.mysql</groupId>
             <artifactId>mysql-connector-j</artifactId>
@@ -63,13 +63,6 @@
         <!--            <artifactId>mysql-connector-j</artifactId>-->
         <!--            <scope>runtime</scope>-->
         <!--        </dependency>-->
-=======
-<!--        <dependency>-->
-<!--            <groupId>com.mysql</groupId>-->
-<!--            <artifactId>mysql-connector-j</artifactId>-->
-<!--            <scope>runtime</scope>-->
-<!--        </dependency>-->
->>>>>>> 57fceb85066ec89ea7c6794ef28c734fec7a417d
         <dependency>
             <groupId>com.mysql</groupId>
             <artifactId>mysql-connector-j</artifactId>
@@ -132,10 +125,7 @@ https://mvnrepository.com/artifact/org.glassfish.web/jakarta.servlet.jsp.jstl --
             <artifactId>selenium-java</artifactId>
             <version>4.25.0</version>
         </dependency>
-<<<<<<< HEAD
-=======
 
->>>>>>> 57fceb85066ec89ea7c6794ef28c734fec7a417d
         <!-- WebDriver Manager (크롬 드라이버 자동 관리) -->
         <dependency>
             <groupId>io.github.bonigarcia</groupId>
@@ -178,10 +168,7 @@ https://mvnrepository.com/artifact/org.glassfish.web/jakarta.servlet.jsp.jstl --
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-jpa</artifactId>
         </dependency>
-<<<<<<< HEAD
-=======
 
->>>>>>> 57fceb85066ec89ea7c6794ef28c734fec7a417d
     </dependencies>
 
     <build>

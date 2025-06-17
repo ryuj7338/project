@@ -21,16 +21,6 @@
     <hr/>
   </div>
 
-    <div>
-        <a href="${news.link}" target="_blank">${news.title}</a><br/>
-        <span>${news.press} / ${news.date}</span><br/>
-        <span>${news.summary}</span><br/>
-        <c:if test="${not empty news.image}">
-            <img src="${news.image}" width="200"/>
-        </c:if>
-        <hr/>
-    </div>
-
 </c:forEach>
 
 <!-- 페이징 UI -->

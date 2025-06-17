@@ -104,20 +104,6 @@ CREATE TABLE university(
                            url VARCHAR(500) NOT NULL
 );
 
-
-<<<<<<< HEAD
-# 채용공고 테이블
-CREATE TABLE jobs(
-                     id INT(10) UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
-                     title VARCHAR(200) NOT NULL,
-                     `body` TEXT NOT NULL,
-                     category CHAR(50) NOT NULL COMMENT '경찰, 경호, 소방, 군인',
-                     url VARCHAR(500) NOT NULL,
-                     regDate DATETIME NOT NULL,
-                     deadline DATE NOT NULL
-);
-
-=======
 # 채용정보 테이블
 CREATE TABLE job_posting(
                             id INT(10) UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
@@ -130,7 +116,7 @@ CREATE TABLE job_posting(
 
 SELECT * FROM job_posting;
 
->>>>>>> 57fceb85066ec89ea7c6794ef28c734fec7a417d
+
 SELECT * FROM board;
 
 # post 테이블에 좋아요 컬럼 추가
@@ -330,4 +316,4 @@ WHERE id = 4;
 =======
 
 SELECT * FROM board;
->>>>>>> 57fceb85066ec89ea7c6794ef28c734fec7a417d
+
