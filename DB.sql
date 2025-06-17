@@ -32,19 +32,19 @@ CREATE TABLE board (
 );
 
 # 회원 테이블 생성
-CREATE TABLE users (
-                       id INT(10) UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
-                       regDate DATETIME NOT NULL,
-                       updateDate DATETIME NOT NULL,
-                       loginId CHAR(100) NOT NULL,
-                       loginPw CHAR(200) NOT NULL,
-                       `authLevel` SMALLINT(2) UNSIGNED DEFAULT 3 COMMENT '권한 레벨 (3=일반, 7=관리자)',
-                       `name` CHAR(20) NOT NULL,
-                       nickname CHAR(20) NOT NULL,
-                       cellphone CHAR(20) NOT NULL,
-                       email CHAR(50) NOT NULL,
-                       delStatus TINYINT(1) UNSIGNED NOT NULL DEFAULT 0 COMMENT '탈퇴 여부 (0=탈퇴 전, 1=탈퇴 후)',
-                       delDate DATETIME COMMENT '탈퇴 날짜'
+CREATE TABLE `member` (
+                          id INT(10) UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
+                          regDate DATETIME NOT NULL,
+                          updateDate DATETIME NOT NULL,
+                          loginId CHAR(100) NOT NULL,
+                          loginPw CHAR(200) NOT NULL,
+                          `authLevel` SMALLINT(2) UNSIGNED DEFAULT 3 COMMENT '권한 레벨 (3=일반, 7=관리자)',
+                          `name` CHAR(20) NOT NULL,
+                          nickname CHAR(20) NOT NULL,
+                          cellphone CHAR(20) NOT NULL,
+                          email CHAR(50) NOT NULL,
+                          delStatus TINYINT(1) UNSIGNED NOT NULL DEFAULT 0 COMMENT '탈퇴 여부 (0=탈퇴 전, 1=탈퇴 후)',
+                          delDate DATETIME COMMENT '탈퇴 날짜'
 );
 
 
@@ -88,11 +88,20 @@ CREATE TABLE `comment` (
 
 
 # 자격증 테이블
-CREATE TABLE qualifications(
-                               id INT(10) UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
-                               `name` VARCHAR(50) NOT NULL,
-                               category_code VARCHAR(50) NOT NULL COMMENT '무도, 경비, 응급 등'
+CREATE TABLE qualifications (
+                                id INT(10) UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
+                                `name` VARCHAR(50) NOT NULL,
+                                category_code VARCHAR(50) NOT NULL COMMENT '무도, 경비, 응급 등',
+                                agency VARCHAR(100) COMMENT '시행기관',
+                                qualification_type VARCHAR(50) COMMENT '자격증 구분',
+                                eligibility TEXT COMMENT '응시자격',
+                                subjects TEXT COMMENT '시험과목',
+                                method TEXT COMMENT '시험방법',
+                                frequency VARCHAR(20) COMMENT '시행횟수',
+                                note TEXT COMMENT '비고',
+                                regDate DATETIME NOT NULL
 );
+
 
 
 # 대학교 테이블
@@ -103,6 +112,7 @@ CREATE TABLE university(
                            major VARCHAR(50) NOT NULL,
                            url VARCHAR(500) NOT NULL
 );
+
 
 # 채용정보 테이블
 CREATE TABLE job_posting(
@@ -115,7 +125,6 @@ CREATE TABLE job_posting(
 );
 
 SELECT * FROM job_posting;
-
 
 SELECT * FROM board;
 
@@ -312,8 +321,5 @@ WHERE id  = 3;
 UPDATE post
 SET memberId = 5
 WHERE id = 4;
-<<<<<<< HEAD
-=======
 
 SELECT * FROM board;
-
