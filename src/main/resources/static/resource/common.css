@@ -1,0 +1,55 @@
+@charset "UTF-8";
+
+@font-face {
+    font-family: 'GmarketSansMedium';
+    src:
+            url('https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_2001@1.1/GmarketSansMedium.woff')
+            format('woff');
+    font-weight: normal;
+    font-style: normal;
+}
+
+html>body {
+    font-family: 'GmarketSansMedium', sans;
+}
+
+a {
+    text-decoration: none;
+}
+
+ul, li {
+    display: inline-block;
+    list-style: none;
+}
+
+header > div > ul > li > a {
+    margin-right: 30px;
+}
+
+/* 2차 메뉴*/
+header > div > ul > li > ul > li {
+    padding-bottom: 30px;
+}
+
+header > div > ul > li > ul {
+    background-color: white;
+    display: none;
+    position: absolute;
+}
+
+header > div > ul > li:hover {
+    display: block;
+}
+
+.image_box {
+    margin-top: calc(100% / 10);
+    height: 500px;
+    border: 10px solid red;
+}
+
+.news_box {
+    margin-top: calc(100% / 6);
+    width: 86%;
+    margin-left: auto;
+    margin-right: auto;
+}
