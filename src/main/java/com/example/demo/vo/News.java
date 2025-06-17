@@ -5,9 +5,11 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+
 public class News {
 
     private String title;
@@ -18,3 +20,4 @@ public class News {
     private String date;
 
 }
+

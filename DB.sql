@@ -105,6 +105,7 @@ CREATE TABLE university(
 );
 
 
+<<<<<<< HEAD
 # 채용공고 테이블
 CREATE TABLE jobs(
                      id INT(10) UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
@@ -116,6 +117,20 @@ CREATE TABLE jobs(
                      deadline DATE NOT NULL
 );
 
+=======
+# 채용정보 테이블
+CREATE TABLE job_posting(
+                            id INT(10) UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
+                            title VARCHAR(255) NOT NULL,
+                            company_name VARCHAR(255) NOT NULL,
+                            certificate TEXT NOT NULL,
+                            start_date VARCHAR(50) NOT NULL,
+                            end_date VARCHAR(50) NOT NULL
+);
+
+SELECT * FROM job_posting;
+
+>>>>>>> 57fceb85066ec89ea7c6794ef28c734fec7a417d
 SELECT * FROM board;
 
 # post 테이블에 좋아요 컬럼 추가
@@ -311,3 +326,8 @@ WHERE id  = 3;
 UPDATE post
 SET memberId = 5
 WHERE id = 4;
+<<<<<<< HEAD
+=======
+
+SELECT * FROM board;
+>>>>>>> 57fceb85066ec89ea7c6794ef28c734fec7a417d

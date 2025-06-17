@@ -200,7 +200,9 @@ public class UsrPostController {
             return rq.historyBackOnView("존재하지 않는 게시판입니다.");
         }
 
-        // 채용공고
+
+        // 채용공고 게시판 - 엑셀 읽어서 보여주기
+
         if (boardId == 7) {
             try {
                 jobPostingService.saveFromExcel("src/main/resources/jobkorea_requirements.xlsx");
@@ -211,7 +213,11 @@ public class UsrPostController {
             List<JobPosting> allJobs = jobPostingService.getAll();
             List<JobPosting> filteredJobs = new ArrayList<>();
 
+
             // 메시지 전달
+
+            // 메시지 전달용 변수
+
             String message = null;
 
             String keywordParam = req.getParameter("keyword"); // 실제 요청에 포함됐는지 확인
@@ -267,8 +273,12 @@ public class UsrPostController {
             model.addAttribute("page", page);
             model.addAttribute("pagesCount", pagesCount);
             model.addAttribute("keyword", keyword);        // 검색창 유지용
+
             model.addAttribute("searchType", searchType);   // 검색타입 유지용
             model.addAttribute("message", message);     // 알림 메시지
+
+            model.addAttribute("searchType", searchType);  // 검색타입 유지용
+            model.addAttribute("message", message);        // 알림 메시지
 
             // 페이지 블록 관련 변수 추가
             model.addAttribute("startPage", startPage);
@@ -285,6 +295,7 @@ public class UsrPostController {
         //  뉴스
         if (boardId == 8) {
             try {
+
                 List<News> allNews = newsService.crawlNews("경호", 5); // 전체 뉴스 가져오기
 
                 int itemsInAPage = 5; // 한 페이지당 몇 개씩 보여줄지
@@ -311,6 +322,7 @@ public class UsrPostController {
                 return rq.historyBackOnView("뉴스 데이터를 불러오는데 실패했습니다.");
             }
         }
+
 
         // 법률 게시판 처리
         if (boardId == 9) {
@@ -357,6 +369,7 @@ public class UsrPostController {
 
             return "/usr/post/lawlist"; // JSP 파일명
         }
+
 
 
         int postsCount = postService.getPostCount(boardId, searchKeyword, searchType);

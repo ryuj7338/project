@@ -38,12 +38,27 @@
         <div class="flex-grow"></div>
         <div class="flex-grow justify-center">
             <ul class="px-8">
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+                <li class="px-8"><a href="/usr/post/list">자격</a></li>
+                <li class="px-8"><a href="/usr/post/list">안내</a></li>
+                <li class="px-8"><a href="/usr/post/list">정보</a></li>
+                <li class="px-8"><a href="/usr/post/list">취업</a></li>
+                <li class="px-8"><a href="/usr/post/list">커뮤니티</a></li>
+                <li class="px-8"><a href="/usr/post/list">자료실</a></li>
+=======
+>>>>>>> 57fceb85066ec89ea7c6794ef28c734fec7a417d
                 <li class="px-8"><a href="#">자격</a></li>
                 <li class="px-8"><a href="#">안내</a></li>
                 <li class="px-8"><a href="#">정보</a></li>
                 <li class="px-8"><a href="#">취업</a></li>
                 <li class="px-8"><a href="#">커뮤니티</a></li>
                 <li class="px-8"><a href="#">자료실</a></li>
+<<<<<<< HEAD
+=======
+>>>>>>> 210cdef7314d3c6ed949a19fd8ed1f51df322a8c
+>>>>>>> 57fceb85066ec89ea7c6794ef28c734fec7a417d
             </ul>
         </div>
     </div>

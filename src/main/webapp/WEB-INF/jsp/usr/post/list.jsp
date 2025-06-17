@@ -125,6 +125,7 @@
 	</div>
 </div>
 
+
 <%-- <!-- 정적 페이징-->
 <div class="page flex justify-center mt-8">
 	<div class="join">
@@ -136,13 +137,6 @@
 	</div>
 
 </div> --%>
-
-
-
-
-
-
-
 
 
 <%@ include file="../common/foot.jspf"%>

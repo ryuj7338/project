@@ -2,7 +2,11 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <html>
 <head>
+
   <title>채용공고</title>
+
+
+
 </head>
 <body>
 
@@ -10,13 +14,20 @@
 
 <!-- ✅ alert 메시지 표시 -->
 <c:if test="${not empty message}">
+
   <script>
     alert("${message}");
   </script>
+
+    <script>
+        alert("${message}");
+    </script>
+
 </c:if>
 
 <!-- 검색 폼 -->
 <form method="get" action="/usr/post/list">
+
   <input type="hidden" name="boardId" value="7" />
   <select name="searchType">
     <option value="title" ${searchType == 'title' ? 'selected' : ''}>공고 제목</option>
@@ -24,12 +35,22 @@
   </select>
   <input type="text" name="keyword" value="${keyword}" placeholder="검색어 입력" />
   <button type="submit">검색</button>
+
+    <input type="hidden" name="boardId" value="7" />
+    <select name="searchType">
+        <option value="title" ${searchType == 'title' ? 'selected' : ''}>공고 제목</option>
+        <option value="companyName" ${searchType == 'companyName' ? 'selected' : ''}>회사 이름</option>
+    </select>
+    <input type="text" name="keyword" value="${keyword}" placeholder="검색어 입력" />
+    <button type="submit">검색</button>
+
 </form>
 
 <hr/>
 
 <!--  채용공고 목록 테이블 -->
 <table border="1" width="100%">
+
   <thead>
   <tr>
     <th>공고 제목</th>
@@ -50,10 +71,33 @@
     </tr>
   </c:forEach>
   </tbody>
+=======
+    <thead>
+    <tr>
+        <th>공고 제목</th>
+        <th>회사명</th>
+        <th>시작일</th>
+        <th>마감일</th>
+        <th>우대자격증</th>
+    </tr>
+    </thead>
+    <tbody>
+    <c:forEach var="job" items="${jobPostings}">
+        <tr>
+            <td>${job.title}</td>
+            <td>${job.companyName}</td>
+            <td>${job.startDate}</td>
+            <td>${job.endDate}</td>
+            <td>${job.certificate}</td>
+        </tr>
+    </c:forEach>
+    </tbody>
+
 </table>
 
 <!-- 페이징 처리 -->
 <div style="margin-top: 20px;">
+
 
   <!-- ◀ 이전 -->
   <c:if test="${hasPrev}">
@@ -85,3 +129,6 @@
 </div>
 </body>
 </html>
+
+
+

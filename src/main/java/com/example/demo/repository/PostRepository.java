@@ -8,6 +8,7 @@ import java.util.List;
 @Mapper
 public interface PostRepository {
 
+
     public int writePost(int memberId, String title, String body);
 
     public void deletePost(int id);
@@ -37,3 +38,4 @@ public interface PostRepository {
 
     public int getLike(int relId);
 }
+

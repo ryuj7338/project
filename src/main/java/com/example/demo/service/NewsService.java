@@ -34,7 +34,11 @@ public class NewsService {
             int start = (page - 1) * 10 + 1;
             String url = "https://search.naver.com/search.naver?where=news&query=" + query + "&start=" + start;
             driver.get(url);
+
             Thread.sleep(1000);
+
+            Thread.sleep(2000);
+
 
             Document doc = Jsoup.parse(driver.getPageSource());
 
@@ -70,8 +74,12 @@ public class NewsService {
                 }
             }
         }
+
         driver.quit();
         return newsList;
 
     }
 }
+
+
+

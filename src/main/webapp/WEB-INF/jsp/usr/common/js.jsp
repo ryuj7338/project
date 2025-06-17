@@ -2,13 +2,15 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 
 <script>
-  let historyBack = '${historyBack} == true';
 
-  let msg = '${msg}'.trim();
+    let historyBack = '${historyBack} == true';
 
-  if (msg.length > 0) {
-    alert(msg);
-  }
+    let msg = '${msg}'.trim();
 
-  history.back();
+    if (msg.length > 0) {
+        alert(msg);
+    }
+
+    history.back();
+
 </script>
