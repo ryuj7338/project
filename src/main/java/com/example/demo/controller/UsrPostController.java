@@ -200,7 +200,7 @@ public class UsrPostController {
             return rq.historyBackOnView("존재하지 않는 게시판입니다.");
         }
 
-        // 채용공고 
+        // 채용공고
         if (boardId == 7) {
             try {
                 jobPostingService.saveFromExcel("src/main/resources/jobkorea_requirements.xlsx");
@@ -268,7 +268,7 @@ public class UsrPostController {
             model.addAttribute("pagesCount", pagesCount);
             model.addAttribute("keyword", keyword);        // 검색창 유지용
             model.addAttribute("searchType", searchType);  // 검색타입 유지용
-            model.addAttribute("message", message);        // 알림 메시지
+            model.addAttribute("message", message);     // 알림 메시지
 
             // 페이지 블록 관련 변수 추가
             model.addAttribute("startPage", startPage);
