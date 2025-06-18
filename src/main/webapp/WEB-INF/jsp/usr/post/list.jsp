@@ -126,4 +126,17 @@
 </div>
 
 
+<%-- <!-- 정적 페이징-->
+<div class="page flex justify-center mt-8">
+	<div class="join">
+		<c:forEach begin="1" end="${pagesCount }" var="i">
+			<a href="?page=${i }&boardId=${param.boardId}"
+				class="join-item btn btn-sqaure ${param.page == i ? 'btn-active' : ''}" type="radio" name="options"
+				aria-label="${i }" checked="checked">${i}</a>
+		</c:forEach>
+	</div>
+
+</div> --%>
+
+
 <%@ include file="../common/foot.jspf"%>

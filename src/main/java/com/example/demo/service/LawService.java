@@ -106,4 +106,6 @@ public class LawService {
         Node node = nodeList.item(0);
         return node.getTextContent();
     }
+
 }
+

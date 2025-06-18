@@ -25,5 +25,6 @@ public class JobPosting {
     private String certificate;
     private String startDate;
     private String endDate;
-
+//    private String originalUrl;
 }
+

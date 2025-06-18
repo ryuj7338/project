@@ -8,33 +8,34 @@ import java.util.List;
 @Mapper
 public interface PostRepository {
 
-    int writePost(int memberId, String title, String body);
 
-    void deletePost(int id);
+    public int writePost(int memberId, String title, String body);
 
-    void modifyPost(int id, String title, String body);
+    public void deletePost(int id);
 
-    Post getPostById(int id);
+    public void modifyPost(int id, String title, String body);
 
-    List<Post> getPosts();
+    public Post getPostById(int id);
 
-    int getLastInsertId();
+    public List<Post> getPosts();
 
-    Post getForPrintPost(int loginedMemberId);
+    public int getLastInsertId();
 
-    List<Post> getForPrintPosts(int boardId, int limitFrom, int limitTake);
+    public Post getForPrintPost(int loginedMemberId);
 
-    int getPostCount(int boardId, String searchKeyword, String searchType);
+    public List<Post> getForPrintPosts(int boardId, int limitFrom, int limitTake);
 
-    List<Post> getForPosts(int boardId, int limitFrom, int limitTake, String searchKeyword, String searchType);
+    public int getPostCount(int boardId, String searchKeyword, String searchType);
 
+    public List<Post> getForPosts(int boardId, int limitFrom, int limitTake, String searchKeyword, String searchType);
 
-    int increaseHitCount(int id);
+    public int increaseHitCount(int id);
 
-    int getPostHitCount(int id);
+    public int getPostHitCount(int id);
 
-    int increaseLikeReaction(int relId);
-    int decreaseLikeReaction(int relId);
+    public int increaseLikeReaction(int relId);
+    public int decreaseLikeReaction(int relId);
 
-    int getLike(int relId);
+    public int getLike(int relId);
 }
+
