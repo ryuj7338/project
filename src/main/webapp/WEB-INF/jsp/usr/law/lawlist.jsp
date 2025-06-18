@@ -9,14 +9,35 @@
 <body>
 <h1>법령 정보 목록</h1>
 
+<script>
+  function validateSearch() {
+    const keywordInput = document.getElementById("keyword");
+    const keyword = keywordInput.value.trim();
+
+    if (keyword.length === 0) {
+      alert("검색어를 입력하세요.");
+      keywordInput.focus();
+      return false; // 중요: 제출 막기
+    }
+
+    return true; // 제출 허용
+  }
+</script>
+
+<c:if test="${not empty message}">
+  <script>
+    alert("${message}");
+  </script>
+</c:if>
+
 <!--  검색창 -->
-<form method="get" action="/usr/law/list">
-
-  <input type="hidden" name="boardId" value="8" />
-  <input type="text" name="keyword" value="${keyword}" placeholder="법령명을 입력하세요" />
+<form method="get" action="/usr/law/list" onsubmit="return validateSearch()">
+  <input type="hidden" name="boardId" value="${board.id}" />
+  <select name="searchType">
+    <option value="title" ${searchType == 'title' ? 'selected' : ''}>법령명</option>
+  </select>
+  <input type="text" name="keyword" id="keyword" value="${keyword}" placeholder="검색어 입력" />
   <button type="submit">검색</button>
-
-
 </form>
 
 <!--  법령 목록 출력 -->

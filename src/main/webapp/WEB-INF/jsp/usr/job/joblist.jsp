@@ -9,24 +9,35 @@
 
 <h1>채용공고 목록</h1>
 
-<!-- ✅ alert 메시지 표시 -->
-<c:if test="${not empty message}">
+<script>
+  function SearchForm__submit(form) {
+    const keyword = form.keyword.value.trim();
 
-  <script>
-    alert("${message}");
-  </script>
+    //  검색어 입력 유효성 검사
+    if (keyword.length === 0) {
+      alert('검색어를 입력하세요.');
+      form.keyword.focus();
+      return;
+    }
 
+    form.submit();
+  }
 
-</c:if>
+  //  서버에서 전달된 메시지가 있으면 alert
+  <c:if test="${not empty message}">
+  alert("${message}");
+  </c:if>
+</script>
 
 <!-- 검색 폼 -->
-<form method="get" action="/usr/job/list">
-
+<form method="get" action="/usr/job/list" onsubmit="SearchForm__submit(this); return false;">
   <input type="hidden" name="boardId" value="11" />
+
   <select name="searchType">
     <option value="title" ${searchType == 'title' ? 'selected' : ''}>공고 제목</option>
     <option value="companyName" ${searchType == 'companyName' ? 'selected' : ''}>회사 이름</option>
   </select>
+
   <input type="text" name="keyword" value="${keyword}" placeholder="검색어 입력" />
   <button type="submit">검색</button>
 </form>
