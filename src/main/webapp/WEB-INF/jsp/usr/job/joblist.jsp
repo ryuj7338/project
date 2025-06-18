@@ -20,9 +20,9 @@
 </c:if>
 
 <!-- 검색 폼 -->
-<form method="get" action="/usr/post/list">
+<form method="get" action="/usr/job/list">
 
-  <input type="hidden" name="boardId" value="7" />
+  <input type="hidden" name="boardId" value="11" />
   <select name="searchType">
     <option value="title" ${searchType == 'title' ? 'selected' : ''}>공고 제목</option>
     <option value="companyName" ${searchType == 'companyName' ? 'selected' : ''}>회사 이름</option>
@@ -64,7 +64,7 @@
 
   <!-- ◀ 이전 -->
   <c:if test="${hasPrev}">
-    <a href="/usr/post/list?boardId=7&page=${prevPage}
+    <a href="/usr/job/list?page=${prevPage}
         <c:if test='${not empty keyword}'> &amp;searchType=${searchType}&amp;keyword=${keyword} </c:if>">
       ◀ 이전
     </a>
@@ -73,7 +73,7 @@
 
   <!-- 페이지 숫자 -->
   <c:forEach var="i" begin="${startPage}" end="${endPage}">
-    <a href="/usr/post/list?boardId=7&page=${i}
+    <a href="/usr/job/list?page=${i}
         <c:if test='${not empty keyword}'> &amp;searchType=${searchType}&amp;keyword=${keyword} </c:if>"
        style="${i == page ? 'font-weight:bold; color:red;' : ''}">
         ${i}
@@ -83,7 +83,7 @@
 
   <!-- 다음 ▶ -->
   <c:if test="${hasNext}">
-    <a href="/usr/post/list?boardId=7&page=${nextPage}
+    <a href="/usr/job/list?page=${nextPage}
         <c:if test='${not empty keyword}'> &amp;searchType=${searchType}&amp;keyword=${keyword} </c:if>">
       다음 ▶
     </a>

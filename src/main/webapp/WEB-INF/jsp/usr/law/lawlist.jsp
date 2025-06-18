@@ -10,9 +10,9 @@
 <h1>법령 정보 목록</h1>
 
 <!--  검색창 -->
-<form method="get" action="/usr/post/list">
+<form method="get" action="/usr/law/list">
 
-  <input type="hidden" name="boardId" value="9" />
+  <input type="hidden" name="boardId" value="8" />
   <input type="text" name="keyword" value="${keyword}" placeholder="법령명을 입력하세요" />
   <button type="submit">검색</button>
 
@@ -51,16 +51,16 @@
 <div style="margin-top: 20px;">
 
   <c:if test="${pageNo > 1}">
-    <a href="?boardId=9&keyword=${keyword}&page=${pageNo - 1}&numOfRows=${numOfRows}">이전</a>
+    <a href="?keyword=${keyword}&page=${pageNo - 1}&numOfRows=${numOfRows}">이전</a>
   </c:if>
 
   <c:forEach begin="1" end="${pagesCount}" var="i">
-    <a href="?boardId=9&keyword=${keyword}&page=${i}&numOfRows=${numOfRows}"
+    <a href="?keyword=${keyword}&page=${i}&numOfRows=${numOfRows}"
        style="${i == pageNo ? 'font-weight: bold;' : ''}">${i}</a>
   </c:forEach>
 
   <c:if test="${pageNo < pagesCount}">
-    <a href="?boardId=9&keyword=${keyword}&page=${pageNo + 1}&numOfRows=${numOfRows}">다음</a>
+    <a href="?keyword=${keyword}&page=${pageNo + 1}&numOfRows=${numOfRows}">다음</a>
   </c:if>
 
 </div>

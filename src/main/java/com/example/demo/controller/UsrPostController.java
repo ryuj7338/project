@@ -190,7 +190,7 @@ public class UsrPostController {
 
 
     @RequestMapping("/usr/post/list")
-    public String showList(HttpServletRequest req, Model model,@RequestParam(required = false) String keyword, @RequestParam(defaultValue = "0") int boardId, @RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "") String searchKeyword, @RequestParam(defaultValue = "title") String searchType) {
+    public String showList(HttpServletRequest req, Model model, @RequestParam(defaultValue = "0") int boardId, @RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "") String searchKeyword, @RequestParam(defaultValue = "title") String searchType) {
 
         Rq rq = (Rq) req.getAttribute("rq");
 
@@ -201,9 +201,121 @@ public class UsrPostController {
         }
 
 
-        // 채용공고 게시판 - 엑셀 읽어서 보여주기
+        int postsCount = postService.getPostCount(boardId, searchKeyword, searchType);
+        int itemsInAPage = 10;
 
-        if (boardId == 7) {
+        int pagesCount = (int) Math.ceil(postsCount / (double) itemsInAPage);
+
+        List<Post> posts = postService.getForPosts(boardId, itemsInAPage, page, searchKeyword, searchType);
+
+        model.addAttribute("searchKeyword", searchKeyword);
+        model.addAttribute("searchType", searchType);
+        model.addAttribute("pagesCount", pagesCount);
+        model.addAttribute("postsCount", postsCount);
+        model.addAttribute("posts", posts);
+        model.addAttribute("boardId", boardId);
+        model.addAttribute("board", board);
+        model.addAttribute("page", page);
+
+        return "/usr/post/list";
+    }
+
+    @RequestMapping("/usr/news/list")
+    public String newsList(HttpServletRequest req, Model model, @RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "7") int boardId) {
+
+        Rq rq = (Rq) req.getAttribute("rq");
+
+        Board board = boardService.getBoardById(boardId);
+
+        try {
+            List<News> allNews = newsService.crawlNews("경호", 5);
+
+            int itemsInAPage = 5;
+            int totalNewsCount = allNews.size();
+            int pagesCount = (int) Math.ceil((double) totalNewsCount / itemsInAPage);
+
+            int fromIndex = (page - 1) * itemsInAPage;
+            int toIndex = Math.min(fromIndex + itemsInAPage, totalNewsCount);
+            List<News> pagedNews = allNews.subList(fromIndex, toIndex);
+
+            model.addAttribute("newsList", pagedNews);
+            model.addAttribute("pagesCount", pagesCount);
+            model.addAttribute("page", page);
+            model.addAttribute("board", board);
+            model.addAttribute("boardId", boardId);
+
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            return rq.historyBackOnView("뉴스 데이터를 불러오는데 실패했습니다.");
+        }
+
+        return "/usr/news/newslist";
+    }
+
+
+    @RequestMapping("/usr/law/list")
+    public String lawList(HttpServletRequest req, Model model,@RequestParam(defaultValue = "8") int boardId, @RequestParam(required = false) String keyword, @RequestParam(defaultValue = "1") int page) {
+
+        Rq rq = (Rq) req.getAttribute("rq");
+
+
+        Board board = boardService.getBoardById(boardId);
+
+
+            List<String> queries = List.of(
+                    "경비업법",
+                    "청원경찰법", "국가공무원법", "군인사법",
+                    "헌법", "민법", "형법", "형사소송법", "행정법",
+                    "소방기본법", "소방시설공사업법", "위험물안전관리법");
+
+
+            List<Map<String, String>> allLaws = new ArrayList<>();
+
+            for (String query : queries) {
+                List<Map<String, String>> result = lawService.getLawInfoList(query);
+                for (Map<String, String> item : result) {
+                    if (item.get("법령명") == null) continue;
+
+                    String lawName = item.get("법령명");
+                    if (keyword == null || keyword.isBlank()){
+                        allLaws.add(item);
+                    }
+                    else if (lawName.contains(keyword)){
+                        allLaws.add(item);
+                    }
+
+                }
+            }
+
+            // 페이징 처리
+            int numOfRows = 10;
+            int totalCount = allLaws.size();
+            int pagesCount = (int) Math.ceil((double) totalCount / numOfRows);
+            int fromIndex = Math.min((page - 1) * numOfRows, totalCount);
+            int toIndex = Math.min(fromIndex + numOfRows, totalCount);
+            List<Map<String, String>> pagedLaws = allLaws.subList(fromIndex, toIndex);
+
+            // 모델에 전달
+            model.addAttribute("lawList", pagedLaws);
+            model.addAttribute("pageNo", page);
+            model.addAttribute("pagesCount", pagesCount);
+            model.addAttribute("numOfRows", numOfRows);
+            model.addAttribute("keyword", keyword);
+            model.addAttribute("board", board);
+
+
+
+        return "/usr/law/lawlist";
+    }
+
+    @RequestMapping("/usr/job/list")
+    public String jobList(HttpServletRequest req, Model model, @RequestParam(defaultValue = "11") int boardId, @RequestParam(defaultValue = "title") String searchType, @RequestParam(required = false) String keyword, @RequestParam(defaultValue = "1") int page) {
+
+        Rq rq = (Rq) req.getAttribute("rq");
+
+        Board board = boardService.getBoardById(boardId);
+
+
             try {
                 jobPostingService.saveFromExcel("src/main/resources/jobkorea_requirements.xlsx");
             } catch (Exception e) {
@@ -215,9 +327,6 @@ public class UsrPostController {
 
 
             // 메시지 전달
-
-            // 메시지 전달용 변수
-
             String message = null;
 
             String keywordParam = req.getParameter("keyword"); // 실제 요청에 포함됐는지 확인
@@ -288,106 +397,7 @@ public class UsrPostController {
             model.addAttribute("prevPage", prevPage);
             model.addAttribute("nextPage", nextPage);
 
-            return "/usr/post/joblist";
 
-        }
-
-        //  뉴스
-        if (boardId == 8) {
-            try {
-
-                List<News> allNews = newsService.crawlNews("경호", 5); // 전체 뉴스 가져오기
-
-                int itemsInAPage = 5; // 한 페이지당 몇 개씩 보여줄지
-                int totalNewsCount = allNews.size();
-                int pagesCount = (int) Math.ceil((double) totalNewsCount / itemsInAPage);
-
-                int fromIndex = (page - 1) * itemsInAPage;
-                int toIndex = Math.min(fromIndex + itemsInAPage, totalNewsCount);
-
-                // 실제 보여줄 뉴스 리스트
-                List<News> pagedNews = allNews.subList(fromIndex, toIndex);
-
-                // JSP에 넘길 값들
-                model.addAttribute("newsList", pagedNews);
-                model.addAttribute("pagesCount", pagesCount);
-                model.addAttribute("page", page);
-                model.addAttribute("board", board);
-                model.addAttribute("boardId", boardId);
-
-                return "/usr/post/newslist";
-
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt(); // 스레드 인터럽트 상태 복구
-                return rq.historyBackOnView("뉴스 데이터를 불러오는데 실패했습니다.");
-            }
-        }
-
-
-        // 법률 게시판 처리
-        if (boardId == 9) {
-            List<String> queries = List.of(
-                    "경비업법",
-                    "청원경찰법", "국가공무원법", "군인사법",
-                    "헌법", "민법", "형법", "형사소송법", "행정법",
-                    "소방기본법", "소방시설공사업법", "위험물안전관리법"
-            );
-
-            List<Map<String, String>> allLaws = new ArrayList<>();
-
-            for (String query : queries) {
-                List<Map<String, String>> result = lawService.getLawInfoList(query);
-                for (Map<String, String> item : result) {
-                    if (item.get("법령명") == null) continue;
-
-                    String lawName = item.get("법령명");
-                    if (keyword == null || keyword.isBlank()){
-                        allLaws.add(item);
-                    }
-                    else if (lawName.contains(keyword)){
-                        allLaws.add(item);
-                    }
-
-                }
-            }
-
-            // 페이징 처리
-            int numOfRows = 10;
-            int totalCount = allLaws.size();
-            int pagesCount = (int) Math.ceil((double) totalCount / numOfRows);
-            int fromIndex = Math.min((page - 1) * numOfRows, totalCount);
-            int toIndex = Math.min(fromIndex + numOfRows, totalCount);
-            List<Map<String, String>> pagedLaws = allLaws.subList(fromIndex, toIndex);
-
-            // 모델에 전달
-            model.addAttribute("lawList", pagedLaws);
-            model.addAttribute("pageNo", page);
-            model.addAttribute("pagesCount", pagesCount);
-            model.addAttribute("numOfRows", numOfRows);
-            model.addAttribute("keyword", searchKeyword);
-            model.addAttribute("board", board);
-
-            return "/usr/post/lawlist"; // JSP 파일명
-        }
-
-
-
-        int postsCount = postService.getPostCount(boardId, searchKeyword, searchType);
-        int itemsInAPage = 10;
-
-        int pagesCount = (int) Math.ceil(postsCount / (double) itemsInAPage);
-
-        List<Post> posts = postService.getForPosts(boardId, itemsInAPage, page, searchKeyword, searchType);
-
-        model.addAttribute("searchKeyword", searchKeyword);
-        model.addAttribute("searchType", searchType);
-        model.addAttribute("pagesCount", pagesCount);
-        model.addAttribute("postsCount", postsCount);
-        model.addAttribute("posts", posts);
-        model.addAttribute("boardId", boardId);
-        model.addAttribute("board", board);
-        model.addAttribute("page", page);
-
-        return "/usr/post/list";
+        return "/usr/job/joblist";
     }
 }

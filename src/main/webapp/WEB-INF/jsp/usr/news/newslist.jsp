@@ -27,7 +27,7 @@
 <div style="text-align:center; margin-top: 20px;">
 
   <c:forEach var="i" begin="1" end="${pagesCount}">
-    <a href="/usr/post/list?boardId=${boardId}&page=${i}"
+    <a href="/usr/news/list?page=${i}"
        style="margin: 0 5px; <c:if test='${i == page}'>font-weight:bold; color:red;</c:if>">
         ${i}
     </a>
