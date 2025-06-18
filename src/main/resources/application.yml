@@ -18,3 +18,7 @@ spring:
 mybatis:
   type-aliases-package: com.example.demo.vo
   mapper-locations: classpath:/mappers/**/*.xml
+  naver:
+    client_id: ZdyW5GGtNSgCCaduup7_
+    redirect_uri: http://localhost:8080/login/naver/code
+    client_secret: pJh4IlGi2_
