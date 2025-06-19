@@ -31,7 +31,6 @@ CREATE TABLE board (
 
 # 회원 테이블 생성
 CREATE TABLE `member` (
-<<<<<<< HEAD
     id INT(10) UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
     regDate DATETIME NOT NULL,
     updateDate DATETIME NOT NULL,
@@ -44,20 +43,6 @@ CREATE TABLE `member` (
     email CHAR(50) NOT NULL,
     delStatus TINYINT(1) UNSIGNED NOT NULL DEFAULT 0 COMMENT '탈퇴 여부 (0=탈퇴 전, 1=탈퇴 후)',
     delDate DATETIME COMMENT '탈퇴 날짜'
-=======
-                          id INT(10) UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
-                          regDate DATETIME NOT NULL,
-                          updateDate DATETIME NOT NULL,
-                          loginId CHAR(100) NOT NULL,
-                          loginPw CHAR(200) NOT NULL,
-                          `authLevel` SMALLINT(2) UNSIGNED DEFAULT 3 COMMENT '권한 레벨 (3=일반, 7=관리자)',
-                          `name` CHAR(20) NOT NULL,
-                          nickname CHAR(20) NOT NULL,
-                          cellphone CHAR(20) NOT NULL,
-                          email CHAR(50) NOT NULL,
-                          delStatus TINYINT(1) UNSIGNED NOT NULL DEFAULT 0 COMMENT '탈퇴 여부 (0=탈퇴 전, 1=탈퇴 후)',
-                          delDate DATETIME COMMENT '탈퇴 날짜'
->>>>>>> 641ab7f613c18b59f6d9be0463f8d567b37cfb87
 );
 
 
@@ -101,92 +86,64 @@ CREATE TABLE `comment` (
 
 
 # 자격증 테이블
-CREATE TABLE qualifications (
-<<<<<<< HEAD
-    id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    `name` VARCHAR(100) NOT NULL COMMENT '자격증 이름',
-    issuing_agency VARCHAR(100) COMMENT '발급 기관',
+CREATE TABLE qualifications
+(
+    id                INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    `name`            VARCHAR(100) NOT NULL COMMENT '자격증 이름',
+    issuing_agency    VARCHAR(100) COMMENT '발급 기관',
     organizing_agency VARCHAR(100) COMMENT '주관 기관(시행/운영)',
-    grade VARCHAR(30) DEFAULT NULL COMMENT '급수 (해당 시에만 입력)',
-    category_code VARCHAR(50) DEFAULT NULL COMMENT '무도, 응급, 경호, 그 외 등 내부 분류용(UI에 표시 안함)',
-    `type` VARCHAR(50) DEFAULT NULL COMMENT '자격증 종류 (예: 국가기술, 민간, 국제 등)'
-=======
-                                id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-                                `name` VARCHAR(100) NOT NULL COMMENT '자격증 이름',
-                                issuing_agency VARCHAR(100) COMMENT '발급 기관',
-                                organizing_agency VARCHAR(100) COMMENT '주관 기관(시행/운영)',
-                                grade VARCHAR(30) DEFAULT NULL COMMENT '급수 (해당 시에만 입력)',
-                                category_code VARCHAR(50) DEFAULT NULL COMMENT '무도, 응급, 경호, 그 외 등 내부 분류용(UI에 표시 안함)',
-                                `type` VARCHAR(50) DEFAULT NULL COMMENT '자격증 종류 (예: 국가기술, 민간, 국제 등)'
->>>>>>> 641ab7f613c18b59f6d9be0463f8d567b37cfb87
+    grade             VARCHAR(30) DEFAULT NULL COMMENT '급수 (해당 시에만 입력)',
+    category_code     VARCHAR(50) DEFAULT NULL COMMENT '무도, 응급, 경호, 그 외 등 내부 분류용(UI에 표시 안함)',
+    `type`            VARCHAR(50) DEFAULT NULL COMMENT '자격증 종류 (예: 국가기술, 민간, 국제 등)'
 );
 
 SELECT * FROM qualifications;
 
 # 대학교 테이블
-<<<<<<< HEAD
-CREATE TABLE university (
-    id INT(10) UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
-    `name` VARCHAR(100) NOT NULL,            -- 대학교명
-    region VARCHAR(50) NOT NULL,             -- 지역
-    major VARCHAR(100) NOT NULL,             -- 학과
-    type VARCHAR(20),                        -- 국립/사립/공립
-    tuition INT UNSIGNED,                    -- 연간 등록금 (원)
-    admission_rate FLOAT,                    -- 입학 경쟁률
-    employment_rate FLOAT,                   -- 취업률
-    ranking INT UNSIGNED,                    -- 대학 순위
-    url VARCHAR(500) NOT NULL,               -- 학교 메인 사이트
-    department_info VARCHAR(500),            -- 학과 전용 페이지
-    campus VARCHAR(50),                      -- 캠퍼스 이름
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-=======
-CREATE TABLE university(
-                           id INT(10) UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
-                           `name` VARCHAR(50) NOT NULL,	-- 대학교명
-                           region VARCHAR(50) NOT NULL,	-- 지역
-                           major VARCHAR(50) NOT NULL,	-- 학과
-                           url VARCHAR(500) NOT NULL		-- 사이트 주소
->>>>>>> 641ab7f613c18b59f6d9be0463f8d567b37cfb87
-);
 
+CREATE TABLE university
+(
+    id              INT(10) UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    `name`          VARCHAR(100) NOT NULL, -- 대학교명
+    region          VARCHAR(50)  NOT NULL, -- 지역
+    major           VARCHAR(100) NOT NULL, -- 학과
+    type            VARCHAR(20),           -- 국립/사립/공립
+    tuition         INT UNSIGNED,          -- 연간 등록금 (원)
+    admission_rate  FLOAT,                 -- 입학 경쟁률
+    employment_rate FLOAT,                 -- 취업률
+    ranking         INT UNSIGNED,          -- 대학 순위
+    url             VARCHAR(500) NOT NULL, -- 학교 메인 사이트
+    department_info VARCHAR(500),          -- 학과 전용 페이지
+    campus          VARCHAR(50),           -- 캠퍼스 이름
+    created_at      DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at      DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
 
 # 채용정보 테이블
 CREATE TABLE job_posting(
-<<<<<<< HEAD
     id INT(10) UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
     title VARCHAR(255) NOT NULL,	-- 공고 제목
     company_name VARCHAR(255) NOT NULL,	-- 기업명
     certificate TEXT NOT NULL,	-- 우대 자격
     start_date VARCHAR(50) NOT NULL,	-- 시작일
     end_date VARCHAR(50) NOT NULL,	-- 마감일
-    original_url VARCHAR(255)
-=======
-                            id INT(10) UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
-                            title VARCHAR(255) NOT NULL,	-- 공고 제목
-                            company_name VARCHAR(255) NOT NULL,	-- 기업명
-                            certificate TEXT NOT NULL,	-- 우대 자격
-                            start_date VARCHAR(50) NOT NULL,	-- 시작일
-                            end_date VARCHAR(50) NOT NULL,	-- 마감일
-                            original_url VARCHAR(255)
->>>>>>> 641ab7f613c18b59f6d9be0463f8d567b37cfb87
+    original_url VARCHAR(255)   -- 개별 페이지
 );
 
 
 #찜 테이블
 CREATE TABLE job_favorite(
-                             id INT(10) UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
-                             memberId INT(10) UNSIGNED NOT NULL,
-                             jobPostingId INT(10) UNSIGNED NOT NULL,
-                             regDate DATETIME NOT NULL,
-                             updateDate DATETIME NOT NULL
+id INT(10) UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
+memberId INT(10) UNSIGNED NOT NULL,
+jobPostingId INT(10) UNSIGNED NOT NULL,
+regDate DATETIME NOT NULL,
+updateDate DATETIME NOT NULL
 );
 
 SELECT * FROM job_favorite;
 
 # 자소서/면접 저장 테이블
 CREATE TABLE interview_answers (
-<<<<<<< HEAD
     id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
     memberId INT UNSIGNED NOT NULL,
     regDate DATETIME NOT NULL,
@@ -195,16 +152,6 @@ CREATE TABLE interview_answers (
     answer TEXT NOT NULL,
     category VARCHAR(50) COMMENT '면접 / 자소서 구분',
     FOREIGN KEY (memberId) REFERENCES MEMBER(id)
-=======
-                                   id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-                                   memberId INT UNSIGNED NOT NULL,
-                                   regDate DATETIME NOT NULL,
-                                   updateDate DATETIME NOT NULL,
-                                   question TEXT NOT NULL,
-                                   answer TEXT NOT NULL,
-                                   category VARCHAR(50) COMMENT '면접 / 자소서 구분',
-                                   FOREIGN KEY (memberId) REFERENCES MEMBER(id)
->>>>>>> 641ab7f613c18b59f6d9be0463f8d567b37cfb87
 );
 
 
