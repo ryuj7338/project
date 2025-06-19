@@ -14,6 +14,9 @@ import org.springframework.stereotype.Service;
 
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -41,8 +44,15 @@ public class JobPostingService {
                 job.setStartDate(getString(row.getCell(2)));
                 job.setEndDate(getString(row.getCell(3)));
                 job.setCertificate(getString(row.getCell(4)));
-                job.setOriginal_url(getString(row.getCell(5)));
+                job.setOriginalUrl(getString(row.getCell(5)));
 
+                if(!job.getEndDate().isBlank()){
+                    try {
+                        job.setDday(calculateDday(job.getEndDate()));
+                    }catch (Exception e){
+                        job.setDday(null);
+                    }
+                }
                 jobPostings.add(job);
             }
 
@@ -61,9 +71,54 @@ public class JobPostingService {
         };
     }
 
+    private Integer calculateDday(String endDateStr) {
+        if (endDateStr == null || endDateStr.isBlank()) return null;
+
+        endDateStr = endDateStr.trim();
+
+        // 요일 정보 제거: "2025.07.18 (금)" → "2025.07.18"
+        if (endDateStr.contains("(")) {
+            endDateStr = endDateStr.substring(0, endDateStr.indexOf("(")).trim();
+
+        }
+
+        // 시간 정보 제거: "2025.07.18 23:59" → "2025.07.18"
+        if (endDateStr.contains(" ")) {
+            endDateStr = endDateStr.split(" ")[0];
+        }
+
+        LocalDate today = LocalDate.now();
+        DateTimeFormatter formatter;
+
+        if (endDateStr.contains(".")) {
+            formatter = DateTimeFormatter.ofPattern("yyyy.MM.dd");
+        } else if (endDateStr.contains("-")) {
+            formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        } else {
+            throw new IllegalArgumentException("지원하지 않는 날짜 형식: " + endDateStr);
+        }
+
+        LocalDate endDate = LocalDate.parse(endDateStr, formatter);
+        return (int) ChronoUnit.DAYS.between(today, endDate);
+    }
+
     public List<JobPosting> getAll() {
         return jobPostingRepository.findAll();
     }
+
+    public List<JobPosting> getFavoriteJobPostingsWithDday(List<JobPosting> favoriteJobs) {
+        for (JobPosting job : favoriteJobs) {
+            if (job.getEndDate() != null && !job.getEndDate().isBlank()) {
+                try {
+                    job.setDday(calculateDday(job.getEndDate()));
+                } catch (Exception e) {
+                    job.setDday(null);
+                }
+            }
+        }
+        return favoriteJobs;
+    }
+
 
 
 }

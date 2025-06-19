@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -319,34 +320,56 @@ public class UsrPostController {
     }
 
 
-    @RequestMapping("/usr/job/favorite/add")
+    @RequestMapping("/usr/job/favorite/toggle")
     @ResponseBody
-    public ResultData<?> addFavorite(@RequestParam int jobPostingId, HttpServletRequest req){
-        Rq rq = (Rq) req.getAttribute("rq");
+    public ResultData<?> toggleFavorite(@RequestParam int jobPostingId, HttpServletRequest req) {
 
+        Rq rq = (Rq) req.getAttribute("rq");
         int memberId = rq.getLoginedMemberId();
 
-        boolean alreadyFavorited = jobFavoriteService.isFavorited(memberId, jobPostingId);
-        if(alreadyFavorited){
-            return ResultData.from("F-1", "이미 찜한 공고입니다.");
-        }
 
-        jobFavoriteService.add(memberId, jobPostingId);
-        return ResultData.from("S-1", "찜 목록에 추가되었습니다.");
+        return jobFavoriteService.toggleFavorite(memberId, jobPostingId);
     }
 
-    @RequestMapping("/usr/job/favorite/delete")
-    @ResponseBody
-    public ResultData<?> deleteFavorite(@RequestParam int jobPostingId, HttpServletRequest req){
+    @RequestMapping("/usr/job/favorite/list")
+    public String showFavoriteJobs(HttpServletRequest req, Model model) {
         Rq rq = (Rq) req.getAttribute("rq");
         int memberId = rq.getLoginedMemberId();
 
-        jobFavoriteService.remove(memberId, jobPostingId);
-        return ResultData.from("S-1", "찜 목록에서 삭제되었습니다.");
+        if (memberId == 0) {
+            return "redirect:/usr/member/login?msg=로그인이 필요합니다.";
+        }
+
+        // 찜한 공고 불러오기
+        List<JobPosting> favoriteJobs = jobFavoriteService.getFavoriteJobPostingsWithDday(memberId);
+
+        // D-day 계산
+        favoriteJobs = jobPostingService.getFavoriteJobPostingsWithDday(favoriteJobs);
+        model.addAttribute("favoriteJobs", favoriteJobs);
+
+        return "/usr/job/favorite";
     }
 
     @RequestMapping("/usr/job/list")
     public String jobList(HttpServletRequest req, Model model, @RequestParam(defaultValue = "11") int boardId, @RequestParam(defaultValue = "title") String searchType, @RequestParam(required = false) String keyword, @RequestParam(defaultValue = "1") int page) {
+
+        Rq rq = (Rq) req.getAttribute("rq");
+        int memberId = rq.getLoginedMemberId();
+
+        List<JobPosting> favoriteJobs = new ArrayList<>();
+        if(memberId != 0) {
+            favoriteJobs = jobFavoriteService.getFavoriteJobPostingsWithDday(memberId);
+        }
+
+        model.addAttribute("logined", memberId != 0);
+
+        List<Long> favoriteJobId = new ArrayList<>();
+        for(JobPosting jobPosting : favoriteJobs) {
+            favoriteJobId.add(jobPosting.getId());
+        }
+
+        model.addAttribute("favoriteJobs", favoriteJobs);
+        model.addAttribute("favoriteId", favoriteJobId);
 
         Board board = boardService.getBoardById(boardId);
 

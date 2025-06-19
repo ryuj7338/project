@@ -20,11 +20,14 @@ public class JobPosting {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+
     private String title;
     private String companyName;
     private String certificate;
     private String startDate;
     private String endDate;
-    private String original_url;
+    private String originalUrl;
+
+    private Integer dday;
 }
 

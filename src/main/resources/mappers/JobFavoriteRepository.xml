@@ -5,31 +5,38 @@
 
 <mapper namespace="com.example.demo.repository.JobFavoriteRepository">
 
-    <select id="countByMemberIdAndJobPostingId" parameterType="int">
-        SELECT COUNT(*) FROM job_favorite
-        WHERE memberId = ${memberId}
-        AND jobPostingId = ${jobPostingId}
+    <select id="findByMemberId" resultType="JobFavorite">
+        SELECT * FROM job_favorite
+        WHERE memberId = #{memberId}
     </select>
 
     <insert id="insert">
-        INSERT INTO job_favorite
-        SET memberId = ${memberId},
-            jobPostingId = ${jobPostingId},
-            regDate = NOW(),
-            updateDate = NOW()
+        INSERT INTO job_favorite (memberId, jobPostingId, regDate, updateDate)
+        VALUES (#{memberId}, #{jobPostingId}, NOW(), NOW())
     </insert>
 
     <delete id="delete">
         DELETE FROM job_favorite
-        WHERE memberId = ${memberId}
-        AND jobPostingId = ${jobPostingId}
+        WHERE memberId = #{memberId} AND jobPostingId = #{jobPostingId}
     </delete>
 
-    <select id="findFavoriteJobsByMemberId" resultType="com.example.demo.vo.JobPosting">
-        SELECT jp.* FROM job_favorite jf
-        JOIN job_posting jp
-        ON jf.jobPostingId = jp.id
-        WHERE jf.memberId = ${memberId}
+    <select id="countByMemberIdAndJobPostingId" resultType="int">
+        SELECT COUNT(*) FROM job_favorite
+        WHERE memberId = #{memberId} AND jobPostingId = #{jobPostingId}
     </select>
 
+    <select id="findJobPostingIdByMemberId" resultType="long">
+        SELECT jobPostingId FROM job_favorite
+        WHERE memberId = #{memberId}
+    </select>
+
+    <select id="findJobPostingsByMemberId" resultType="com.example.demo.vo.JobPosting">
+        SELECT *
+        FROM job_posting
+        WHERE id IN (
+            SELECT jobPostingId
+            FROM job_favorite
+            WHERE memberId = #{memberId}
+        )
+    </select>
 </mapper>
