@@ -34,6 +34,11 @@
 						<td style="text-align: center;"><a class="btn btn-outline btn-primary" href="${rq.findLoginIdUri }">아이디
 								찾기</a> <a class="btn btn-outline btn-success" href="${rq.findLoginPwUri }">비밀번호찾기</a></td>
 					</tr>
+					<tr>
+					<td>
+					<a href="javascript:kakaoLogin()"><img src="<c:url value="/image/kakao_login_medium_narrow.png"/>" style="width: 200px"></a>
+</td>
+</tr>
 				</tbody>
 			</table>
 		</form>
@@ -44,7 +49,28 @@
 	</div>
 </section>
 
-
+<script type="text/javascript" src="https://developers.kakao.com/sdk/js/kakao.js"></script>
+<script type="text/javascript">
+    Kakao.init('9c30d628ff4b5f6e101179faa1f4867b');
+    function kakaoLogin() {
+        Kakao.Auth.login({
+            success: function (response) {
+                Kakao.API.request({
+                    url: '/v2/user/me',
+                    success: function (response) {
+                        alert(JSON.stringify(response))
+                    },
+                    fail: function (error) {
+                        alert(JSON.stringify(error))
+                    },
+                })
+            },
+            fail: function (error) {
+                alert(JSON.stringify(error))
+            },
+        })
+    }
+</script>
 
 <%@ include file="../common/foot.jspf"%>
 

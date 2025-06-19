@@ -18,7 +18,7 @@ spring:
 mybatis:
   type-aliases-package: com.example.demo.vo
   mapper-locations: classpath:/mappers/**/*.xml
-  naver:
-    client_id: ZdyW5GGtNSgCCaduup7_
-    redirect_uri: http://localhost:8080/login/naver/code
-    client_secret: pJh4IlGi2_
+
+kakao:
+  client_id: 79f2a3a73883a82595a2202187f96cc5
+  redirect_uri: http://localhost:8080/login/oauth2/code/kakao

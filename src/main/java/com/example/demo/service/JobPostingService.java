@@ -41,6 +41,7 @@ public class JobPostingService {
                 job.setStartDate(getString(row.getCell(2)));
                 job.setEndDate(getString(row.getCell(3)));
                 job.setCertificate(getString(row.getCell(4)));
+                job.setOriginal_url(getString(row.getCell(5)));
 
                 jobPostings.add(job);
             }

@@ -120,6 +120,16 @@ CREATE TABLE job_posting(
 );
 
 
+#찜 테이블
+CREATE TABLE job_favorite(
+                             id INT(10) UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
+                             memberId INT(10) UNSIGNED NOT NULL,
+                             jobPostingId INT(10) UNSIGNED NOT NULL,
+                             regDate DATETIME NOT NULL,
+                             updateDate DATETIME NOT NULL
+);
+
+SELECT * FROM job_favorite;
 
 # 자소서/면접 저장 테이블
 CREATE TABLE interview_answers (
@@ -171,8 +181,8 @@ title = '제목3',
 
 
 # 게시판 데이터 생성
-INSERT INTO board
-SET regDate = NOW(),
+insert into board
+set regDate = now(),
 updateDate = NOW(),
 `code` = 'Q&A',
 `name` = '질문 게시판';
@@ -239,8 +249,8 @@ updateDate = NOW(),
 
 
 # 자격증 데이터 생성
-INSERT INTO qualifications
-SET `name` = '경비지도사',
+insert into qualifications
+set `name` = '경비지도사',
 issuing_agency = '한국산업인력공단',
 organizing_agency = '경찰청 생활안전과',
 category_code = '경호',

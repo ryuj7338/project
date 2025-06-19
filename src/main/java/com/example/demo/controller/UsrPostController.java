@@ -45,6 +45,9 @@ public class UsrPostController {
     private JobPostingService jobPostingService;
 
     @Autowired
+    private JobFavoriteService jobFavoriteService;
+
+    @Autowired
     private Rq rq;
 
     UsrPostController(BeforeActionInterceptor beforeActionInterceptor) {
@@ -253,6 +256,8 @@ public class UsrPostController {
     }
 
 
+
+
     @RequestMapping("/usr/law/list")
     public String showLawList(Model model, @RequestParam(defaultValue = "9") int boardId, @RequestParam(defaultValue = "1") int page, @RequestParam(required = false) String keyword) {
 
@@ -313,6 +318,32 @@ public class UsrPostController {
         return "/usr/law/lawlist";
     }
 
+
+    @RequestMapping("/usr/job/favorite/add")
+    @ResponseBody
+    public ResultData<?> addFavorite(@RequestParam int jobPostingId, HttpServletRequest req){
+        Rq rq = (Rq) req.getAttribute("rq");
+
+        int memberId = rq.getLoginedMemberId();
+
+        boolean alreadyFavorited = jobFavoriteService.isFavorited(memberId, jobPostingId);
+        if(alreadyFavorited){
+            return ResultData.from("F-1", "이미 찜한 공고입니다.");
+        }
+
+        jobFavoriteService.add(memberId, jobPostingId);
+        return ResultData.from("S-1", "찜 목록에 추가되었습니다.");
+    }
+
+    @RequestMapping("/usr/job/favorite/delete")
+    @ResponseBody
+    public ResultData<?> deleteFavorite(@RequestParam int jobPostingId, HttpServletRequest req){
+        Rq rq = (Rq) req.getAttribute("rq");
+        int memberId = rq.getLoginedMemberId();
+
+        jobFavoriteService.remove(memberId, jobPostingId);
+        return ResultData.from("S-1", "찜 목록에서 삭제되었습니다.");
+    }
 
     @RequestMapping("/usr/job/list")
     public String jobList(HttpServletRequest req, Model model, @RequestParam(defaultValue = "11") int boardId, @RequestParam(defaultValue = "title") String searchType, @RequestParam(required = false) String keyword, @RequestParam(defaultValue = "1") int page) {

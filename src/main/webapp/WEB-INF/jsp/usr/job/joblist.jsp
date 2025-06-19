@@ -59,7 +59,7 @@
   <tbody>
   <c:forEach var="job" items="${jobPostings}">
     <tr>
-      <td>${job.title}</td>
+      <td><a href="${job.original_url}" target="_blank">${job.title}</a></td>
       <td>${job.companyName}</td>
       <td>${job.startDate}</td>
       <td>${job.endDate}</td>
