@@ -11,9 +11,10 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -125,32 +126,101 @@ public class UsrPostController {
     }
 
     @RequestMapping("/usr/post/write")
-    public String showWrite(){
+    public String showWrite(@RequestParam int boardId, HttpServletRequest req, Model model) {
+
+        Rq rq = (Rq) req.getAttribute("rq");
+
+        if (boardId == 5 && !rq.getIsAdmin()){
+            return rq.historyBackOnView("관리자 권한이 필요합니다.");
+        }
+
+        model.addAttribute("boardId", boardId);
         return "/usr/post/write";
     }
 
     @RequestMapping("/usr/post/doWrite")
     @ResponseBody
-    public String doWrite(HttpServletRequest req, String title, String body) {
+    public String doWrite(HttpServletRequest req,
+                          @RequestParam String title,
+                          @RequestParam String body,
+                          @RequestParam int boardId,
+                          @RequestParam(name = "files", required = false) List<MultipartFile> files) {
 
         Rq rq = (Rq) req.getAttribute("rq");
 
-        if (Ut.isEmptyOrNull(title)) {
-            return Ut.jsHistoryBack("F-1", "제목을 입력하세요");
+        // 관리자 전용 게시판
+        if (boardId == 5 && !rq.getIsAdmin()) {
+            return Ut.jsHistoryBack("F-3", "관리자만 작성할 수 있습니다.");
         }
 
-        if (Ut.isEmptyOrNull(body)) {
-            return Ut.jsHistoryBack("F-2", "내용을 입력하세요");
+        // 일반 사용자 게시판 제한
+        if (!rq.getIsAdmin() && !(boardId == 1 || boardId == 2 || boardId == 3 || boardId == 4)) {
+            return Ut.jsHistoryBack("F-4", "작성 권한이 없습니다.");
         }
 
-        ResultData doWriteRd = postService.writePost(rq.getLoginedMemberId(), title, body);
+        if (Ut.isEmptyOrNull(title)) return Ut.jsHistoryBack("F-1", "제목을 입력하세요");
+        if (Ut.isEmptyOrNull(body)) return Ut.jsHistoryBack("F-2", "내용을 입력하세요");
 
-        int id = (int) doWriteRd.getData1();
+        StringBuilder finalBody = new StringBuilder(body);
 
-        Post post = postService.getPostById(id);
+        // 허용 확장자 목록
+        List<String> allowedExtensions = List.of("pdf", "pptx", "hwp", "docx", "xlsx", "jpg", "jpeg", "png", "zip");
 
-        return Ut.jsReplace(doWriteRd.getResultCode(), doWriteRd.getMsg(), "../post/list");
+        if (files != null && !files.isEmpty()) {
+            for (MultipartFile file : files) {
+                if (!file.isEmpty()) {
+                    try {
+                        String originalFilename = file.getOriginalFilename();
+
+                        // 확장자 추출
+                        String ext = originalFilename.substring(originalFilename.lastIndexOf(".") + 1).toLowerCase();
+
+                        // 확장자 제한
+                        if (!allowedExtensions.contains(ext)) {
+                            return Ut.jsHistoryBack("F-6", "허용되지 않은 파일 형식입니다: " + ext);
+                        }
+
+                        // 파일명 정제 (보안 위험 문자 제거)
+                        String safeFilename = originalFilename.replaceAll("[^a-zA-Z0-9가-힣._-]", "_");
+
+                        // 중복 방지용 저장 파일명 (UUID)
+                        String uuid = java.util.UUID.randomUUID().toString();
+                        String savedFileName = uuid + "_" + safeFilename;
+
+                        // 저장 경로
+                        String uploadDirPath = "src/main/resources/static/uploadFiles";
+                        File uploadDir = new File(uploadDirPath);
+                        if (!uploadDir.exists()) uploadDir.mkdirs();
+
+                        File destFile = new File(uploadDir, savedFileName);
+                        file.transferTo(destFile);
+
+                        // 게시글에 파일 링크 추가
+                        finalBody.append("<br><a href='/uploadFiles/")
+                                .append(savedFileName)
+                                .append("' target='_blank'>[파일: ")
+                                .append(safeFilename)
+                                .append("]</a>");
+
+                    } catch (Exception e) {
+                        return Ut.jsHistoryBack("F-5", "파일 업로드 중 오류 발생: " + e.getMessage());
+                    }
+                }
+            }
+        }
+
+        // 게시글 작성
+        ResultData doWriteRd = postService.writePost(
+                rq.getLoginedMemberId(),
+                boardId,
+                title,
+                finalBody.toString()
+        );
+
+        return Ut.jsReplace(doWriteRd.getResultCode(), doWriteRd.getMsg(), "../post/list?boardId=" + boardId);
     }
+
+
 
 
     @RequestMapping("/usr/post/detail")
