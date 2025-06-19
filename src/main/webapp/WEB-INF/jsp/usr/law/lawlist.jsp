@@ -1,5 +1,17 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+
+
+<!-- 제이쿼리 -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
+<!-- 폰트어썸 -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+<!-- 폰트어썸 FREE 아이콘 리스트 : https://fontawesome.com/v5.15/icons?d=gallery&p=2&m=free -->
+
+<!-- 테일윈드 -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.1.4/tailwind.min.css">
+<!-- 테일윈드 치트시트 : https://nerdcave.com/tailwind-cheat-sheet -->
 <html>
 <head>
 
@@ -56,7 +68,7 @@
   <tbody>
   <c:forEach var="law" items="${lawList}">
     <tr>
-      <td><a href="${law["법령상세링크"]}" target="_blank">${law["법령명"]}</a></td>
+      <td><a href="${law["법령상세링크"]}" target="_blank" class="no-underline text-black hover:text-blue-400 transition-colors duration-150">${law["법령명"]}</a></td>
       <td>${law["공포번호"]}</td>
       <td>${law["공포일자"]}</td>
       <td>${law["법령구분명"]}</td>

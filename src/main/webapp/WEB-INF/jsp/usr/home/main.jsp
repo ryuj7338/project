@@ -3,9 +3,10 @@
 
 <c:set var="pageTitle" value="MAIN PAGE"></c:set>
 <%@ include file="../common/head.jspf"%>
+
 <body class="bg-gray-900 relative">
 
-<header>
+
     <!-- 제이쿼리 -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 
@@ -17,25 +18,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.1.4/tailwind.min.css">
     <!-- 테일윈드 치트시트 : https://nerdcave.com/tailwind-cheat-sheet -->
 
-    <div class="flex h-16 mx-auto items-center text-3x1 bg-white">
-        <a href="" class="flex flex-ai-c items-center absolute block">
-            <img class="w-16 h-16" src="https://velog.velcdn.com/images/ryuj7338/post/b891e272-de6f-4c1e-b605-b3b733f58f87/image.png" alt="">경호</a>
-        <div class="flex-grow"></div>
-        <div class="flex-grow justify-center">
-            <ul class="px-8">
 
-                <li class="px-6"><a href="/usr/post/list">경호 소개</a></li>
-                <li class="px-6"><a href="/usr/post/list">진로 안내</a></li>
-                <li class="px-6"><a href="/usr/post/list">정보</a></li>
-                <li class="px-6"><a href="/usr/post/list">취업</a></li>
-                <li class="px-6"><a href="/usr/post/list">커뮤니티</a></li>
-                <li class="px-6"><a href="/usr/post/list">학습자료</a></li>
-
-
-
-            </ul>
-        </div>
-    </div>
     <div class="image_box">
 
     </div>
@@ -63,7 +46,7 @@
     </div>
 
     <div class="bg-white border-black border"></div>
-</header>
+
 
 
 </body>

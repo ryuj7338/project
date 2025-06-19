@@ -1,10 +1,20 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-<html>
-<head>
 
-  <title>채용공고</title>
-</head>
+
+<!-- 제이쿼리 -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
+<!-- 폰트어썸 -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<!-- 폰트어썸 FREE 아이콘 리스트 : https://fontawesome.com/v5.15/icons?d=gallery&p=2&m=free -->
+
+<!-- 테일윈드 -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.1.4/tailwind.min.css">
+<!-- 테일윈드 치트시트 : https://nerdcave.com/tailwind-cheat-sheet -->
+
+
+
 <body>
 
 <h1>채용공고 목록</h1>
@@ -58,8 +68,10 @@
   </thead>
   <tbody>
   <c:forEach var="job" items="${jobPostings}">
-    <tr>
-      <td><a href="${job.original_url}" target="_blank">${job.title}</a></td>
+    <tr class="">
+      <td><a href="${job.original_url}" target="_blank" class="no-underline text-black">${job.title}</a><button class="icon-button">
+        <i class="fa-regular fa-star ml-1 text-xl" ></i>
+      </button><button class="icon-button"><i class="fa-solid fa-star text-yellow-400 text-xl"></i></button></td>
       <td>${job.companyName}</td>
       <td>${job.startDate}</td>
       <td>${job.endDate}</td>
@@ -102,7 +114,7 @@
 
 </div>
 </body>
-</html>
+
 
 
 
