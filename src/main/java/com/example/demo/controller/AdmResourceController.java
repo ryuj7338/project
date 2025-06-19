@@ -21,42 +21,54 @@ public class AdmResourceController {
     @Autowired
     private final BoardService boardService;
 
+    private final String basePath = "src/main/resources/static/uploadFiles";
+
     @RequestMapping("/autoUpload")
     @ResponseBody
     public String autoUpload() {
-        String basePath = "src/main/resources/static/uploadFiles";
         String[] types = {"pdf", "pptx", "image"};
-
         int count = 0;
 
         for (String type : types) {
             File folder = new File(basePath + "/" + type);
             if (!folder.exists()) continue;
 
-            for (File file : folder.listFiles()) {
-                if (file.isFile()) {
-                    String title = file.getName();
-                    String filePath = "/uploadFiles/" + type + "/" + title;
-
-                    // boardId는 자료실 게시판 번호로 고정 또는 매핑 필요
-                    int boardId = getBoardIdByType(type);
-
-                    // 중복 등록 방지 로직도 넣을 수 있음 (선택)
-                    if (postService.existsByTitle(title)) continue;
-
-                    postService.write(
-                            boardId,
-                            "관리자",
-                            1, // admin id
-                            title,
-                            "<a href='" + filePath + "' target='_blank'>[다운로드]</a>"
-                    );
-                    count++;
-                }
-            }
+            count += uploadFilesRecursively(folder, type);
         }
 
         return count + "개의 자료가 자동 등록되었습니다.";
+    }
+
+    private int uploadFilesRecursively(File folder, String type) {
+        int count = 0;
+        File[] files = folder.listFiles();
+        if (files == null) return 0;
+
+        for (File file : files) {
+            if (file.isDirectory()) {
+                count += uploadFilesRecursively(file, type);
+            } else if (file.isFile()) {
+                String title = file.getName();
+                String relativePath = file.getAbsolutePath().replace("\\", "/")
+                        .replace(new File(basePath).getAbsolutePath().replace("\\", "/"), "");
+                String filePath = "/uploadFiles" + relativePath;
+
+                // boardId 매핑
+                int boardId = getBoardIdByType(type);
+
+                if (postService.existsByTitle(title)) {
+                    System.out.println("[SKIP] 이미 등록된 제목: " + title);
+                    continue;
+                }
+
+                postService.write(boardId, "관리자", 1, title,
+                        "<a href='" + filePath + "' target='_blank'>[다운로드]</a>");
+                System.out.println("[등록 완료] " + title + " -> " + filePath);
+                count++;
+            }
+        }
+
+        return count;
     }
 
     private int getBoardIdByType(String type) {

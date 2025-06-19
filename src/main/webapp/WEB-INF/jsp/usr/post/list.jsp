@@ -1,5 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn"%>
 
 <head>
   <link rel="stylesheet" href="/resource/common.css" />
@@ -72,9 +73,18 @@
                   <span style="color: red;">[${post.extra__repliesCount}]</span>
                 </c:if>
               </a>
-              <c:if test="${boardId == 1 || boardId == 2 || boardId == 3 || boardId == 4}">
+
+              <!-- 파일 다운로드 링크 출력 (게시판 1~4 또는 5: 기출문제) -->
+              <c:if test="${boardId == 1 || boardId == 2 || boardId == 3 || boardId == 4 || boardId == 5}">
                 <br/>
-                <c:out value="${post.body}" escapeXml="false" />
+                <c:forEach var="line" items="${fn:split(post.body, '<br>')}">
+                  <c:if test="${fn:contains(line, '/uploadFiles/')}">
+                    <c:set var="fileName" value="${fn:substringAfter(line, '/uploadFiles/')}" />
+                    <a class="text-blue-500 hover:underline" href="/file/download?filename=${fileName}" target="_blank">
+                      ⬇ 다운로드: ${fileName}
+                    </a><br/>
+                  </c:if>
+                </c:forEach>
               </c:if>
             </td>
             <td style="text-align: center;">${post.extra__writer}</td>
@@ -108,19 +118,3 @@
     <c:if test="${startPage > 2}">
       <button class="join-item btn btn-sm btn-disabled">...</button>
     </c:if>
-
-    <c:forEach begin="${startPage}" end="${endPage}" var="i">
-      <a class="join-item btn btn-sm ${param.page == i ? 'btn-active' : ''}" href="?page=${i}&boardId=${boardId}">${i}</a>
-    </c:forEach>
-
-    <c:if test="${endPage < pagesCount - 1}">
-      <button class="join-item btn btn-sm btn-disabled">...</button>
-    </c:if>
-
-    <c:if test="${endPage < pagesCount}">
-      <a class="join-item btn btn-sm" href="?page=${pagesCount}&boardId=${boardId}">${pagesCount}</a>
-    </c:if>
-  </div>
-</div>
-
-<%@ include file="../common/foot.jspf"%>
