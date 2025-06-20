@@ -33,6 +33,8 @@ public class WebMvcConfigurer implements org.springframework.web.servlet.config.
         ir.addPathPatterns("/favicon.ico");
         ir.addPathPatterns("/resource/**");
         ir.addPathPatterns("/error");
+        ir.addPathPatterns("/static/**");
+        ir.addPathPatterns("/uploadFiles/**");
 
     //  로그인 필요
         ir = registry.addInterceptor(needLoginInterceptor);

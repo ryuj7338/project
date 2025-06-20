@@ -11,7 +11,7 @@
         SELECT C.*, M.nickname AS extra__writer
         FROM `comment` AS C
                  INNER JOIN `member` AS M
-                            ON R.memberId = M.id
+                            ON C.memberId = M.id
         WHERE relTypeCode = #{relTypeCode}
           AND relId = #{relId}
         ORDER BY C.id ASC;

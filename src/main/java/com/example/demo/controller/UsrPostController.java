@@ -209,6 +209,7 @@ public class UsrPostController {
             }
         }
 
+        System.out.println(">> 글 작성 시도: boardId=" + boardId + ", title=" + title);
         // 게시글 작성
         ResultData doWriteRd = postService.writePost(
                 rq.getLoginedMemberId(),
@@ -217,6 +218,7 @@ public class UsrPostController {
                 finalBody.toString()
         );
 
+        System.out.println(">> 결과: " + doWriteRd);
         return Ut.jsReplace(doWriteRd.getResultCode(), doWriteRd.getMsg(), "../post/list?boardId=" + boardId);
     }
 

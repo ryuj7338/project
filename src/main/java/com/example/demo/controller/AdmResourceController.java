@@ -26,7 +26,7 @@ public class AdmResourceController {
     @RequestMapping("/autoUpload")
     @ResponseBody
     public String autoUpload() {
-        String[] types = {"pdf", "pptx", "image"};
+        String[] types = {"pdf", "pptx", "image", "hwp", "xlsx"};
         int count = 0;
 
         for (String type : types) {
@@ -34,42 +34,45 @@ public class AdmResourceController {
             if (!folder.exists()) continue;
 
             count += uploadFilesRecursively(folder, type);
-        }
-
-        return count + "개의 자료가 자동 등록되었습니다.";
-    }
-
-    private int uploadFilesRecursively(File folder, String type) {
-        int count = 0;
-        File[] files = folder.listFiles();
-        if (files == null) return 0;
-
-        for (File file : files) {
-            if (file.isDirectory()) {
-                count += uploadFilesRecursively(file, type);
-            } else if (file.isFile()) {
-                String title = file.getName();
-                String relativePath = file.getAbsolutePath().replace("\\", "/")
-                        .replace(new File(basePath).getAbsolutePath().replace("\\", "/"), "");
-                String filePath = "/uploadFiles" + relativePath;
-
-                // boardId 매핑
-                int boardId = getBoardIdByType(type);
-
-                if (postService.existsByTitle(title)) {
-                    System.out.println("[SKIP] 이미 등록된 제목: " + title);
-                    continue;
                 }
 
-                postService.write(boardId, "관리자", 1, title,
-                        "<a href='" + filePath + "' target='_blank'>[다운로드]</a>");
-                System.out.println("[등록 완료] " + title + " -> " + filePath);
-                count++;
-            }
+             return count + "개의 파일을 업로드했습니다.";
+
         }
 
-        return count;
+
+
+    private int uploadFilesRecursively(File folder, String type) {
+    int count = 0;
+    File[] files = folder.listFiles();
+    if (files == null) return 0;
+
+    for (File file : files) {
+        if (file.isDirectory()) {
+            count += uploadFilesRecursively(file, type);
+        } else {
+            String title = file.getName();
+
+            // 상대 경로 추출
+            String relativePath = file.getAbsolutePath()
+                    .replace("\\", "/")
+                    .replace(new File(basePath).getAbsolutePath().replace("\\", "/"), "");
+            String fileUrl = "/uploadFiles" + relativePath;
+
+            // 중복 방지
+            if (postService.existsByTitle(title)) continue;
+
+            // 게시글 등록
+            int boardId = 5; // 기출문제 게시판
+            postService.writePost(1, boardId, title,
+                    "<a href='" + fileUrl + "' target='_blank'>[다운로드]</a>");
+
+            count++;
+        }
     }
+    return count;
+}
+
 
     private int getBoardIdByType(String type) {
         switch (type) {
