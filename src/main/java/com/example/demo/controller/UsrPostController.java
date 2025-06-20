@@ -277,12 +277,14 @@ public class UsrPostController {
         }
 
 
+
         int postsCount = postService.getPostCount(boardId, searchKeyword, searchType);
         int itemsInAPage = 10;
 
         int pagesCount = (int) Math.ceil(postsCount / (double) itemsInAPage);
 
         List<Post> posts = postService.getForPosts(boardId, itemsInAPage, page, searchKeyword, searchType);
+        posts = postService.getPostsByBoardId(boardId);
 
         model.addAttribute("searchKeyword", searchKeyword);
         model.addAttribute("searchType", searchType);

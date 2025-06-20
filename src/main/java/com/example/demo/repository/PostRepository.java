@@ -8,38 +8,39 @@ import java.util.List;
 @Mapper
 public interface PostRepository {
 
+    int writePost(int memberId, int boardId, String title, String body);
 
-    public int writePost(int memberId, int boardId, String title, String body);
+    void deletePost(int id);
 
-    public void deletePost(int id);
+    void modifyPost(int id, String title, String body);
 
-    public void modifyPost(int id, String title, String body);
+    Post getPostById(int id);
 
-    public Post getPostById(int id);
+    List<Post> getPosts();
 
-    public List<Post> getPosts();
+    int getLastInsertId();
 
-    public int getLastInsertId();
+    Post getForPrintPost(int loginedMemberId);
 
-    public Post getForPrintPost(int loginedMemberId);
+    List<Post> getForPrintPosts(int boardId, int limitFrom, int limitTake);
 
-    public List<Post> getForPrintPosts(int boardId, int limitFrom, int limitTake);
+    int getPostCount(int boardId, String searchKeyword, String searchType);
 
-    public int getPostCount(int boardId, String searchKeyword, String searchType);
+    List<Post> getForPosts(int boardId, int limitFrom, int limitTake, String searchKeyword, String searchType);
 
-    public List<Post> getForPosts(int boardId, int limitFrom, int limitTake, String searchKeyword, String searchType);
+    int increaseHitCount(int id);
 
-    public int increaseHitCount(int id);
+    int getPostHitCount(int id);
 
-    public int getPostHitCount(int id);
+    int increaseLikeReaction(int relId);
+    int decreaseLikeReaction(int relId);
 
-    public int increaseLikeReaction(int relId);
-    public int decreaseLikeReaction(int relId);
-
-    public int getLike(int relId);
+    int getLike(int relId);
 
     boolean existsByTitle(String title);
 
     void savePost(Post post);
+
+    List<Post> getPostsByBoardId(int boardId);
 }
 

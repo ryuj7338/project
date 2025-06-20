@@ -154,5 +154,8 @@ public class PostService {
         postRepository.savePost(post);
     }
 
+    public List<Post> getPostsByBoardId(int boardId) {
+        return postRepository.getPostsByBoardId(boardId);
+    }
 }
 

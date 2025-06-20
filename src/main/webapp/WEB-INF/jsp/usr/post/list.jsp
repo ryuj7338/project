@@ -27,7 +27,7 @@
 
 <!-- 검색 폼 -->
 <div class="text-center">
-  <form action="../post/list" method="POST">
+  <form action="../post/list?boardId=${boardId}" method="POST">
     <div class="inline-flex justify-center mx-auto border border-solid border-blue-400 p-3 rounded-lg">
       <select name="searchType" data-value="${param.searchType}">
         <option disabled selected>선택</option>
@@ -73,19 +73,6 @@
                   <span style="color: red;">[${post.extra__repliesCount}]</span>
                 </c:if>
               </a>
-
-              <!-- 파일 다운로드 링크 출력 (게시판 1~4 또는 5: 기출문제) -->
-              <c:if test="${boardId == 1 || boardId == 2 || boardId == 3 || boardId == 4 || boardId == 5}">
-                <br/>
-                <c:forEach var="line" items="${fn:split(post.body, '<br>')}">
-                  <c:if test="${fn:contains(line, '/uploadFiles/')}">
-                    <c:set var="fileName" value="${fn:substringAfter(line, '/uploadFiles/')}" />
-                    <a class="text-blue-500 hover:underline" href="/file/download?filename=${fileName}" target="_blank">
-                      ⬇ 다운로드: ${fileName}
-                    </a><br/>
-                  </c:if>
-                </c:forEach>
-              </c:if>
             </td>
             <td style="text-align: center;">${post.extra__writer}</td>
             <td style="text-align: center;">${post.regDate.substring(0,10)}</td>

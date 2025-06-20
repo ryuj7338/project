@@ -167,4 +167,10 @@
         SELECT COUNT(*) > 0 FROM post WHERE title = #{title}
     </select>
 
+    <select id="getPostsByBoardId" parameterType="int" resultType="com.example.demo.vo.Post">
+        SELECT * FROM post
+        WHERE boardId = #{boardId}
+        ORDER BY id DESC
+    </select>
+
 </mapper>

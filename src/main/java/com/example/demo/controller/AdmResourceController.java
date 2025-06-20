@@ -30,10 +30,10 @@ public class AdmResourceController {
         int count = 0;
 
         for (String type : types) {
-            File folder = new File(basePath + "/" + type);
-            if (!folder.exists()) continue;
+            File baseFolder = new File(basePath + "/" + type);
+            if (!baseFolder.exists()) continue;
 
-            count += uploadFilesRecursively(folder, type);
+            count += uploadFilesRecursively(baseFolder, type);
                 }
 
              return count + "개의 파일을 업로드했습니다.";
@@ -43,35 +43,37 @@ public class AdmResourceController {
 
 
     private int uploadFilesRecursively(File folder, String type) {
-    int count = 0;
-    File[] files = folder.listFiles();
-    if (files == null) return 0;
+        int count = 0;
+        File[] files = folder.listFiles();
 
-    for (File file : files) {
-        if (file.isDirectory()) {
-            count += uploadFilesRecursively(file, type);
-        } else {
-            String title = file.getName();
+        if (files == null) return 0;
 
-            // 상대 경로 추출
-            String relativePath = file.getAbsolutePath()
+        for (File file : files) {
+            if (file.isDirectory()) {
+                count += uploadFilesRecursively(file, type);
+            } else {
+                String title = file.getName();
+
+
+                String relativePath = file.getAbsolutePath()
                     .replace("\\", "/")
                     .replace(new File(basePath).getAbsolutePath().replace("\\", "/"), "");
-            String fileUrl = "/uploadFiles" + relativePath;
+                String fileUrl = "/uploadFiles" + relativePath;
 
-            // 중복 방지
-            if (postService.existsByTitle(title)) continue;
+                // 중복 방지
+                if (postService.existsByTitle(title)){
+                    System.out.println("[SKIP] 이미 등록됨");
+                    continue;
+                }
 
-            // 게시글 등록
-            int boardId = 5; // 기출문제 게시판
-            postService.writePost(1, boardId, title,
-                    "<a href='" + fileUrl + "' target='_blank'>[다운로드]</a>");
+                postService.writePost(1, 5, title,
+                "<a href='" + fileUrl + "' target='_blank'>[다운로드]</a>");
 
-            count++;
+                count++;
+            }
         }
+        return count;
     }
-    return count;
-}
 
 
     private int getBoardIdByType(String type) {
