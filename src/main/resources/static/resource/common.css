@@ -54,3 +54,7 @@ header > div > ul > li:hover {
     margin-left: auto;
     margin-right: auto;
 }
+
+.toast-ui-content{
+    text-align: center;
+}

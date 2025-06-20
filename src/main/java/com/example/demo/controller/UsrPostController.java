@@ -141,9 +141,9 @@ public class UsrPostController {
     @RequestMapping("/usr/post/doWrite")
     @ResponseBody
     public String doWrite(HttpServletRequest req,
-                          @RequestParam String title,
-                          @RequestParam String body,
-                          @RequestParam int boardId,
+                          @RequestParam(required = false) String title,
+                          @RequestParam(required = false) String body,
+                          @RequestParam(defaultValue = "1") int boardId,
                           @RequestParam(name = "files", required = false) List<MultipartFile> files) {
 
         Rq rq = (Rq) req.getAttribute("rq");
@@ -263,7 +263,8 @@ public class UsrPostController {
         if(increaseHitCountRd.isFail()){
             return increaseHitCountRd;
         }
-        return ResultData.newData(increaseHitCountRd, "hitCount", postService.getPostHitCount(id));
+        int hitcount = (int) postService.getPostHitCount(id);
+        return ResultData.newData(increaseHitCountRd, "hitCount", hitcount);
     }
 
 

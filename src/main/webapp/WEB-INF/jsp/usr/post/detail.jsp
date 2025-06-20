@@ -3,8 +3,25 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
 
 <%@ include file="../common/head.jspf"%>
+<%@ include file="../common/toastUiEditorLib.jspf" %>
+
+<!-- Toast UI Viewer CSS/JS -->
+<link rel="stylesheet" href="https://uicdn.toast.com/editor/latest/toastui-editor.min.css" />
+<link rel="stylesheet" href="https://uicdn.toast.com/editor-plugin-code-syntax-highlight/latest/toastui-editor-plugin-code-syntax-highlight.min.css" />
+<script src="https://uicdn.toast.com/editor/latest/toastui-editor-all.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.23.0/prism.min.js"></script>
+<script src="https://uicdn.toast.com/editor-plugin-code-syntax-highlight/latest/toastui-editor-plugin-code-syntax-highlight.min.js"></script>
+<!-- Prism 및 Toast UI Syntax Highlight 플러그인 포함 -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.23.0/prism.min.js"></script>
+<script src="https://uicdn.toast.com/editor-plugin-code-syntax-highlight/latest/toastui-editor-plugin-code-syntax-highlight.min.js"></script>
+
+
+
+
 
 <c:set var="pageTitle" value="게시글 상세보기" />
+
+
 
 <script>
 	const params = {};
@@ -19,13 +36,13 @@
 		}
 	}
 
-	function doLikeReaction(articleId) {
+	function doLikeReaction(PostId) {
 		$.ajax({
 			url: '/usr/reaction/doLike',
 			type: 'POST',
 			data: {
-				relTypeCode: 'article',
-				relId: articleId
+				relTypeCode: 'post',
+				relId: PostId
 			},
 			dataType: 'json',
 			success: function(data) {
@@ -53,21 +70,21 @@
 </script>
 
 <script>
-	function ArticleDetail__doIncreaseHitCount() {
-		const localStorageKey = 'article__' + params.id + '__alreadyOnView';
+	function PostDetail__doIncreaseHitCount() {
+		const localStorageKey = 'post__' + params.id + '__alreadyOnView';
 		if (localStorage.getItem(localStorageKey)) return;
 		localStorage.setItem(localStorageKey, true);
 
-		$.get('../article/doIncreaseHitCountRd', {
+		$.get('../post/doIncreaseHitCountRd', {
 			id: params.id,
 			ajaxMode: 'Y'
 		}, function(data) {
-			$('.article-detail__hit-count').html(data.data1);
+			$('.post-detail__hit-count').html(data.data1);
 		}, 'json');
 	}
 
 	$(function() {
-		ArticleDetail__doIncreaseHitCount();
+		PostDetail__doIncreaseHitCount();
 	});
 </script>
 
@@ -79,7 +96,7 @@
 			<tr><th style="text-align: center;">작성일</th><td style="text-align: center;">${post.regDate}</td></tr>
 			<tr><th style="text-align: center;">수정일</th><td style="text-align: center;">${post.updateDate}</td></tr>
 			<tr><th style="text-align: center;">작성자</th><td style="text-align: center;">${post.extra__writer}</td></tr>
-			<tr><th style="text-align: center;">조회수</th><td style="text-align: center;"><span class="article-detail__hit-count">${post.hit}</span></td></tr>
+			<tr><th style="text-align: center;">조회수</th><td style="text-align: center;"><span class="post-detail__hit-count">${post.hit}</span></td></tr>
 			<tr>
 				<th style="text-align: center;">좋아요</th>
 				<td style="text-align: center;">
@@ -91,8 +108,9 @@
 			<tr><th style="text-align: center;">제목</th><td style="text-align: center;">${post.title}</td></tr>
 
 			<tr>
-				<th style="text-align: center;">본문</th>
-				<td style="text-align: center;">
+				<th style="text-align: center;">내용</th>
+				<td>
+					<div class="toast-ui-viewer" id="viewer" style="display:none;"></div>
 
 				</td>
 			</tr>
@@ -107,8 +125,9 @@
     				</c:forEach>
  				</td>
 			</tr>
-		</table>
 
+		</table>
+		<script type="text/template" id="viewerContent">${fn:escapeXml(post.body)}</script>
 		<!-- 버튼 -->
 		<div class="btns mt-4">
 			<button type="button" onclick="history.back();">뒤로가기</button>
@@ -121,5 +140,31 @@
 		</div>
 	</div>
 </section>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const viewerEl = document.querySelector('#viewer');
+    const contentTemplate = document.querySelector('#viewerContent');
+    if (!viewerEl || !contentTemplate) return;
+
+    const markdown = contentTemplate.textContent.trim();
+
+    // ✅ 여기에서 plugin을 따로 선언
+    const codeSyntaxHighlight = toastui.EditorPlugin.codeSyntaxHighlight;
+
+    new toastui.Editor({
+      el: viewerEl,
+      viewer: true,
+      height: 'auto',
+      initialValue: markdown,
+      plugins: [codeSyntaxHighlight]
+    });
+
+    viewerEl.style.display = 'block';
+  });
+</script>
+
+
+
+
 
 <%@ include file="../common/foot.jspf"%>

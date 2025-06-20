@@ -74,7 +74,7 @@
 			isAjax : 'Y',
 			loginId : form.loginId.value
 		}, function(data) {
-			$('.checkDup-msg').html('<div class="mt-2">' + data.msg + '</div>')
+			$('.checkDup-msg').html('<div class="">' + data.msg + '</div>')
 			if (data.success) {
 				validLoginId = data.data1;
 			} else {
