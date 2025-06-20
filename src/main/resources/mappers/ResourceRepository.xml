@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.demo.repository.ResourceRepository">
+
+    <insert id="insertResource" parameterType="Resource">
+        INSERT INTO resources
+        SET regDate = NOW(),
+        updateDate = NOW(),
+        memberId = #{memberId},
+        boardId = #{boardId},
+        title = #{title},
+        `body` = #{body},
+        image = #{img},
+        pdf = #{pdf},
+        zip = #{zip}
+    </insert>
+
+    <update id="updateResource" parameterType="Resource">
+        UPDATE resources
+        SET updateDate = NOW(),
+            title = #{title},
+            body = #{body},
+            image = #{image},
+            pdf = #{pdf},
+            zip = #{zip}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteResource">
+        DELETE FROM resources WHERE id = #{id}
+    </delete>
+
+    <select id="getById" resultType="Resource">
+        SELECT * FROM resources WHERE id = #{id}
+    </select>
+
+    <select id="getListByBoardId" resultType="Resource">
+        SELECT * FROM resources WHERE boardId = #{boardId} ORDER BY id DESC
+    </select>
+
+</mapper>

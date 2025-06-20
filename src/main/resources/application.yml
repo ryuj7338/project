@@ -22,3 +22,6 @@ mybatis:
 kakao:
   client_id: 79f2a3a73883a82595a2202187f96cc5
   redirect_uri: http://localhost:8080/login/oauth2/code/kakao
+
+custom:
+  uploadDirPath: src/main/resources/static/uploadFiles

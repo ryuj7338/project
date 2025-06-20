@@ -9,7 +9,7 @@ import java.util.List;
 public interface PostRepository {
 
 
-    public int writePost(int memberId, String title, String body);
+    public int writePost(int memberId, int boardId, String title, String body);
 
     public void deletePost(int id);
 
@@ -37,5 +37,9 @@ public interface PostRepository {
     public int decreaseLikeReaction(int relId);
 
     public int getLike(int relId);
+
+    boolean existsByTitle(String title);
+
+    void savePost(Post post);
 }
 

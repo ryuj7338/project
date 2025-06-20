@@ -8,12 +8,14 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.checkerframework.checker.units.qual.A;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,6 +25,7 @@ public class JobPostingService {
 
     @Autowired
     private JobPostingRepository jobPostingRepository;
+
 
     public void saveFromExcel(String filePath) throws Exception {
         try (InputStream is = new FileInputStream(filePath);
@@ -35,15 +38,27 @@ public class JobPostingService {
                 Row row = sheet.getRow(i);
                 if (row == null) continue;
 
-                JobPosting job = new JobPosting();
-                job.setTitle(getString(row.getCell(0)));
-                job.setCompanyName(getString(row.getCell(1)));
-                job.setStartDate(getString(row.getCell(2)));
-                job.setEndDate(getString(row.getCell(3)));
-                job.setCertificate(getString(row.getCell(4)));
-                job.setOriginal_url(getString(row.getCell(5)));
+                JobPosting jobpost = new JobPosting();
 
-                jobPostings.add(job);
+                String endDateStr = getString(row.getCell(3));
+
+                jobpost.setEndDate(endDateStr);
+
+                jobpost.setTitle(getString(row.getCell(0)));
+                jobpost.setCompanyName(getString(row.getCell(1)));
+                jobpost.setStartDate(getString(row.getCell(2)));
+                jobpost.setEndDate(getString(row.getCell(3)));
+                jobpost.setCertificate(getString(row.getCell(4)));
+                jobpost.setOriginalUrl(getString(row.getCell(5)));
+
+                if(!jobpost.getEndDate().isBlank()){
+                    try {
+                        jobpost.setDday(calculateDday(jobpost.getEndDate()));
+                    }catch (Exception e){
+                        jobpost.setDday(null);
+                    }
+                }
+                jobPostings.add(jobpost);
             }
 
             // 기존 데이터 삭제 후 저장 (중복 방지)
@@ -61,9 +76,64 @@ public class JobPostingService {
         };
     }
 
+    private Integer calculateDday(String endDateStr) {
+        if (endDateStr == null || endDateStr.isBlank()) return null;
+
+        endDateStr = endDateStr.trim();
+
+
+        if (endDateStr.contains("(")) {
+            endDateStr = endDateStr.substring(0, endDateStr.indexOf("(")).trim();
+        }
+
+        if (endDateStr.contains("상시")){
+            return -1;
+        }
+
+        if (endDateStr.contains(" ")) {
+            endDateStr = endDateStr.split(" ")[0];
+        }
+
+        DateTimeFormatter formatter;
+
+        if (endDateStr.contains(".")) {
+            formatter = DateTimeFormatter.ofPattern("yyyy.MM.dd");
+        } else if (endDateStr.contains("-")) {
+            formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        } else {
+            throw new IllegalArgumentException("지원하지 않는 날짜 형식: " + endDateStr);
+        }
+
+
+        LocalDate endDate = LocalDate.parse(endDateStr, formatter);
+
+        return (int)  ChronoUnit.DAYS.between(LocalDate.now(), endDate);
+    }
+
+    private String getDdayStr(Integer dday) {
+        if (dday == null) return "마감";
+        if (dday == -1) return "상시채용";
+        if (dday < 0) return "마감";
+        return "D-" + dday;
+    }
+
     public List<JobPosting> getAll() {
         return jobPostingRepository.findAll();
     }
+
+    public List<JobPosting> getFavoriteJobPostingsWithDday(List<JobPosting> favoriteJobs) {
+        for (JobPosting job : favoriteJobs) {
+            if (job.getEndDate() != null && !job.getEndDate().isBlank()) {
+                try {
+                    job.setDday(calculateDday(job.getEndDate()));
+                } catch (Exception e) {
+                    job.setDday(null);
+                }
+            }
+        }
+        return favoriteJobs;
+    }
+
 
 
 }

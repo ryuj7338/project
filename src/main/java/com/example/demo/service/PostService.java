@@ -29,9 +29,9 @@ public class PostService {
         postRepository.deletePost(id);
     }
 
-    public ResultData writePost(int memberId, String title, String body) {
+    public ResultData writePost(int memberId, int boardId, String title, String body) {
 
-        postRepository.writePost(memberId, title, body);
+        postRepository.writePost(memberId, boardId, title, body);
 
         int id = postRepository.getLastInsertId();
 
@@ -139,5 +139,20 @@ public class PostService {
     public int getLike(int relId) {
         return postRepository.getLike(relId);
     }
+
+    public boolean existsByTitle(String title) {
+        return postRepository.existsByTitle(title);
+    }
+
+    public void write(int boardId, String nickname, int memberId, String title, String body) {
+        Post post = new Post();
+        post.setBoardId(boardId);
+        post.setExtra__writer(nickname);
+        post.setMemberId(memberId);
+        post.setTitle(title);
+        post.setBody(body);
+        postRepository.savePost(post);
+    }
+
 }
 

@@ -18,6 +18,7 @@ public class Post {
     private String title;
     private String body;
     private int memberId;
+    private int boardId;
     private int hit;
 
     private String extra__writer;
@@ -29,6 +30,8 @@ public class Post {
     private String searchType;
 
     private int like;
+
+    private int extra__repliesCount;
 
     private int extra__commentsCount;
 }

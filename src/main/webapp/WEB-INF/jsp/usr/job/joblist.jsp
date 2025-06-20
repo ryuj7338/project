@@ -1,6 +1,8 @@
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 
+<c:set var="pageTitle" value="채용공고" ></c:set>
+<%@ include file="../common/head.jspf"%>
 
 <!-- 제이쿼리 -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
@@ -17,7 +19,7 @@
 
 <body>
 
-<h1>채용공고 목록</h1>
+
 
 <script>
   function SearchForm__submit(form) {
@@ -37,6 +39,33 @@
   <c:if test="${not empty message}">
   alert("${message}");
   </c:if>
+</script>
+
+<script>
+  function toggleFavorite(jobPostingId) {
+	const btn = $('#favorite-btn-' + jobPostingId);
+	const icon = $('#favorite-icon-' + jobPostingId);
+	let isFavorited = btn.data('favorited'); // true or false
+
+	$.ajax({
+		url: "/usr/job/favorite/toggle",
+		method: "POST",
+		data: { jobPostingId },
+		success: function(response) {
+			isFavorited = !isFavorited;
+			btn.data('favorited', isFavorited); // 상태 갱신
+
+			if (isFavorited) {
+				icon.removeClass('fa-regular').addClass('fa-solid text-yellow-400');
+			} else {
+				icon.removeClass('fa-solid text-yellow-400').addClass('fa-regular');
+			}
+		},
+		error: function() {
+			alert("찜 요청 실패");
+		}
+	});
+}
 </script>
 
 <!-- 검색 폼 -->
@@ -67,11 +96,22 @@
   </tr>
   </thead>
   <tbody>
-  <c:forEach var="job" items="${jobPostings}">
-    <tr class="">
-      <td><a href="${job.original_url}" target="_blank" class="no-underline text-black">${job.title}</a><button class="icon-button">
-        <i class="fa-regular fa-star ml-1 text-xl" ></i>
-      </button><button class="icon-button"><i class="fa-solid fa-star text-yellow-400 text-xl"></i></button></td>
+   <c:forEach var="job" items="${jobPostings}">
+      <tr>
+        <td><a href="${job.originalUrl}" target="_blank" class="no-underline text-black">${job.title}</a>
+          <c:choose>
+            <c:when test="${favoriteId.contains(job.id)}">
+              <button class="icon-button" data-favorited="true" id="favorite-btn-${job.id}" onclick="toggleFavorite(${job.id})">
+                <i id="favorite-icon-${job.id}" class="fa-solid fa-star text-yellow-400 text-xl"></i>
+              </button>
+            </c:when>
+          <c:otherwise>
+            <button class="icon-button" data-favorited="false" id="favorite-btn-${job.id}" onclick="toggleFavorite(${job.id})">
+              <i id="favorite-icon-${job.id}" class="fa-regular fa-star text-xl"></i>
+            </button>
+          </c:otherwise>
+        </c:choose>
+      </td>
       <td>${job.companyName}</td>
       <td>${job.startDate}</td>
       <td>${job.endDate}</td>
@@ -116,5 +156,4 @@
 </body>
 
 
-
-
+<%@ include file="../common/foot.jspf"%>

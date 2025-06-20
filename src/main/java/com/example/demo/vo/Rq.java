@@ -131,4 +131,20 @@ public class Rq {
     private String getAfterFindLoginPwUri() {
         return getEncodedCurrentUri();
     }
+
+    public boolean getIsLogined() {
+        return isLogined;
+    }
+
+    public boolean isLogined() {
+        return isLogined;
+    }
+
+    public boolean getIsAdmin() {
+        return isLogined && loginedMember != null && loginedMember.getAuthLevel() == 7;
+    }
+
+    public boolean isAdmin() {
+        return isLogined() && loginedMember != null && loginedMember.getAuthLevel() == 7;
+    }
 }
