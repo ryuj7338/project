@@ -63,19 +63,25 @@ public class JobFavoriteService {
             return ResultData.from("F-L", "로그인이 필요합니다.");
         }
 
-        if (isFavorited(memberId, jobPostingId)) {
-            jobFavoriteRepository.delete(memberId, jobPostingId);
-            return ResultData.from("S-2", "찜 해제", "favorited", false);
-        } else {
-            jobFavoriteRepository.insert(memberId, jobPostingId);
-            return ResultData.from("S-1", "찜 추가", "favorited", true);
+        try {
+            if (isFavorited(memberId, jobPostingId)) {
+                jobFavoriteRepository.delete(memberId, jobPostingId);
+                return ResultData.from("S-2", "찜 해제", "favorited", false);
+            } else {
+                jobFavoriteRepository.insert(memberId, jobPostingId);
+                return ResultData.from("S-1", "찜 추가", "favorited", true);
+            }
+        } catch (Exception e) {
+            e.printStackTrace(); // 콘솔 확인용
+            return ResultData.from("F-E", "찜 처리 중 오류가 발생했습니다.");
         }
     }
 
+
     public boolean isFavorited(int memberId, int jobPostingId) {
-        List<Long> id = jobFavoriteRepository.findJobPostingIdByMemberId(memberId);
         return jobFavoriteRepository.countByMemberIdAndJobPostingId(memberId, jobPostingId) > 0;
     }
+
 
     public List<JobPosting> getFavoriteByMemberId(int memberId) {
         return jobFavoriteRepository.findFavoriteJobsByMemberId(memberId);

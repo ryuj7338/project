@@ -404,6 +404,10 @@ public class UsrPostController {
         Rq rq = (Rq) req.getAttribute("rq");
         int memberId = rq.getLoginedMemberId();
 
+        if (rq == null || rq.getLoginedMemberId() == 0) {
+            return ResultData.from("F-L", "로그인이 필요합니다.");
+        }
+
 
         return jobFavoriteService.toggleFavorite(memberId, jobPostingId);
     }

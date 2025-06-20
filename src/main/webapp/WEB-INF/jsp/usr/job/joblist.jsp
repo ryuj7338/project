@@ -45,27 +45,40 @@
   function toggleFavorite(jobPostingId) {
 	const btn = $('#favorite-btn-' + jobPostingId);
 	const icon = $('#favorite-icon-' + jobPostingId);
-	let isFavorited = btn.data('favorited'); // true or false
+	let isFavorited = btn.data('favorited');
 
 	$.ajax({
-		url: "/usr/job/favorite/toggle",
-		method: "POST",
-		data: { jobPostingId },
-		success: function(response) {
-			isFavorited = !isFavorited;
-			btn.data('favorited', isFavorited); // 상태 갱신
+      url: "/usr/job/favorite/toggle",
+      method: "POST",
+      data: { jobPostingId },
+      headers: {
+        Accept: "application/json"
+      },
+      success: function(response) {
+        isFavorited = !isFavorited;
+        btn.data('favorited', isFavorited);
+        if (response.resultCode === 'F-L') {
+          alert(response.msg); // ✅ 여기서 "로그인이 필요합니다." 출력됨
+          location.href = "/usr/member/login?redirectUrl=" + encodeURIComponent(location.href);
+          return;
+        }
+        if(isFavorited){
+          icon.removeClass('fa-regular').addClass('fa-solid text-yellow-400');
+        }else {
+          icon.removeClass('fa-solid text-yellow-400').addClass('fa-regular');
+        }
 
-			if (isFavorited) {
-				icon.removeClass('fa-regular').addClass('fa-solid text-yellow-400');
-			} else {
-				icon.removeClass('fa-solid text-yellow-400').addClass('fa-regular');
-			}
-		},
-		error: function() {
-			alert("찜 요청 실패");
-		}
-	});
+      alert(response.msg); // "찜 추가" 또는 "찜 해제"
+
+
+    },
+    error: function() {
+      alert("찜 요청 실패");
+    }
+  });
+
 }
+
 </script>
 
 <!-- 검색 폼 -->
@@ -83,7 +96,6 @@
 
 <hr/>
 
-<!--  채용공고 목록 테이블 -->
 <table border="1" width="100%">
 
   <thead>

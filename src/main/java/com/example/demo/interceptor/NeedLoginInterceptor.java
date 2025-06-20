@@ -20,8 +20,15 @@ public class NeedLoginInterceptor implements HandlerInterceptor {
         Rq rq = (Rq) req.getAttribute("rq");
 
         if (!rq.isLogined()) {
+            String acceptHeader = req.getHeader("accept");
+            boolean isAjax = acceptHeader != null && acceptHeader.contains("application/json");
 
-            rq.printHistoryBack("로그인이 필요합니다.");
+            if (isAjax) {
+                resp.setContentType("application/json; charset=UTF-8");
+                resp.getWriter().write("{\"resultCode\":\"F-L\", \"msg\":\"로그인이 필요합니다.\"}");
+            } else {
+                rq.printHistoryBack("로그인이 필요합니다.");
+            }
 
             return false;
         }

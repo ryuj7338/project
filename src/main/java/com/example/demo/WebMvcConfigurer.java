@@ -62,6 +62,7 @@ public class WebMvcConfigurer implements org.springframework.web.servlet.config.
 
     // 찜 관련
         ir.addPathPatterns("/usr/job/favorite/toggle");
+
     //  로그아웃 필요
         ir = registry.addInterceptor(needLogoutInterceptor);
         ir.addPathPatterns("/usr/member/login");

@@ -13,7 +13,7 @@
 <!-- 테일윈드 치트시트 : https://nerdcave.com/tailwind-cheat-sheet -->
 <%@ include file="../common/head.jspf" %>
 
-<h1 class="text-2xl font-bold mb-4">내 찜한 채용공고</h1>
+<h1 class="text-2xl font-bold mb-4"> 찜한 공고</h1>
 
 <c:choose>
   <c:when test="${empty favoriteJobs}">
