@@ -242,6 +242,9 @@ public class UsrPostController {
 
         int commentsCount = comments.size();
 
+        List<FileInfo> fileInfos = postService.extractFileInfos(post.getBody());
+        model.addAttribute("fileInfos", fileInfos);
+
         model.addAttribute("comments", comments);
         model.addAttribute("commentsCount", commentsCount);
         model.addAttribute("post", post);

@@ -2,11 +2,13 @@ package com.example.demo.service;
 
 import com.example.demo.repository.PostRepository;
 import com.example.demo.util.Ut;
+import com.example.demo.vo.FileInfo;
 import com.example.demo.vo.Post;
 import com.example.demo.vo.ResultData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -157,5 +159,38 @@ public class PostService {
     public List<Post> getPostsByBoardId(int boardId) {
         return postRepository.getPostsByBoardId(boardId);
     }
+
+    public List<FileInfo> extractFileInfos(String body) {
+        List<FileInfo> list = new ArrayList<>();
+        if (body == null || body.isBlank()) return list;
+
+        String[] lines = body.split("<br\\s*?>");
+        for (String line : lines) {
+            if (!line.contains("/uploadFiles/") || !line.contains("href='")) continue;
+
+            try {
+                int hrefStart = line.indexOf("href='") + 6;
+                int hrefEnd = line.indexOf("'", hrefStart);
+                if (hrefEnd <= hrefStart) continue;
+
+                String path = line.substring(hrefStart, hrefEnd);
+                String name = path.substring(path.lastIndexOf("/") + 1);
+
+                System.out.println(">>>> href 추출: " + path);
+                System.out.println(">>>> 파일명 추출 전: " + path.substring(path.lastIndexOf("/") + 1));
+                // 허용 확장자
+                String ext = name.substring(name.lastIndexOf(".") + 1).toLowerCase();
+                List<String> allowed = List.of("pdf", "hwp", "pptx", "xlsx", "jpg", "jpeg", "png", "gif");
+
+                if (!allowed.contains(ext)) continue;
+
+                list.add(new FileInfo(name, path));
+            } catch (Exception e) {
+
+            }
+        }
+        return list;
+    }
+
 }
 

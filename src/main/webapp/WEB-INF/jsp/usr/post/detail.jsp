@@ -2,7 +2,6 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
 
-
 <%@ include file="../common/head.jspf"%>
 
 <c:set var="pageTitle" value="게시글 상세보기" />
@@ -35,16 +34,9 @@
 					var likeCount = $('#likeCount');
 					var likeCountC = $('.likeCount');
 
-					if (data.resultCode == 'S-1') {
-						likeButton.toggleClass('btn-outline');
-						likeCount.text(data.data1);
-						likeCountC.text(data.data1);
-					} else if (data.resultCode == 'S-2') {
-
-						likeButton.toggleClass('btn-outline');
-						likeCount.text(data.data1);
-						likeCountC.text(data.data1);
-					}
+					likeButton.toggleClass('btn-outline');
+					likeCount.text(data.data1);
+					likeCountC.text(data.data1);
 				} else {
 					alert(data.msg);
 				}
@@ -88,7 +80,8 @@
 			<tr><th style="text-align: center;">수정일</th><td style="text-align: center;">${post.updateDate}</td></tr>
 			<tr><th style="text-align: center;">작성자</th><td style="text-align: center;">${post.extra__writer}</td></tr>
 			<tr><th style="text-align: center;">조회수</th><td style="text-align: center;"><span class="article-detail__hit-count">${post.hit}</span></td></tr>
-			<tr><th style="text-align: center;">좋아요</th>
+			<tr>
+				<th style="text-align: center;">좋아요</th>
 				<td style="text-align: center;">
 					<button id="likeButton" class="btn btn-outline btn-success" onclick="doLikeReaction(${param.id})">
 						LIKE 👍 <span id="likeCount" class="likeCount">${post.like}</span>
@@ -100,33 +93,23 @@
 			<tr>
 				<th style="text-align: center;">본문</th>
 				<td style="text-align: center;">
-					<c:out value="${post.body}" escapeXml="false" />
+
 				</td>
 			</tr>
 
 			<tr>
 				<th style="text-align: center;">다운로드 파일</th>
+
 				<td style="text-align: center;">
-					<c:if test="${fn:contains(post.body, '/uploadFiles/')}">
-						<c:forEach var="line" items="${fn:split(post.body, '<br>')}">
-							<c:if test="${fn:contains(line, '/uploadFiles/')}">
-
-								<c:set var="filePath" value="${line}" />
-
-								<!-- 파일명만 추출 -->
-								<c:set var="parts" value="${fn:split(filePath, '/')}" />
-								<c:set var="fileName" value="${fn:substringAfter(filePath, fn:substringBeforeLast(filePath, '/') + '/')}" />
-
-								<a class="text-blue-500 hover:underline" href="${filePath}" target="_blank">
-									⬇ 다운로드: ${fileName}
-								</a><br/>
-							</c:if>
-						</c:forEach>
-					</c:if>
-				</td>
+    				<c:forEach var="file" items="${fileInfos}">
+      					📎 ${file.name}
+      					<a href="${file.path}" download class="text-blue-500 hover:underline">[다운로드]</a><br/>
+    				</c:forEach>
+ 				</td>
 			</tr>
 		</table>
 
+		<!-- 버튼 -->
 		<div class="btns mt-4">
 			<button type="button" onclick="history.back();">뒤로가기</button>
 			<c:if test="${post.userCanModify}">
