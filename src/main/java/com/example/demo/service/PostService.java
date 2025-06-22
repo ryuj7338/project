@@ -192,5 +192,12 @@ public class PostService {
         return list;
     }
 
+    public void write(Post post) {
+        postRepository.write(post);
+    }
+
+    public void update(Post post) {
+        postRepository.update(post);
+    }
 }
 

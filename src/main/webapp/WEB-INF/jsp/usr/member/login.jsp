@@ -14,7 +14,7 @@
 				<tbody>
 					<tr>
 						<th>아이디</th>
-						<td style="text-align: center;"><input class="input input-primary" name="loginId" autocomplete="off"
+						<td style="text-align: center;"><input class="input input-primary" name="loginId" autocomplete="on"
 							type="text" placeholder="아이디 입력" /></td>
 					</tr>
 					<tr>

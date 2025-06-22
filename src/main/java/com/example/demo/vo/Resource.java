@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 public class Resource {
 
     private int id;
+    private int postId;
     private int memberId;
     private int boardId;
     private String regDate;

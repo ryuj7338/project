@@ -1,52 +1,47 @@
 package com.example.demo.controller;
 
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.core.io.InputStreamResource;
-import org.springframework.http.*;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.*;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.*;
 
 @Controller
 @RequestMapping("/file")
 public class FileDownloadController {
 
-    @GetMapping("/download")
-    public ResponseEntity<InputStreamResource> downloadFile(@RequestParam String filename) throws IOException {
-        String fileBasePath = "src/main/resources/static/uploadFiles/";
-        File file = new File(fileBasePath + filename);
+    @Value("${custom.uploadDirPath}")
+    private String uploadDirPath;
 
-        if (!file.exists()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+    @GetMapping("/download")
+    public void download(@RequestParam String path, HttpServletResponse response) throws IOException {
+        // 보안 체크: 디렉토리 이탈 방지
+        if (path.contains("..")) {
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+            return;
         }
 
-        // 파일명 인코딩
-        String encodedFilename = URLEncoder.encode(file.getName(), StandardCharsets.UTF_8)
-                .replaceAll("\\+", "%20");
+        File file = new File(uploadDirPath, new File(path).getName());
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(getMediaType(filename));
-        headers.setContentLength(file.length());
-        headers.setContentDisposition(ContentDisposition.attachment()
-                .filename(encodedFilename, StandardCharsets.UTF_8)
-                .build());
+        if (!file.exists()) {
+            response.sendError(HttpServletResponse.SC_NOT_FOUND);
+            return;
+        }
 
-        InputStreamResource resource = new InputStreamResource(new FileInputStream(file));
+        // Content Type 자동 설정
+        String contentType = Files.probeContentType(file.toPath());
+        response.setContentType(contentType != null ? contentType : "application/octet-stream");
 
-        return new ResponseEntity<>(resource, headers, HttpStatus.OK);
-    }
+        response.setHeader("Content-Disposition", "attachment; filename=\"" + URLEncoder.encode(file.getName(), StandardCharsets.UTF_8) + "\"");
+        response.setContentLengthLong(file.length());
 
-    private MediaType getMediaType(String filename) {
-        if (filename.endsWith(".pdf")) return MediaType.APPLICATION_PDF;
-        if (filename.endsWith(".png")) return MediaType.IMAGE_PNG;
-        if (filename.endsWith(".jpg") || filename.endsWith(".jpeg")) return MediaType.IMAGE_JPEG;
-        if (filename.endsWith(".zip")) return MediaType.APPLICATION_OCTET_STREAM;
-        if (filename.endsWith(".hwp") || filename.endsWith(".pptx") || filename.endsWith(".docx"))
-            return MediaType.APPLICATION_OCTET_STREAM;
-
-        return MediaType.APPLICATION_OCTET_STREAM;
+        // 파일 스트림 복사
+        try (InputStream in = new FileInputStream(file); OutputStream out = response.getOutputStream()) {
+            in.transferTo(out);
+        }
     }
 }

@@ -17,6 +17,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Controller
@@ -51,6 +52,9 @@ public class UsrPostController {
 
     @Autowired
     private Rq rq;
+
+    @Autowired
+    private ResourceService resourceService;
 
     UsrPostController(BeforeActionInterceptor beforeActionInterceptor) {
         this.beforeActionInterceptor = beforeActionInterceptor;
@@ -144,115 +148,148 @@ public class UsrPostController {
                           @RequestParam(required = false) String title,
                           @RequestParam(required = false) String body,
                           @RequestParam(defaultValue = "1") int boardId,
-                          @RequestParam(name = "files", required = false) List<MultipartFile> files) {
+                          @RequestParam(name = "files", required = false) MultipartFile[] files) {
 
         Rq rq = (Rq) req.getAttribute("rq");
 
-        // 관리자 전용 게시판
-        if (boardId == 5 && !rq.getIsAdmin()) {
+        // 권한 체크
+        if (boardId == 5 && !rq.getIsAdmin())
             return Ut.jsHistoryBack("F-3", "관리자만 작성할 수 있습니다.");
-        }
 
-        // 일반 사용자 게시판 제한
-        if (!rq.getIsAdmin() && !(boardId == 1 || boardId == 2 || boardId == 3 || boardId == 4)) {
+        if (!rq.getIsAdmin() && !(boardId == 1 || boardId == 2 || boardId == 3 || boardId == 4))
             return Ut.jsHistoryBack("F-4", "작성 권한이 없습니다.");
-        }
 
         if (Ut.isEmptyOrNull(title)) return Ut.jsHistoryBack("F-1", "제목을 입력하세요");
         if (Ut.isEmptyOrNull(body)) return Ut.jsHistoryBack("F-2", "내용을 입력하세요");
 
+        // 1. 게시글 저장
+        Post post = new Post();
+        post.setBoardId(boardId);
+        post.setTitle(title);
+        post.setBody(body);
+        post.setMemberId(rq.getLoginedMemberId());
+
+        postService.write(post);
+
+        // 2. 파일 업로드 디버깅
+        System.out.println(">> 파일 배열 null 여부: " + (files == null));
+        System.out.println(">> 파일 개수: " + (files != null ? files.length : 0));
+
         StringBuilder finalBody = new StringBuilder(body);
+        List<String> allowedExtensions = List.of("pdf", "ppt", "pptx", "hwp", "doc", "docx", "xls", "xlsx", "jpg", "jpeg", "png", "gif", "zip");
 
-        // 허용 확장자 목록
-        List<String> allowedExtensions = List.of("pdf", "pptx", "hwp", "docx", "xlsx", "jpg", "jpeg", "png", "zip");
-
-        if (files != null && !files.isEmpty()) {
+        // 3. 파일 저장
+        if (files != null && files.length > 0) {
             for (MultipartFile file : files) {
-                if (!file.isEmpty()) {
-                    try {
-                        String originalFilename = file.getOriginalFilename();
 
-                        // 확장자 추출
-                        String ext = originalFilename.substring(originalFilename.lastIndexOf(".") + 1).toLowerCase();
+                System.out.println("======== 파일 업로드 디버깅 ========");
+                System.out.println("원본 파일 이름: " + file.getOriginalFilename());
+                System.out.println("파일 크기: " + file.getSize());
+                System.out.println("파일 비었나? : " + file.isEmpty());
+                System.out.println("컨텐트 타입: " + file.getContentType());
+                System.out.println("=================================");
 
-                        // 확장자 제한
-                        if (!allowedExtensions.contains(ext)) {
-                            return Ut.jsHistoryBack("F-6", "허용되지 않은 파일 형식입니다: " + ext);
-                        }
+                if (file.isEmpty()) continue;
 
-                        // 파일명 정제 (보안 위험 문자 제거)
-                        String safeFilename = originalFilename.replaceAll("[^a-zA-Z0-9가-힣._-]", "_");
+                try {
+                    String originalFilename = file.getOriginalFilename();
+                    String ext = originalFilename.substring(originalFilename.lastIndexOf(".") + 1).toLowerCase();
 
-                        // 중복 방지용 저장 파일명 (UUID)
-                        String uuid = java.util.UUID.randomUUID().toString();
-                        String savedFileName = uuid + "_" + safeFilename;
-
-                        // 저장 경로
-                        String uploadDirPath = "src/main/resources/static/uploadFiles";
-                        File uploadDir = new File(uploadDirPath);
-                        if (!uploadDir.exists()) uploadDir.mkdirs();
-
-                        File destFile = new File(uploadDir, savedFileName);
-                        file.transferTo(destFile);
-
-                        // 게시글에 파일 링크 추가
-                        finalBody.append("<br><a href='/uploadFiles/")
-                                .append(savedFileName)
-                                .append("' target='_blank'>[파일: ")
-                                .append(safeFilename)
-                                .append("]</a>");
-
-                    } catch (Exception e) {
-                        return Ut.jsHistoryBack("F-5", "파일 업로드 중 오류 발생: " + e.getMessage());
+                    if (!allowedExtensions.contains(ext)) {
+                        return Ut.jsHistoryBack("F-6", "허용되지 않은 파일 형식입니다: " + ext);
                     }
+
+                    String safeFilename = originalFilename.replaceAll("[^a-zA-Z0-9가-힣._-]", "_");
+                    String uuid = UUID.randomUUID().toString();
+                    String savedFileName = uuid + "_" + safeFilename;
+
+                    String uploadDirPath = new File("").getAbsolutePath() + "/uploadFiles";
+
+                    File uploadDir = new File(uploadDirPath);
+                    if (!uploadDir.exists()) uploadDir.mkdirs();
+
+                    File destFile = new File(uploadDir, savedFileName);
+                    file.transferTo(destFile);
+
+                    String fileUrl = "/uploadFiles/" + savedFileName;
+
+                    // 본문에 파일 링크 삽입
+                    finalBody.append("<br><a href='").append(fileUrl)
+                            .append("' target='_blank'>[파일: ").append(safeFilename).append("]</a>");
+
+                    // 리소스 객체 생성
+                    Resource resource = new Resource();
+                    resource.setPostId(post.getId());
+                    resource.setMemberId(rq.getLoginedMemberId());
+                    resource.setBoardId(boardId);
+                    resource.setTitle(title);
+                    resource.setBody(body);
+
+                    switch (ext) {
+                        case "pdf": resource.setPdf(fileUrl); break;
+                        case "ppt":
+                        case "pptx": resource.setPptx(fileUrl); break;
+                        case "hwp": resource.setHwp(fileUrl); break;
+                        case "doc":
+                        case "docx": resource.setWord(fileUrl); break;
+                        case "xls":
+                        case "xlsx": resource.setXlsx(fileUrl); break;
+                        case "jpg":
+                        case "jpeg":
+                        case "png":
+                        case "gif": resource.setImage(fileUrl); break;
+                        case "zip": resource.setZip(fileUrl); break;
+                    }
+
+                    resourceService.save(resource);
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    return Ut.jsHistoryBack("F-5", "파일 업로드 중 오류 발생: " + e.getMessage());
                 }
             }
         }
 
-        System.out.println(">> 글 작성 시도: boardId=" + boardId + ", title=" + title);
-        // 게시글 작성
-        ResultData doWriteRd = postService.writePost(
-                rq.getLoginedMemberId(),
-                boardId,
-                title,
-                finalBody.toString()
-        );
+        // 4. 본문 업데이트
+        post.setBody(finalBody.toString());
+        postService.update(post);
 
-        System.out.println(">> 결과: " + doWriteRd);
-        return Ut.jsReplace(doWriteRd.getResultCode(), doWriteRd.getMsg(), "../post/list?boardId=" + boardId);
+        return Ut.jsReplace("S-1", "게시물이 작성되었습니다.", "/usr/post/detail?id=" + post.getId());
     }
-
-
 
 
     @RequestMapping("/usr/post/detail")
     public String showDetail(HttpServletRequest req, Model model, int id) {
-
         Rq rq = (Rq) req.getAttribute("rq");
+        int loginedMemberId = rq.getLoginedMemberId();
 
-        Post post = postService.getForPrintPost(rq.getLoginedMemberId(), id);
+        Post post = postService.getForPrintPost(loginedMemberId, id);
 
-        ResultData usersReactionRd = reactionService.usersReaction(rq.getLoginedMemberId(), "post", id);
-
-        if(usersReactionRd.isSuccess()){
-            model.addAttribute("userCanMakeReaction", usersReactionRd.isSuccess());
+        ResultData usersReactionRd = reactionService.usersReaction(loginedMemberId, "post", id);
+        if (usersReactionRd.isSuccess()) {
+            model.addAttribute("userCanMakeReaction", true);
         }
 
-        List<Comment> comments = commentService.getForPrintComments(rq.getLoginedMemberId(),"post", id);
-
+        List<Comment> comments = commentService.getForPrintComments(loginedMemberId, "post", id);
         int commentsCount = comments.size();
 
-        List<FileInfo> fileInfos = postService.extractFileInfos(post.getBody());
-        model.addAttribute("fileInfos", fileInfos);
+        // ✅ 첨부파일 조회
+        List<Resource> resourceList = resourceService.getListByPostId(id);
+        model.addAttribute("resourceList", resourceList);
+
+        Resource resource = resourceService.getByPostId(id); // 단일 조회용
+        model.addAttribute("resource", resource);
 
         model.addAttribute("comments", comments);
         model.addAttribute("commentsCount", commentsCount);
         model.addAttribute("post", post);
         model.addAttribute("usersReaction", usersReactionRd.getData1());
-        model.addAttribute("isAlreadyAddLikeRp", reactionService.isAlreadyAddLikeRp(rq.getLoginedMemberId(), id, "post"));
+        model.addAttribute("isAlreadyAddLikeRp", reactionService.isAlreadyAddLikeRp(loginedMemberId, id, "post"));
 
         return "/usr/post/detail";
     }
+
+
 
     @RequestMapping("/usr/post/doIncreaseHitCountRd")
     @ResponseBody

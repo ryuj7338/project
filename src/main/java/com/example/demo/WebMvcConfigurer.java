@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
+import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 
 @Configuration
 public class WebMvcConfigurer implements org.springframework.web.servlet.config.annotation.WebMvcConfigurer {
@@ -34,7 +35,9 @@ public class WebMvcConfigurer implements org.springframework.web.servlet.config.
         ir.addPathPatterns("/resource/**");
         ir.addPathPatterns("/error");
         ir.addPathPatterns("/static/**");
+        ir.addPathPatterns("/upload/**");
         ir.addPathPatterns("/uploadFiles/**");
+        ir.addPathPatterns("file:///\" + System.getProperty(\"user.dir\") + \"/uploadFiles/");
 
     //  로그인 필요
         ir = registry.addInterceptor(needLoginInterceptor);
@@ -74,4 +77,5 @@ public class WebMvcConfigurer implements org.springframework.web.servlet.config.
         ir.addPathPatterns("/usr/member/findLoginPw");
         ir.addPathPatterns("/usr/member/doFindLoginPw");
     }
+
 }

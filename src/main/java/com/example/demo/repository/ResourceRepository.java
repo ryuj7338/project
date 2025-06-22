@@ -9,8 +9,16 @@ import java.util.List;
 public interface ResourceRepository {
 
     void insertResource(Resource resource);
+
     void updateResource(Resource resource);
+
     void deleteResource(int id);
+
     Resource getById(int id);
+
     List<Resource> getListByBoardId(int boardId);
+
+    List<Resource> getListByPostId(int postId);
+
+    Resource getByPostId(int postId); // postId로 첨부파일 조회 (상세페이지용)
 }

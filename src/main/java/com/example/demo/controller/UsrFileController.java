@@ -11,7 +11,9 @@ import com.example.demo.vo.Rq;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.UUID;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
 
 @Controller
 @RequiredArgsConstructor
@@ -23,37 +25,64 @@ public class UsrFileController {
 
     @PostMapping("/upload")
     @ResponseBody
-    public String uploadFiles(@RequestParam("files") MultipartFile[] files, HttpServletRequest req) {
+    public Map<String, Object> uploadFiles(@RequestParam("files") MultipartFile[] files, HttpServletRequest req) {
+        Map<String, Object> result = new HashMap<>();
+        List<String> fileUrls = new ArrayList<>();
 
         Rq rq = (Rq) req.getAttribute("rq");
-        int loginedMemberId = rq.getLoginedMemberId();
+        int memberId = rq.getLoginedMemberId();
 
-        if (files.length == 0 || files[0].isEmpty()) {
-            return "파일이 선택되지 않았습니다.";
-        }
-
-        String userPath = uploadDirPath + "/user/" + loginedMemberId;
+        String userPath = uploadDirPath + "/user/" + memberId;
         File folder = new File(userPath);
-        if (!folder.exists()) {
-            folder.mkdirs();
-        }
-
-        StringBuilder result = new StringBuilder();
+        if (!folder.exists()) folder.mkdirs();
 
         for (MultipartFile file : files) {
             String originalFilename = file.getOriginalFilename();
-            String extension = StringUtils.getFilenameExtension(originalFilename);
-            String uuid = UUID.randomUUID().toString().replace("-", "");
-            String savedFileName = uuid + "." + extension;
+            String ext = StringUtils.getFilenameExtension(originalFilename);
+            String uuid = UUID.randomUUID().toString();
+            String savedFileName = uuid + "." + ext;
 
             try {
                 file.transferTo(new File(userPath + "/" + savedFileName));
-                result.append("업로드 완료: ").append(originalFilename).append("<br>");
+                // 다운로드용 링크 삽입
+                String downloadUrl = "/file/download?path=" + uuid + "." + ext + "&original=" + URLEncoder.encode(originalFilename, StandardCharsets.UTF_8);
+                fileUrls.add(downloadUrl);
             } catch (IOException e) {
-                result.append("업로드 실패: ").append(originalFilename).append("<br>");
+                e.printStackTrace();
             }
         }
 
-        return result.toString();
+        result.put("success", true);
+        result.put("fileUrls", fileUrls);
+        return result;
+    }
+
+
+
+    @PostMapping("/uploadImage")
+    @ResponseBody
+    public Map<String, Object> uploadImage(@RequestParam("file") MultipartFile file, HttpServletRequest req) {
+        Map<String, Object> result = new HashMap<>();
+        Rq rq = (Rq) req.getAttribute("rq");
+        int memberId = rq.getLoginedMemberId();
+
+        String uploadPath = uploadDirPath + "/user/" + memberId;
+        File dir = new File(uploadPath);
+        if (!dir.exists()) dir.mkdirs();
+
+        String ext = StringUtils.getFilenameExtension(file.getOriginalFilename());
+        String uuid = UUID.randomUUID().toString().replace("-", "");
+        String savedFileName = uuid + "." + ext;
+
+        try {
+            file.transferTo(new File(uploadPath + "/" + savedFileName));
+            String fileUrl = "/upload/user/" + memberId + "/" + savedFileName;
+            result.put("url", fileUrl);
+        } catch (IOException e) {
+            e.printStackTrace();
+            result.put("url", "");
+        }
+
+        return result;
     }
 }

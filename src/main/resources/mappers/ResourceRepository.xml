@@ -7,26 +7,30 @@
 
     <insert id="insertResource" parameterType="Resource">
         INSERT INTO resources
-        SET regDate = NOW(),
-        updateDate = NOW(),
-        memberId = #{memberId},
-        boardId = #{boardId},
-        title = #{title},
-        `body` = #{body},
-        image = #{img},
-        pdf = #{pdf},
-        zip = #{zip}
+        (postId, boardId, memberId, title, body,
+         pdf, pptx, hwp, word, xlsx, zip, image,
+         regDate, updateDate)
+        VALUES
+            (#{postId}, #{boardId}, #{memberId}, #{title}, #{body},
+             #{pdf}, #{pptx}, #{hwp}, #{word}, #{xlsx}, #{zip}, #{image},
+             NOW(), NOW())
     </insert>
+
+
+
+
 
     <update id="updateResource" parameterType="Resource">
         UPDATE resources
         SET updateDate = NOW(),
-            title = #{title},
-            body = #{body},
-            image = #{image},
             pdf = #{pdf},
-            zip = #{zip}
-        WHERE id = #{id}
+            pptx = #{pptx},
+            hwp = #{hwp},
+            word = #{word},
+            xlsx = #{xlsx},
+            zip = #{zip},
+            image = #{image}
+        WHERE postId = #{postId}
     </update>
 
     <delete id="deleteResource">
@@ -37,8 +41,13 @@
         SELECT * FROM resources WHERE id = #{id}
     </select>
 
-    <select id="getListByBoardId" resultType="Resource">
-        SELECT * FROM resources WHERE boardId = #{boardId} ORDER BY id DESC
+    <select id="getListByPostId" resultType="Resource">
+        SELECT * FROM resources WHERE postId = #{postId}
     </select>
+
+    <select id="getByPostId" resultType="Resource">
+        SELECT * FROM resources WHERE postId = #{postId}
+    </select>
+
 
 </mapper>

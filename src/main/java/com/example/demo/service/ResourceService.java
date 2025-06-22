@@ -13,9 +13,10 @@ public class ResourceService {
     @Autowired
     private ResourceRepository resourceRepository;
 
-    public void saveResource(Resource resource) {
+    public void save(Resource resource) {
         resourceRepository.insertResource(resource);
     }
+
 
     public void updateResource(Resource resource) {
         resourceRepository.updateResource(resource);
@@ -29,7 +30,11 @@ public class ResourceService {
         return resourceRepository.getById(id);
     }
 
-    public List<Resource> getListByBoardId(int boardId) {
-        return resourceRepository.getListByBoardId(boardId);
+    public List<Resource> getListByPostId(int postId) {
+        return resourceRepository.getListByPostId(postId);
+    }
+
+    public Resource getByPostId(int postId) {
+        return resourceRepository.getByPostId(postId); // 상세 페이지 조회용 메서드
     }
 }

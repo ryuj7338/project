@@ -34,5 +34,13 @@ public class Post {
     private int extra__repliesCount;
 
     private int extra__commentsCount;
+
+    private String pdf;
+    private String pptx;
+    private String hwp;
+    private String word;
+    private String xlsx;
+    private String image;
+    private String zip;
 }
 

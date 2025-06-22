@@ -42,5 +42,9 @@ public interface PostRepository {
     void savePost(Post post);
 
     List<Post> getPostsByBoardId(int boardId);
+
+    void write(Post post);
+
+    void update(Post post);
 }
 

@@ -173,4 +173,23 @@
         ORDER BY id DESC
     </select>
 
+    <insert id="write" parameterType="com.example.demo.vo.Post" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO post
+        SET boardId = #{boardId},
+            memberId = #{memberId},
+            title = #{title},
+            body = #{body},
+            regDate = NOW(),
+            updateDate = NOW()
+    </insert>
+    <update id="update" parameterType="Post">
+        UPDATE post
+        SET
+            title = #{title},
+            body = #{body},
+            updateDate = NOW()
+        WHERE id = #{id}
+    </update>
+
+
 </mapper>
