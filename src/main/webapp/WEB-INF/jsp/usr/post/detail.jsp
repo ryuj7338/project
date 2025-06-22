@@ -148,10 +148,9 @@
 
     const markdown = contentTemplate.textContent.trim();
 
-    // ✅ 여기에서 plugin을 따로 선언
-    const codeSyntaxHighlight = toastui.EditorPlugin.codeSyntaxHighlight;
+    const codeSyntaxHighlight = toastui.Editor.plugin.codeSyntaxHighlight;
 
-    new toastui.Editor({
+    toastui.Editor.factory({
       el: viewerEl,
       viewer: true,
       height: 'auto',
@@ -162,6 +161,7 @@
     viewerEl.style.display = 'block';
   });
 </script>
+
 
 
 
