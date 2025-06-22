@@ -39,11 +39,18 @@ public class MemberService {
             return ResultData.from("F-8", Ut.f("이미 사용중인 닉네임(%s)과 이메일(%s)입니다.", nickname, email));
         }
 
+        loginPw = Ut.sha256(loginPw);
+
         memberRepository.doJoin(loginId, loginPw, name, nickname, email, cellphone);
 
         int id = memberRepository.getLastInsertId();
 
         return ResultData.from("S-1", "회원가입을 성공하였습니다.", "가입 성공 id", id);
+    }
+
+    public Member getMemberByNameAndEmail(String name, String email) {
+
+        return memberRepository.getMemberByNameAndEmail(name, email);
     }
 
     public Member getMemberByNicknameAndEmail(String nickname, String email) {
@@ -57,6 +64,8 @@ public class MemberService {
     }
 
     public ResultData modify(int loginedMemberId, String loginPw, String name, String nickname, String cellphone, String email) {
+
+        loginPw = Ut.sha256(loginPw);
 
         memberRepository.modify(loginedMemberId, loginPw, name, nickname, cellphone, email);
 

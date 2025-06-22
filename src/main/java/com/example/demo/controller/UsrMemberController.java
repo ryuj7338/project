@@ -10,6 +10,7 @@ import com.example.demo.vo.ResultData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
@@ -45,7 +46,7 @@ public class UsrMemberController {
             return Ut.jsHistoryBack("F-3", Ut.f("%s는(은) 없는 아이디입니다.", loginId));
         }
 
-        if(member.getLoginPw().equals(loginPw) == false) {
+        if(member.getLoginPw().equals(Ut.sha256(loginPw)) == false) {
             return Ut.jsHistoryBack("F-4", "비밀번호가 일치하지 않습니다");
         }
 
@@ -121,7 +122,7 @@ public class UsrMemberController {
             return Ut.jsHistoryBack("F-1", "비밀번호를 입력하세요");
         }
 
-        if(rq.getLoginedMember().getLoginPw().equals(loginPw) == false){
+        if(rq.getLoginedMember().getLoginPw().equals(Ut.sha256(loginPw)) == false){
             return Ut.jsHistoryBack("F-2", "비밀번호가 틀렸습니다.");
         }
 
@@ -162,5 +163,24 @@ public class UsrMemberController {
         }
 
         return Ut.jsReplace(modifyRd.getResultCode(), modifyRd.getMsg(), "../member/myPage");
+    }
+
+    @RequestMapping("/usr/member/findLoginId")
+    public String showFindLoginId(){
+
+        return "/usr/member/findLoginId";
+    }
+
+    @RequestMapping("/usr/member/doFindLoginId")
+    @ResponseBody
+    public String doFindLoginId(@RequestParam(defaultValue = "/") String afterFindLoginIdUri, String name, String email){
+
+        Member member = memberService.getMemberByNameAndEmail(name, email);
+
+        if(member == null){
+            return Ut.jsHistoryBack("F-1", "존재하지 않는 회원입니다.");
+        }
+
+        return Ut.jsReplace("S-1", Ut.f("회원님의 아이디는 [ %s ]입니다.", member.getLoginId()), afterFindLoginIdUri);
     }
 }
