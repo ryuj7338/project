@@ -29,31 +29,36 @@ public class UsrMemberController {
 
     @RequestMapping("/usr/member/doLogin")
     @ResponseBody
-    public String doLogin(HttpServletRequest req, String loginId, String loginPw) {
-
+    public String doLogin(HttpServletRequest req, String loginId, String loginPw, String redirectUrl) {
         Rq rq = (Rq) req.getAttribute("rq");
 
-        if(Ut.isEmptyOrNull(loginId)){
+        if (Ut.isEmptyOrNull(loginId)) {
             return Ut.jsHistoryBack("F-1", "아이디를 입력하세요");
         }
-        if(Ut.isEmptyOrNull(loginPw)){
+        if (Ut.isEmptyOrNull(loginPw)) {
             return Ut.jsHistoryBack("F-1", "비밀번호를 입력하세요");
         }
 
         Member member = memberService.getMemberByLoginId(loginId);
 
-        if(member == null) {
+        if (member == null) {
             return Ut.jsHistoryBack("F-3", Ut.f("%s는(은) 없는 아이디입니다.", loginId));
         }
 
-        if(member.getLoginPw().equals(Ut.sha256(loginPw)) == false) {
+        if (!member.getLoginPw().equals(Ut.sha256(loginPw))) {
             return Ut.jsHistoryBack("F-4", "비밀번호가 일치하지 않습니다");
         }
 
         rq.login(member);
 
-        return Ut.jsReplace("S-1", Ut.f("%s님 환영합니다.", member.getNickname()), "/");
+        // ✅ redirectUrl이 없다면 기본값 지정
+        if (Ut.isEmptyOrNull(redirectUrl)) {
+            redirectUrl = "/";
+        }
+
+        return Ut.jsReplace("S-1", Ut.f("%s님 환영합니다.", member.getNickname()), redirectUrl);
     }
+
 
     @RequestMapping("/usr/member/doLogout")
     @ResponseBody

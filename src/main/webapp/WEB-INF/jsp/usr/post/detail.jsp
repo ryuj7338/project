@@ -28,25 +28,48 @@
 	}
 
 	function doLikeReaction(PostId) {
-		$.ajax({
-			url: '/usr/reaction/doLike',
-			type: 'POST',
-			data: {
-				relTypeCode: 'post',
-				relId: PostId
-			},
-			dataType: 'json',
-			success: function(data) {
-				if (data.resultCode.startsWith('S-')) {
-					$('#likeButton').toggleClass('btn-outline');
-					$('#likeCount').text(data.data1);
-					$('.likeCount').text(data.data1);
+	$.ajax({
+		url: '/usr/reaction/doLike',
+		type: 'POST',
+		data: {
+			relTypeCode: 'post',
+			relId: PostId
+		},
+		dataType: 'json',
+		success: function(data) {
+			if (data.resultCode === 'F-L') {
+				// ✅ 1. 먼저 alert
+				alert(data.msg);
+
+				// ✅ 2. 그리고 로그인 페이지로 이동
+				if (data.data1) {
+					location.href = data.data1;
 				} else {
-					alert(data.msg);
+					location.href = '/usr/member/login';
 				}
+				return;
 			}
-		});
-	}
+
+			if (data.resultCode.startsWith('S-')) {
+				const $likeButton = $('#likeButton');
+				const likeCount = data.data1;
+				const isLiked = data.data2;
+
+				if (isLiked) {
+					$likeButton.html('❤️ <span id="likeCount" class="likeCount">' + likeCount + '</span>');
+				} else {
+					$likeButton.html('🤍 <span id="likeCount" class="likeCount">' + likeCount + '</span>');
+				}
+			} else {
+				alert(data.msg);
+			}
+		}
+	});
+}
+
+
+
+
 
 	function PostDetail__doIncreaseHitCount() {
 		const localStorageKey = 'post__' + params.id + '__alreadyOnView';
@@ -74,9 +97,14 @@
 			<tr>
 				<th>좋아요</th>
 				<td>
-					<button id="likeButton" class="btn btn-outline btn-success" onclick="doLikeReaction(${param.id})">
-						LIKE 👍 <span id="likeCount" class="likeCount">${post.like}</span>
+					<button id="likeButton" class="btn btn-outline btn-success" onclick="doLikeReaction(${post.id})">
+    					<c:choose>
+        					<c:when test="${isAlreadyAddLikeRp}">❤️</c:when>
+        					<c:otherwise>🤍</c:otherwise>
+    					</c:choose>
+    					<span id="likeCount" class="likeCount">${post.like}</span>
 					</button>
+
 				</td>
 			</tr>
 			<tr><th>제목</th><td>${post.title}</td></tr>

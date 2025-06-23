@@ -24,7 +24,7 @@
           AND L.memberId = #{memberId}
     </select>
 
-    <delete id="deleteReaction">
+    <delete id="deleteLikeReaction">
         DELETE FROM `like`
         WHERE memberId = #{memberId}
           AND relTypeCode = #{relTypeCode}
