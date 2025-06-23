@@ -33,7 +33,7 @@ public class Post {
 
     private int extra__repliesCount;
 
-    private int extra__commentsCount;
+    private int commentsCount;
 
     private String pdf;
     private String pptx;

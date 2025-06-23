@@ -19,7 +19,7 @@
 					</tr>
 					<tr>
 						<th>비밀번호</th>
-						<td style="text-align: center;"><input class="input input-primary" type="hidden" name="loginPw" autocomplete="off"
+						<td style="text-align: center;"><input class="input input-primary"  name="loginPw" autocomplete="off"
 							type="text" placeholder="비밀번호 입력" /></td>
 					</tr>
 

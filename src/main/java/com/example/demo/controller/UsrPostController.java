@@ -270,7 +270,8 @@ public class UsrPostController {
             model.addAttribute("userCanMakeReaction", true);
         }
 
-        List<Comment> comments = commentService.getForPrintComments(loginedMemberId, "post", id);
+        List<Comment> comments = commentService.getForPrintComments(rq.getLoginedMemberId(), "post", id);
+
         int commentsCount = comments.size();
 
         // ✅ 첨부파일 조회

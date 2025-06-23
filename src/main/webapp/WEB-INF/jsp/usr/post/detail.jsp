@@ -66,11 +66,6 @@
 		}
 	});
 }
-
-
-
-
-
 	function PostDetail__doIncreaseHitCount() {
 		const localStorageKey = 'post__' + params.id + '__alreadyOnView';
 		if (localStorage.getItem(localStorageKey)) return;
@@ -83,6 +78,51 @@
 			$('.post-detail__hit-count').html(data.data1);
 		}, 'json');
 	}
+</script>
+
+<!-- 댓글 수정 -->
+<script>
+function toggleModifybtn(commentId) {
+
+	console.log(commentId);
+
+	$('#modify-btn-'+commentId).hide();
+	$('#save-btn-'+commentId).show();
+	$('#comment-'+commentId).hide();
+	$('#modify-form-'+commentId).show();
+}
+
+function doModifyComment(commentId) {
+	 console.log(commentId); // 디버깅을 위해 commentId 콘솔에 출력
+
+	    // form 요소를 정확하게 선택
+	    var form = $('#modify-form-' + commentId);
+	    console.log(form); // 디버깅을 위해 form을 콘솔에 출력
+
+	    // form 내의 input 요소의 값을 가져옵니다
+	    var text = form.find('input[name="comment-text-' + commentId + '"]').val();
+	    console.log(text); // 디버깅을 위해 text를 콘솔에 출력
+
+	    // form의 action 속성 값을 가져옵니다
+	    var action = form.attr('action');
+	    console.log(action); // 디버깅을 위해 action을 콘솔에 출력
+
+    $.post({
+    	url: '/usr/comment/doModify', // 수정된 URL
+        type: 'POST', // GET에서 POST로 변경
+        data: { id: commentId, body: text }, // 서버에 전송할 데이터
+        success: function(data) {
+        	$('#modify-form-'+commentId).hide();
+        	$('#comment-'+commentId).text(data);
+        	$('#comment-'+commentId).show();
+        	$('#save-btn-'+commentId).hide();
+        	$('#modify-btn-'+commentId).show();
+        },
+        error: function(xhr, status, error) {
+            alert('댓글 수정에 실패했습니다: ' + error);
+        }
+	})
+}
 </script>
 
 <section class="mt-8 text-xl px-4">
@@ -107,7 +147,12 @@
 
 				</td>
 			</tr>
-			<tr><th>제목</th><td>${post.title}</td></tr>
+			<tr>
+				<th style="text-align: center">댓글수</th>
+				<td style="text-align: center"><span class="post-detail_comment-count">${post.commentsCount}</span></td>
+			</tr>
+			<tr>
+				<th>제목</th><td>${post.title}</td></tr>
 			<tr>
 				<th>내용</th>
 				<td>
@@ -116,42 +161,40 @@
 				</td>
 			</tr>
 			<tr>
-    <th>다운로드 파일</th>
-    <td>
-        <c:forEach var="resource" items="${resourceList}">
-            <c:if test="${not empty resource.image}">
-                🖼 이미지:
-                <a href="/file/download?path=${fn:substringAfter(resource.image, '/')}&original=이미지파일.gif" target="_blank">[다운로드]</a><br/>
-            </c:if>
-            <c:if test="${not empty resource.pdf}">
-                📄 PDF:
-                <a href="/file/download?path=${fn:substringAfter(resource.pdf, '/')}&original=문서.pdf" target="_blank">[다운로드]</a><br/>
-            </c:if>
-            <c:if test="${not empty resource.hwp}">
-                📑 HWP:
-                <a href="/file/download?path=${fn:substringAfter(resource.hwp, '/')}&original=한글문서.hwp" target="_blank">[다운로드]</a><br/>
-            </c:if>
-            <c:if test="${not empty resource.word}">
-                📄 Word:
-                <a href="/file/download?path=${fn:substringAfter(resource.word, '/')}&original=워드파일.docx" target="_blank">[다운로드]</a><br/>
-            </c:if>
-            <c:if test="${not empty resource.xlsx}">
-                📊 Excel:
-                <a href="/file/download?path=${fn:substringAfter(resource.xlsx, '/')}&original=엑셀.xlsx" target="_blank">[다운로드]</a><br/>
-            </c:if>
-            <c:if test="${not empty resource.pptx}">
-                📽 PPTX:
-                <a href="/file/download?path=${fn:substringAfter(resource.pptx, '/')}&original=발표자료.pptx" target="_blank">[다운로드]</a><br/>
-            </c:if>
-            <c:if test="${not empty resource.zip}">
-                📦 ZIP:
-                <a href="/file/download?path=${fn:substringAfter(resource.zip, '/')}&original=자료.zip" target="_blank">[다운로드]</a><br/>
-            </c:if>
-        </c:forEach>
-    </td>
-</tr>
-
-
+    			<th>다운로드 파일</th>
+    			<td>
+        			<c:forEach var="resource" items="${resourceList}">
+            			<c:if test="${not empty resource.image}">
+                			🖼 이미지:
+                			<a href="/file/download?path=${fn:substringAfter(resource.image, '/')}&original=이미지파일.gif" target="_blank">[다운로드]</a><br/>
+            			</c:if>
+            			<c:if test="${not empty resource.pdf}">
+                			📄 PDF:
+                			<a href="/file/download?path=${fn:substringAfter(resource.pdf, '/')}&original=문서.pdf" target="_blank">[다운로드]</a><br/>
+            			</c:if>
+            			<c:if test="${not empty resource.hwp}">
+                			📑 HWP:
+                			<a href="/file/download?path=${fn:substringAfter(resource.hwp, '/')}&original=한글문서.hwp" target="_blank">[다운로드]</a><br/>
+            			</c:if>
+            			<c:if test="${not empty resource.word}">
+                			📄 Word:
+               	 			<a href="/file/download?path=${fn:substringAfter(resource.word, '/')}&original=워드파일.docx" target="_blank">[다운로드]</a><br/>
+            			</c:if>
+            			<c:if test="${not empty resource.xlsx}">
+                			📊 Excel:
+                			<a href="/file/download?path=${fn:substringAfter(resource.xlsx, '/')}&original=엑셀.xlsx" target="_blank">[다운로드]</a><br/>
+            			</c:if>
+           	 			<c:if test="${not empty resource.pptx}">
+                			📽 PPTX:
+                			<a href="/file/download?path=${fn:substringAfter(resource.pptx, '/')}&original=발표자료.pptx" target="_blank">[다운로드]</a><br/>
+            			</c:if>
+            			<c:if test="${not empty resource.zip}">
+                			📦 ZIP:
+                			<a href="/file/download?path=${fn:substringAfter(resource.zip, '/')}&original=자료.zip" target="_blank">[다운로드]</a><br/>
+            			</c:if>
+        			</c:forEach>
+    			</td>
+			</tr>
 		</table>
 
 		<div class="btns mt-4">
@@ -165,6 +208,99 @@
 		</div>
 	</div>
 </section>
+<script>
+	function CommentWrite__submit(form) {
+		console.log(form.body.value);
+
+		form.body.value = form.body.value.trim();
+
+		if(form.body.value.length < 3){
+			alert('3글자 이상 입력하세요');
+			form.body.focus();
+			return;
+		}
+
+		form.submit();
+	}
+</script>
+
+	<!-- 댓글 -->
+	<section class="mt-24 text-xl px-4">
+		<c:if test="${rq.isLogined() }">
+			<form action="../comment/doWrite" method="POST" onsubmit="CommentWrite__submit(this); return false;" )>
+				<table class="table" border="1" cellspacing="0" cellpadding="5" style="width: 100%; border-collapse: collapse;">
+					<input type="hidden" name="relTypeCode" value="post" />
+					<input type="hidden" name="relId" value="${post.id }" />
+					<tbody>
+
+						<tr>
+							<th>댓글 내용 입력</th>
+							<td style="text-align: center;"><textarea class="input input-bordered input-sm w-full max-w-xs" name="body"
+									autocomplete="off" type="text" placeholder="내용을 입력하세요"></textarea></td>
+
+						</tr>
+						<tr>
+							<th></th>
+							<td style="text-align: center;">
+								<button class="btn btn-outline">작성</button>
+							</td>
+
+						</tr>
+					</tbody>
+				</table>
+			</form>
+		</c:if>
+
+		<c:if test="${!rq.isLogined() }">
+		댓글 작성을 위해 <a class="btn btn-outline btn-primary" href="../member/login">로그인</a>이 필요합니다
+	</c:if>
+		<!-- 	댓글 리스트 -->
+		<div class="mx-auto">
+			<table class="table" border="1" cellspacing="0" cellpadding="5" style="width: 100%; border-collapse: collapse;">
+				<thead>
+					<tr>
+						<th style="text-align: center;">Registration Date</th>
+						<th style="text-align: center;">Writer</th>
+						<th style="text-align: center;">Body</th>
+						<th style="text-align: center;">Like</th>
+						<th style="text-align: center;">Edit</th>
+						<th style="text-align: center;">Delete</th>
+					</tr>
+				</thead>
+				<tbody>
+					<c:forEach var="comment" items="${comments}">
+						<tr class="hover">
+							<td style="text-align: center;">${comment.regDate.substring(0,10)}</td>
+							<td style="text-align: center;">${comment.extra__writer}</td>
+							<td style="text-align: center;"><span id="comment-${comment.id }">${comment.body}</span>
+								<form method="POST" id="modify-form-${comment.id }" style="display: none;" action="/usr/comment/doModify">
+									<input type="text" value="${comment.body }" name="comment-text-${comment.id }" />
+								</form></td>
+							<td style="text-align: center;">${comment.like}</td>
+							<td style="text-align: center;"><c:if test="${comment.userCanModify }">
+									<%-- 								<a class="btn btn-outline btn-xs btn-success" href="../comment/modify?id=${comment.id }">수정</a> --%>
+									<button onclick="toggleModifybtn('${comment.id}');" id="modify-btn-${comment.id }" style="white-space: nowrap;"
+										class="btn btn-outline btn-xs btn-success">수정</button>
+									<button onclick="doModifyComment('${comment.id}');" style="white-space: nowrap; display: none;"
+										id="save-btn-${comment.id }" class="btn btn-outline btn-xs">저장</button>
+								</c:if></td>
+							<td style="text-align: center;"><c:if test="${comment.userCanDelete }">
+									<a class="btn btn-outline btn-xs btn-error" onclick="if(confirm('정말 삭제?') == false) return false;"
+										href="../comment/doDelete?id=${comment.id }">삭제</a>
+								</c:if></td>
+						</tr>
+					</c:forEach>
+
+					<c:if test="${empty comments}">
+						<tr>
+							<td colspan="4" style="text-align: center;">댓글이 없습니다</td>
+						</tr>
+					</c:if>
+				</tbody>
+			</table>
+
+		</div>
+	</section>
 
 <script>
 	document.addEventListener('DOMContentLoaded', function () {

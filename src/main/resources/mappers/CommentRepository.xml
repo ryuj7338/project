@@ -19,9 +19,9 @@
 
     <insert id="writeComment">
         INSERT INTO `comment`
-        SET regData = NOW(),
-        updataDate = NOW(),
-        memberId = #{memberId},
+        SET regDate = NOW(),
+        updateDate = NOW(),
+        memberId = #{loginedMemberId},
         relTypeCode = #{relTypeCode},
         relId = #{relId},
         `body` = #{body}
