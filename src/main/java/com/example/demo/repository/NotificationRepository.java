@@ -17,4 +17,6 @@ public interface NotificationRepository {
     int save(Notification notification);
 
     Optional<Notification> findById(int notificationId);
+
+
 }

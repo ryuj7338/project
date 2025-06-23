@@ -32,4 +32,12 @@
         WHERE id = #{notificationId}
     </select>
 
+    <select id="findRecentByMemberId" resultType="com.example.demo.vo.Notification">
+        SELECT *
+        FROM notification
+        WHERE memberId = #{memberId}
+        ORDER BY regDate DESC
+            LIMIT #{limit}
+    </select>
+
 </mapper>

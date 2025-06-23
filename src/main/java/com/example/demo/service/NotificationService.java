@@ -43,14 +43,29 @@ public class NotificationService {
     public boolean markAsRead(int memberId, int notificationId) {
         Notification notification = notificationRepository.findById(notificationId).orElse(null);
 
-        if (notification == null || !notification.getMemberId().equals(memberId)) {
-            return false; // 알림이 없거나, 회원이 다르면 실패
+        if (notification == null) {
+            System.out.println("알림이 없습니다. id=" + notificationId);
+            return false;
         }
+
+        if (!notification.getMemberId().equals(memberId)) {
+            System.out.println("회원 ID 불일치. 알림 memberId=" + notification.getMemberId() + ", 요청 memberId=" + memberId);
+            return false;
+        }
+
+        System.out.println("읽음 처리 전 isRead = " + notification.isRead());
 
         notification.setRead(true);
         notificationRepository.save(notification);
 
+        System.out.println("읽음 처리 후 isRead = " + notification.isRead());
+
         return true;
+    }
+
+    public List<Notification> getRecentNotifications(int memberId) {
+        // 예를 들어 최근 5건 조회 같은 로직 추가 가능
+        return notificationRepository.findByMemberIdOrderByRegDateDesc(memberId);
     }
 
 }

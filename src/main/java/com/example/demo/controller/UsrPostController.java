@@ -487,10 +487,8 @@ public class UsrPostController {
     public String showJobDetail(@RequestParam int id,
                                 @RequestParam(required = false) Integer notificationId,
                                 Model model) {
-
-        // 알림 읽음 처리 (notificationId가 있을 때만)
-        if (notificationId != null) {
-            int memberId = rq.getLoginedMemberId();  // rq 객체를 주입받아야 함
+        if (notificationId != null && rq.isLogined()) {
+            int memberId = rq.getLoginedMemberId();
             notificationService.markAsRead(memberId, notificationId);
         }
 

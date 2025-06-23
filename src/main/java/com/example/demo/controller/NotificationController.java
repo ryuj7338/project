@@ -10,6 +10,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.ZoneId;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -28,6 +29,17 @@ public class NotificationController {
     public String redirectToList() {
         return "redirect:/usr/notifications/list";
     }
+
+    @GetMapping("/recent")
+    @ResponseBody
+    public List<Notification> getRecentNotifications() {
+        if (!rq.isLogined()) {
+            return Collections.emptyList(); // 비로그인 시 빈 리스트 반환
+        }
+        int memberId = rq.getLoginedMemberId();
+        return notificationService.getRecentNotifications(memberId);
+    }
+
 
     // 알림 목록 페이지
     @GetMapping("/list")
