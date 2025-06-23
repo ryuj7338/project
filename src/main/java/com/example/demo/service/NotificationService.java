@@ -2,11 +2,13 @@ package com.example.demo.service;
 
 import com.example.demo.repository.NotificationRepository;
 import com.example.demo.vo.Notification;
+import org.checkerframework.checker.units.qual.A;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -15,27 +17,26 @@ public class NotificationService {
     @Autowired
     private NotificationRepository notificationRepository;
 
-    // 회원별 최신 알림 조회 (limit 개수 만큼)
-    public List<Notification> getRecentNotifications(int memberId) {
-        return notificationRepository.findByMemberIdOrderByRegDateDesc(memberId);
+    public NotificationService(NotificationRepository notificationRepository) {
+        this.notificationRepository = notificationRepository;
     }
 
-    // timeAgo 계산 예시 (몇 분/몇 시간 전 등)
-    private void setTimeAgo(Notification notification) {
-        LocalDateTime now = LocalDateTime.now();
-        LocalDateTime regDate = notification.getRegDate();
-
-        Duration duration = Duration.between(regDate, now);
-        long minutes = duration.toMinutes();
-
-        if (minutes < 1) {
-            notification.setTimeAgo("방금 전");
-        } else if (minutes < 60) {
-            notification.setTimeAgo(minutes + "분 전");
-        } else if (minutes < 60 * 24) {
-            notification.setTimeAgo((minutes / 60) + "시간 전");
-        } else {
-            notification.setTimeAgo((minutes / (60 * 24)) + "일 전");
+    public void addNotification(int memberId, String title, String link) {
+        if (notificationRepository.existsByMemberIdAndTitleAndLink(memberId, title, link)) {
+            return; // 중복 시 저장 안 함
         }
+        Notification notification = new Notification();
+        notification.setMemberId(memberId);
+        notification.setTitle(title);
+        notification.setLink(link);
+        // LocalDateTime.now() 대신 Date로 변환해서 저장
+        notification.setRegDate(Date.from(java.time.LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant()));
+        notification.setRead(false);
+
+        notificationRepository.save(notification);
+    }
+
+    public List<Notification> getNotificationsByMemberId(int memberId) {
+        return notificationRepository.findByMemberIdOrderByRegDateDesc(memberId);
     }
 }

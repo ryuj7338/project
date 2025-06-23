@@ -1,12 +1,17 @@
 package com.example.demo.repository;
 
 import com.example.demo.vo.Notification;
-import org.springframework.data.jpa.repository.JpaRepository;
+import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
-public interface NotificationRepository extends JpaRepository<Notification, Integer> {
+@Mapper
+public interface NotificationRepository {
 
-    // 특정 회원의 알림을 최신순으로 조회 (예: 최근 10개)
-    List<Notification> findByMemberIdOrderByRegDateDesc(int memberId);
+    List<Notification> findByMemberIdOrderByRegDateDesc(@Param("memberId") int memberId);
+
+    boolean existsByMemberIdAndTitleAndLink(@Param("memberId") int memberId, @Param("title") String title, @Param("link") String link);
+
+    int save(Notification notification);
 }

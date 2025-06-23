@@ -54,6 +54,9 @@ public class UsrPostController {
     @Autowired
     private ResourceService resourceService;
 
+    @Autowired
+    private NotificationService notificationService;
+
     UsrPostController(BeforeActionInterceptor beforeActionInterceptor) {
         this.beforeActionInterceptor = beforeActionInterceptor;
     }
@@ -434,20 +437,32 @@ public class UsrPostController {
     }
 
 
+
     @RequestMapping("/usr/job/favorite/toggle")
     @ResponseBody
     public ResultData<?> toggleFavorite(@RequestParam int jobPostingId, HttpServletRequest req) {
 
         Rq rq = (Rq) req.getAttribute("rq");
-        int memberId = rq.getLoginedMemberId();
-
         if (rq == null || rq.getLoginedMemberId() == 0) {
             return ResultData.from("F-L", "로그인이 필요합니다.");
         }
 
+        int memberId = rq.getLoginedMemberId();
 
-        return jobFavoriteService.toggleFavorite(memberId, jobPostingId);
+        // 토글 찜 처리
+        ResultData<?> toggleResult = jobFavoriteService.toggleFavorite(memberId, jobPostingId);
+
+        // 찜 추가 성공 시 알림 생성
+        if ("S-1".equals(toggleResult.getResultCode())) {
+            String title = "채용공고 찜이 추가되었습니다.";
+            String link = "/usr/job/detail?id=" + jobPostingId;
+            notificationService.addNotification(memberId, title, link);
+        }
+
+        return toggleResult;
     }
+
+
 
     @RequestMapping("/usr/job/favorite/list")
     public String showFavoriteJobs(HttpServletRequest req, Model model) {
