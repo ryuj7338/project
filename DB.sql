@@ -12,10 +12,13 @@ CREATE TABLE post (
                       `body` TEXT NOT NULL
 );
 
+ALTER TABLE post MODIFY COLUMN `body` LONGTEXT;
 # 나중에 추가할 것
 image VARCHAR(250) NOT NULL;
 
 SELECT * FROM post;
+SELECT title FROM post WHERE title LIKE '%모집%' LIMIT 10;
+
 
 # 게시판 테이블 생성
 CREATE TABLE board (
@@ -28,6 +31,9 @@ CREATE TABLE board (
                        delStatus TINYINT(1) UNSIGNED NOT NULL DEFAULT 0 COMMENT '삭제 여부 (0=삭제 전, 1=삭제 후)',
                        delDate DATETIME COMMENT '삭제 날짜'
 );
+
+ALTER TABLE board
+DROP COLUMN parent_id;
 
 # 회원 테이블 생성
 CREATE TABLE `member` (
@@ -60,11 +66,22 @@ CREATE TABLE resources (
                            zip VARCHAR(250) NOT NULL
 );
 
-SELECT * FROM resources;
-ALTER TABLE resources ADD COLUMN hwp VARCHAR(255) NOT NULL AFTER zip;
+select * from resources;
+alter table resources add column hwp varchar(255) not null after zip;
 ALTER TABLE resources ADD COLUMN word VARCHAR(255) NOT NULL AFTER hwp;
-ALTER TABLE resources ADD COLUMN xlsx VARCHAR(255) NOT NULL AFTER word;
-ALTER TABLE resources ADD COLUMN pptx VARCHAR(255) NOT NULL AFTER xlsx;
+alter table resources add column xlsx varChar(255) not null after word;
+ALTER TABLE resources ADD COLUMN pptx varChar(255) NOT NULL AFTER xlsx;
+alter table resources add column postId int(10) unsigned not null after id;
+
+ALTER TABLE resources
+    MODIFY pdf VARCHAR(255) NULL,
+    MODIFY pptx VARCHAR(255) NULL,
+    MODIFY hwp VARCHAR(255) NULL,
+    MODIFY word VARCHAR(255) NULL,
+    MODIFY xlsx VARCHAR(255) NULL,
+    MODIFY zip VARCHAR(255) NULL,
+    MODIFY image VARCHAR(255) NULL;
+
 
 # 좋아요 테이블 생성
 CREATE TABLE `like` (
@@ -89,53 +106,24 @@ CREATE TABLE `comment` (
                            `body` TEXT NOT NULL
 );
 
+select * from `comment`;
 
 # 자격증 테이블
-CREATE TABLE qualifications
-(
-    id                INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    `name`            VARCHAR(100) NOT NULL COMMENT '자격증 이름',
-    issuing_agency    VARCHAR(100) COMMENT '발급 기관',
-    organizing_agency VARCHAR(100) COMMENT '주관 기관(시행/운영)',
-    grade             VARCHAR(30) DEFAULT NULL COMMENT '급수 (해당 시에만 입력)',
-    category_code     VARCHAR(50) DEFAULT NULL COMMENT '무도, 응급, 경호, 그 외 등 내부 분류용(UI에 표시 안함)',
-    `type`            VARCHAR(50) DEFAULT NULL COMMENT '자격증 종류 (예: 국가기술, 민간, 국제 등)'
+CREATE TABLE qualifications(
+                               id INT(10) UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
+                               `name` VARCHAR(100) NOT NULL COMMENT '자격증 이름',
+                               issuing_agency VARCHAR(100) COMMENT '발급 기관',
+                               organizing_agency VARCHAR(100) COMMENT '주관 기관(시행/운영)',
+                               grade VARCHAR(30) DEFAULT NULL COMMENT '급수 (해당 시에만 입력)',
+                               category_code VARCHAR(50) DEFAULT NULL COMMENT '무도, 응급, 경호, 그 외 등 내부 분류용(UI에 표시 안함)',
+                               `type` VARCHAR(50) DEFAULT NULL COMMENT '자격증 종류 (예: 국가기술, 민간, 국제 등)',
+                               applyUrl varchar(300) comment '접수 사이트 링크'
 );
 
 SELECT * FROM qualifications;
 
-# 대학교 테이블
 
-CREATE TABLE university (
-                            id INT AUTO_INCREMENT PRIMARY KEY,
-                            university_name VARCHAR(100) NOT NULL,           -- 대학교명
-                            department_name VARCHAR(100) NOT NULL,           -- 학과명
-                            recruitment_period ENUM('수시', '정시') NOT NULL, -- 모집 시기 (수시/정시 구분)
-                            admission_type VARCHAR(50),                      -- 전형유형 (학생부위주, 실기위주 등)
-                            admission_method VARCHAR(100),                   -- 전형명
-                            recruitment_count INT,                           -- 모집인원
-                            application_start DATE,                          -- 인터넷 접수 시작일
-                            application_end DATE,                            -- 인터넷 접수 마감일
-                            interview_date_start DATE,                       -- 면접 시작일 (있을 경우)
-                            interview_date_end DATE,                         -- 면접 마감일
-                            result_date DATE,                                 -- 합격자 발표일
 
-    -- 전형요소 비율
-                            ratio_student FLOAT,         -- 학생부 비율 (예: 65.1)
-                            ratio_interview FLOAT,       -- 면접 or 서류 비율
-                            ratio_score FLOAT,           -- 교과성적 반영 비율
-                            ratio_attendance FLOAT,      -- 출결 반영 비율
-
-    -- 정시 추가 항목
-                            ratio_suneung FLOAT,         -- 수능 비율
-                            ratio_practical FLOAT,       -- 실기 비율
-                            suneung_subjects TEXT,       -- 수능 반영 과목 및 비율 설명
-                            additional_points TEXT,      -- 가산점 기준
-                            exploration_subject_count INT, -- 탐구과목 수
-                            minimum_qualification TEXT,  -- 최저학력기준
-
-                            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-);
 
 # 채용정보 테이블
 CREATE TABLE job_posting(
@@ -143,8 +131,8 @@ CREATE TABLE job_posting(
                             title VARCHAR(255) NOT NULL,	-- 공고 제목
                             company_name VARCHAR(255) NOT NULL,	-- 기업명
                             certificate TEXT NOT NULL,	-- 우대 자격
-                            start_date DATE NOT NULL,	-- 시작일
-                            end_date DATE NOT NULL,	-- 마감일
+                            start_date date NOT NULL,	-- 시작일
+                            end_date date NOT NULL,	-- 마감일
                             originalUrl VARCHAR(255)   -- 개별 페이지
 );
 
@@ -160,11 +148,11 @@ CREATE TABLE job_favorite(
 
 SELECT * FROM job_favorite;
 
-ALTER TABLE job_favorite
-DROP COLUMN job_posting_id,
-DROP COLUMN member_id,
-DROP COLUMN reg_date,
-DROP COLUMN update_date;
+alter table job_favorite
+drop column job_posting_id,
+drop column member_id,
+drop column reg_date,
+drop column update_date;
 
 # 자소서/면접 저장 테이블
 CREATE TABLE interview_answers (
@@ -178,6 +166,25 @@ CREATE TABLE interview_answers (
                                    FOREIGN KEY (memberId) REFERENCES MEMBER(id)
 );
 
+# 알림 기능 테이블
+CREATE TABLE notification (
+                              id INT(10) AUTO_INCREMENT PRIMARY KEY,
+                              memberId INT(10) NOT NULL,           -- 알림 받는 회원 ID (외래키 가능)
+                              title VARCHAR(255) NOT NULL,      -- 알림 제목
+                              link VARCHAR(255) DEFAULT NULL,   -- 알림 클릭 시 이동할 링크
+                              regDate DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, -- 알림 생성일시
+                              isRead BOOLEAN NOT NULL DEFAULT FALSE  -- 읽음 여부
+);
+
+select * from notification;
+
+ALTER TABLE notification DROP COLUMN member_id;
+ALTER TABLE notification DROP COLUMN is_read;
+ALTER TABLE notification DROP COLUMN reg_date;
+
+rename table interview_answers to gpt_answer;
+
+select * from gpt_answer;
 
 SELECT * FROM job_posting;
 
@@ -194,6 +201,8 @@ ALTER TABLE post ADD COLUMN memberId INT(10) UNSIGNED NOT NULL AFTER updateDate;
 
 ## 게시판 번호 추가
 ALTER TABLE post ADD COLUMN boardId INT(10) NOT NULL AFTER `memberId`;
+
+alter table post add column hit int(10) unsigned not null default 0;
 
 # 게시글 테스트 데이터 생성
 INSERT INTO post
@@ -216,8 +225,8 @@ title = '제목3',
 
 
 # 게시판 데이터 생성
-INSERT INTO board
-SET regDate = NOW(),
+insert into board
+set regDate = now(),
 updateDate = NOW(),
 `code` = 'Q&A',
 `name` = '질문 게시판';
@@ -250,7 +259,7 @@ INSERT INTO board
 SET regDate = NOW(),
 updateDate = NOW(),
 `code` = '자료',
-`name` = '요약/공유자료';
+`name` = '요약자료';
 
 INSERT INTO board
 SET regDate = NOW(),
@@ -284,19 +293,22 @@ updateDate = NOW(),
 
 
 # 자격증 데이터 생성
-INSERT INTO qualifications
-SET `name` = '경비지도사',
+insert into qualifications
+set `name` = '경비지도사',
 issuing_agency = '한국산업인력공단',
 organizing_agency = '경찰청 생활안전과',
+grade = '일반/기계',
 category_code = '경호',
-`type` = '국가공인자격';
+`type` = '국가공인자격',
+applyUrl = 'https://www.q-net.or.kr/man001.do?gSite=L&gId=09';
 
 INSERT INTO qualifications
 SET `name` = '신변보호사',
 issuing_agency = '(사)한국경비협회',
 organizing_agency = '(사)한국경비협회 ',
 category_code = '경호',
-`type` = ' 국가공인 민간자격';
+`type` = ' 국가공인 민간자격',
+applyUrl ='https://www.ksan.or.kr/test/offer.do';
 
 INSERT INTO qualifications
 SET `name` = '소방안전관리자',
@@ -304,43 +316,40 @@ issuing_agency = '한국소방안전원',
 organizing_agency = '한국소방안전원',
 grade = '특급, 1급, 2급, 3급',
 category_code = '소방',
-`type` = '국가전문자격';
+`type` = '국가전문자격',
+applyUrl = 'https://www.kfsi.or.kr/mobile/exam/ExamApplyList.do';
 
 INSERT INTO qualifications
 SET `name` = '위험물기능사',
 issuing_agency = '한국산업인력공단',
 organizing_agency = '소방청',
 category_code = '소방',
-`type` = '국가기술자격';
+`type` = '국가기술자격',
+applyUrl = 'https://www.q-net.or.kr/rcv001.do?id=rcv00103&gSite=Q&gId=';
 
 INSERT INTO qualifications
 SET `name` = '산업보안관리사',
 issuing_agency = '(사)한국산업기술보호협회',
 organizing_agency = '(사)한국산업기술보호협회',
-category_code = '경호';
+category_code = '경호',
+`type` = '국가공인 자격',
+applyUrl = 'https://license.kaits.or.kr/web/main.do?screenTp=USER';
 
 INSERT INTO qualifications
 SET `name` = 'TOEIC',
 issuing_agency = '한국TOEIC위원회',
 organizing_agency = '한국TOEIC위원회',
 category_code = '외국어',
-`type` = '국가공인 민간 자격';
+`type` = '국가공인 민간 자격',
+applyUrl = 'https://m.exam.toeic.co.kr/receipt/receiptStep1.php';
 
-INSERT INTO qualifications
-SET `name` = 'G-TELP',
-issuing_agency = '지텔프코리아',
-organizing_agency = '국제테스트 연구원(ITSC, International Testing Services Center)',
-category_code = '외국어',
-grade = 'Level 1 ~ 5',
-`type` = '국가공인 민간 자격';
+#자격증 일정 데이터 생성
+INSERT INTO qualification_schedule
+(qualificationId, `round`, examType, regType, regStart, regEnd, examStart, examEnd, resultDate, region, applyUrl)
+VALUES
+(1, '2025년 제1회', '통합', '정기', '2025-09-22', '2025-09-26', '2025-11-15', '2025-11-15', '2025-12-31', NULL, 'https://www.q-net.or.kr/crf005.do?id=crf00502&jmCd=3120');
 
-INSERT INTO qualifications
-SET `name` = 'TEPS',
-issuing_agency = '서울대학교 TEPS관리위원회',
-organizing_agency = '서울대학교 TEPS관리위원회',
-category_code = '외국어',
-`type` = '민간 자격';
-
+select * from qualifications;
 
 # 회원 테스트 데이터 생성
 
@@ -349,10 +358,10 @@ INSERT INTO `member`
 SET regDate = NOW(),
 updateDate = NOW(),
 loginId = 'admin',
-loginPw = 'admin',
+loginPw = SHA2('admin',256),
 `authLevel` = 7,
 `name` = '관리자',
-nickname = '관리자_닉네임',
+nickname = '관리자',
 cellphone = '01012341234',
 email = 'abc@gmail.com';
 
@@ -360,7 +369,7 @@ INSERT INTO `member`
 SET regDate = NOW(),
 updateDate = NOW(),
 loginId = 'test1',
-loginPw = 'test1',
+loginPw = SHA2('test1',256),
 `name` = '회원1',
 nickname = '회원1',
 cellphone = '01012341234',
@@ -371,7 +380,7 @@ SET regDate = NOW(),
 updateDate = NOW(),
 loginId = 'test2',
 loginPw = 'test2',
-`name` = '회원2',
+`name` = SHA2('test2',256),
 nickname = '회원2',
 cellphone= '01056785678',
 email = 'pikachyu@gmail.com';
@@ -380,21 +389,14 @@ INSERT INTO `member`
 SET regDate = NOW(),
 updateDate = NOW(),
 loginId = 'test3',
-loginPw = 'test3',
+loginPw = SHA2('test3',256),
 `name` = '회원3',
 nickname = '회원3',
 cellphone = '01078787878',
 email = 'shinJJang@gmail.com';
 
-INSERT INTO `member`
-SET regDate = NOW(),
-updateDate = NOW(),
-loginId = 'test4',
-loginPw = 'test4',
-`name` = '회원4',
-nickname = '회원4',
-cellphone = '01022222222',
-email = 'maenggu@gmail.com';
+
+ALTER TABLE job_posting ADD COLUMN dday INT DEFAULT NULL;
 
 # 회원 번호 설정
 UPDATE post
