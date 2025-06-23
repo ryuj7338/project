@@ -67,6 +67,9 @@
         ORDER BY regDate DESC
     </select>
 
-
+    <delete id="deleteById" parameterType="int">
+        DELETE FROM gpt_answer
+        WHERE id = #{id}
+    </delete>
 
 </mapper>

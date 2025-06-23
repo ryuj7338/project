@@ -3,12 +3,24 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
 
+<!-- 제이쿼리 -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
+<!-- 폰트어썸 -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+
+<!-- 테일윈드 -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.1.4/tailwind.min.css">
+
 <!DOCTYPE html>
 <html lang="ko">
 <head>
     <meta charset="UTF-8" />
     <title>GPT 대화 기록</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <meta name="_csrf" content="${_csrf.token}" />
+    <meta name="_csrf_header" content="${_csrf.headerName}" />
+
 </head>
 <body class="bg-gray-50">
 
@@ -40,11 +52,8 @@
         </ul>
     </aside>
 
-
-
     <!-- 메인 컨텐츠 -->
     <main class="flex-1 p-10 bg-gray-100">
-
 
         <div class="bg-white rounded-2xl p-8 shadow-md max-w-5xl mx-auto">
             <div class="flex items-center justify-between mb-6">
@@ -58,7 +67,6 @@
                     </select>
                 </form>
             </div>
-            <!-- 나머지 테이블 등 콘텐츠 -->
 
             <c:choose>
                 <c:when test="${isLogined}">
@@ -69,19 +77,24 @@
                             <th class="py-2 px-4">카테고리</th>
                             <th class="py-2 px-4">질문</th>
                             <th class="py-2 px-4">답변</th>
+                            <th class="py-2 px-4">삭제</th>
                         </tr>
                         </thead>
                         <tbody>
                         <c:forEach var="item" items="${answers}">
                             <c:choose>
                                 <c:when test="${selectedCategory == 'all'}">
-                                    <!-- 전체 선택 시 모든 항목 출력 -->
-                                    <tr class="border-b hover:bg-gray-50 cursor-pointer"
-                                        onclick="location.href='/usr/gpt/history/${item.id}'">
+                                    <tr class="border-b hover:bg-gray-50">
                                         <td class="py-2 px-4">${fn:substring(item.regDate, 0, 10)}</td>
                                         <td class="py-2 px-4">${item.category}</td>
-                                        <td class="py-2 px-4 whitespace-pre-wrap">${fn:substring(item.question, 0, 40)}<c:if test="${fn:length(item.question) > 40}">...</c:if></td>
+                                        <td class="py-2 px-4 whitespace-pre-wrap cursor-pointer"
+                                            onclick="location.href='/usr/gpt/history/${item.id}'">
+                                                ${fn:substring(item.question, 0, 40)}<c:if test="${fn:length(item.question) > 40}">...</c:if>
+                                        </td>
                                         <td class="py-2 px-4 whitespace-pre-wrap">${fn:substring(item.answer, 0, 60)}<c:if test="${fn:length(item.answer) > 60}">...</c:if></td>
+                                        <td class="py-2 px-4 text-center">
+                                            <button class="delete-btn" data-id="${item.id}">삭제</button>
+                                        </td>
                                     </tr>
                                 </c:when>
                                 <c:otherwise>
@@ -89,20 +102,23 @@
                                     <c:set var="isFeedback" value="${fn:contains(cat, '-피드백')}" />
 
                                     <c:if test="${cat == selectedCategory or (isFeedback and cat.startsWith(selectedCategory))}">
-                                        <tr class="border-b hover:bg-gray-50 cursor-pointer"
-                                            onclick="location.href='/usr/gpt/history/${item.id}'">
+                                        <tr class="border-b hover:bg-gray-50">
                                             <td class="py-2 px-4">${fn:substring(item.regDate, 0, 10)}</td>
                                             <td class="py-2 px-4">${item.category}</td>
-                                            <td class="py-2 px-4 whitespace-pre-wrap">${fn:substring(item.question, 0, 40)}<c:if test="${fn:length(item.question) > 40}">...</c:if></td>
+                                            <td class="py-2 px-4 whitespace-pre-wrap cursor-pointer"
+                                                onclick="location.href='/usr/gpt/history/${item.id}'">
+                                                    ${fn:substring(item.question, 0, 40)}<c:if test="${fn:length(item.question) > 40}">...</c:if>
+                                            </td>
                                             <td class="py-2 px-4 whitespace-pre-wrap">${fn:substring(item.answer, 0, 60)}<c:if test="${fn:length(item.answer) > 60}">...</c:if></td>
+                                            <td class="py-2 px-4 text-center">
+                                                <button class="delete-btn" data-id="${item.id}">삭제</button>
+                                            </td>
                                         </tr>
                                     </c:if>
 
                                 </c:otherwise>
                             </c:choose>
                         </c:forEach>
-
-
                         </tbody>
                     </table>
                 </c:when>
@@ -116,11 +132,46 @@
                     </div>
                 </c:otherwise>
             </c:choose>
-
         </div>
 
     </main>
 </div>
+
+
+<script>
+    $(document).on("click", ".delete-btn", function(event) {
+        event.stopPropagation();
+
+        const id = $(this).data("id");
+        if (!id) {
+            alert("삭제할 ID가 없습니다.");
+            return;
+        }
+        if (!confirm("정말 삭제하시겠습니까?")) {
+            return;
+        }
+
+        fetch("/usr/gpt/delete", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded"
+            },
+            body: "id=" + id
+        })
+            .then(res => res.json())
+            .then(result => {
+                if (result.resultCode === "S-1") {
+                    alert("삭제되었습니다.");
+                    $(this).closest("tr").remove();
+                } else {
+                    alert(result.msg || "삭제에 실패했습니다.");
+                }
+            })
+            .catch(() => {
+                alert("서버와 통신 중 오류가 발생했습니다.");
+            });
+    });
+</script>
 
 </body>
 </html>

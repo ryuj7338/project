@@ -22,4 +22,6 @@ public interface GptAnswerRepository {
 
 
     List<GptAnswer> findByMemberIdAndCategoryLikeOrCategoryLikeOrderByRegDateDesc(Map<String, Object> params);
+
+    void deleteById(int id);
 }

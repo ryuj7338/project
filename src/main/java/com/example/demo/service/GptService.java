@@ -128,4 +128,8 @@ public class GptService {
     }
 
 
+    public void deleteById(int id) {
+        gptAnswerRepository.deleteById(id);
+    }
+
 }

@@ -2,24 +2,26 @@ package com.example.demo.controller;
 
 import com.example.demo.service.GptService;
 import com.example.demo.vo.GptAnswer;
+import com.example.demo.vo.ResultData;
 import com.example.demo.vo.Rq;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Map;
 
 @Controller
 @RequestMapping("/usr/gpt")
 public class UsrGptViewController {
+
+    @Autowired
+    private Rq rq;
 
     @Autowired
     private GptService gptService;
@@ -78,6 +80,31 @@ public class UsrGptViewController {
         model.addAttribute("answer", answer);
         model.addAttribute("category", answer.getCategory()); // 필요시 category도 전달
         return "usr/gpt/history_detail";  // JSP 경로
+    }
+
+    @PostMapping("/delete")
+    @ResponseBody
+    public ResultData deleteAnswer(@RequestParam int id) {
+
+        if (!rq.isLogined()) {
+            return ResultData.from("F-L", "로그인이 필요합니다.");
+        }
+
+        int loginedMemberId = rq.getLoginedMemberId();
+
+        GptAnswer answer = gptService.findById(id);
+
+        if (answer == null) {
+            return ResultData.from("F-1", "존재하지 않는 기록입니다.");
+        }
+
+        if (answer.getMemberId() != loginedMemberId) {
+            return ResultData.from("F-2", "권한이 없습니다.");
+        }
+
+        gptService.deleteById(id);
+
+        return ResultData.from("S-1", "삭제되었습니다.");
     }
 
 
