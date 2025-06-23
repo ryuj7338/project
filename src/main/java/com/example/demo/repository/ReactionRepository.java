@@ -10,4 +10,6 @@ public interface ReactionRepository {
     int addLikeReaction(int memberId, String relTypeCode, int relId);
 
     void deleteLikeReaction(int memberId, String relTypeCode, int relId);
+
+    int getSumReactionTotal(String relTypeCode, int relId);
 }

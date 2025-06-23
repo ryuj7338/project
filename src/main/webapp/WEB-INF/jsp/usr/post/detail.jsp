@@ -88,11 +88,11 @@ function toggleModifybtn(commentId) {
 
 	$('#modify-btn-'+commentId).hide();
 	$('#save-btn-'+commentId).show();
-	$('#comment-'+commentId).hide();
+	$('#reply-'+commentId).hide();
 	$('#modify-form-'+commentId).show();
 }
 
-function doModifyComment(commentId) {
+function doModifyReply(commentId) {
 	 console.log(commentId); // 디버깅을 위해 commentId 콘솔에 출력
 
 	    // form 요소를 정확하게 선택
@@ -100,7 +100,7 @@ function doModifyComment(commentId) {
 	    console.log(form); // 디버깅을 위해 form을 콘솔에 출력
 
 	    // form 내의 input 요소의 값을 가져옵니다
-	    var text = form.find('input[name="comment-text-' + commentId + '"]').val();
+	    var text = form.find('input[name="reply-text-' + commentId + '"]').val();
 	    console.log(text); // 디버깅을 위해 text를 콘솔에 출력
 
 	    // form의 action 속성 값을 가져옵니다
@@ -227,10 +227,10 @@ function doModifyComment(commentId) {
 	<!-- 댓글 -->
 	<section class="mt-24 text-xl px-4">
 		<c:if test="${rq.isLogined() }">
-			<form action="../comment/doWrite" method="POST" onsubmit="CommentWrite__submit(this); return false;" )>
+			<form action="../usr/comment/doWrite" method="POST" onsubmit="CommentWrite__submit(this); return false;" )>
 				<table class="table" border="1" cellspacing="0" cellpadding="5" style="width: 100%; border-collapse: collapse;">
-					<input type="hidden" name="relTypeCode" value="post" />
-					<input type="hidden" name="relId" value="${post.id }" />
+					<input type="hidden" name="relTypeCode" value="article" />
+					<input type="hidden" name="relId" value="${article.id }" />
 					<tbody>
 
 						<tr>
@@ -254,53 +254,98 @@ function doModifyComment(commentId) {
 		<c:if test="${!rq.isLogined() }">
 		댓글 작성을 위해 <a class="btn btn-outline btn-primary" href="../member/login">로그인</a>이 필요합니다
 	</c:if>
-		<!-- 	댓글 리스트 -->
-		<div class="mx-auto">
-			<table class="table" border="1" cellspacing="0" cellpadding="5" style="width: 100%; border-collapse: collapse;">
-				<thead>
-					<tr>
-						<th style="text-align: center;">Registration Date</th>
-						<th style="text-align: center;">Writer</th>
-						<th style="text-align: center;">Body</th>
-						<th style="text-align: center;">Like</th>
-						<th style="text-align: center;">Edit</th>
-						<th style="text-align: center;">Delete</th>
-					</tr>
-				</thead>
-				<tbody>
-					<c:forEach var="comment" items="${comments}">
-						<tr class="hover">
-							<td style="text-align: center;">${comment.regDate.substring(0,10)}</td>
-							<td style="text-align: center;">${comment.extra__writer}</td>
-							<td style="text-align: center;"><span id="comment-${comment.id }">${comment.body}</span>
-								<form method="POST" id="modify-form-${comment.id }" style="display: none;" action="/usr/comment/doModify">
-									<input type="text" value="${comment.body }" name="comment-text-${comment.id }" />
-								</form></td>
-							<td style="text-align: center;">${comment.like}</td>
-							<td style="text-align: center;"><c:if test="${comment.userCanModify }">
-									<%-- 								<a class="btn btn-outline btn-xs btn-success" href="../comment/modify?id=${comment.id }">수정</a> --%>
-									<button onclick="toggleModifybtn('${comment.id}');" id="modify-btn-${comment.id }" style="white-space: nowrap;"
-										class="btn btn-outline btn-xs btn-success">수정</button>
-									<button onclick="doModifyComment('${comment.id}');" style="white-space: nowrap; display: none;"
-										id="save-btn-${comment.id }" class="btn btn-outline btn-xs">저장</button>
-								</c:if></td>
-							<td style="text-align: center;"><c:if test="${comment.userCanDelete }">
-									<a class="btn btn-outline btn-xs btn-error" onclick="if(confirm('정말 삭제?') == false) return false;"
-										href="../comment/doDelete?id=${comment.id }">삭제</a>
-								</c:if></td>
-						</tr>
-					</c:forEach>
+		<!-- 댓글 리스트 -->
+<div class="mx-auto">
+  <table class="table" border="1" cellspacing="0" cellpadding="5" style="width: 100%; border-collapse: collapse;">
+    <thead>
+      <tr>
+        <th style="text-align: center;">작성일</th>
+        <th style="text-align: center;">작성자</th>
+        <th style="text-align: center;">내용</th>
+        <th style="text-align: center;">좋아요</th>
+        <th style="text-align: center;">수정</th>
+        <th style="text-align: center;">삭제</th>
+      </tr>
+    </thead>
+    <tbody>
+      <c:forEach var="comment" items="${comments}">
+        <tr class="hover">
+          <td style="text-align: center;">${comment.regDate.substring(0,10)}</td>
+          <td style="text-align: center;">${comment.extra__writer}</td>
+          <td style="text-align: center;">
+            <span id="comment-${comment.id}">${comment.body}</span>
+            <form method="POST" id="modify-form-${comment.id}" style="display: none;" action="/usr/comment/doModify">
+              <input type="text" value="${comment.body}" name="reply-text-${comment.id}" />
+            </form>
+          </td>
 
-					<c:if test="${empty comments}">
-						<tr>
-							<td colspan="4" style="text-align: center;">댓글이 없습니다</td>
-						</tr>
-					</c:if>
-				</tbody>
-			</table>
+          <!-- ✅ 좋아요 버튼 영역 -->
+          <td style="text-align: center;">
+            <button class="comment-like-btn"
+                    data-rel-id="${comment.id}"
+                    data-liked="${comment.alreadyLiked}">
+              <span class="heart">
+  				${comment.alreadyLiked ? '❤️' : '🤍'}
+			  </span>
+              <span class="like-count">${comment.like}</span>
+            </button>
+          </td>
 
-		</div>
+          <!-- 수정 버튼 -->
+          <td style="text-align: center;">
+            <c:if test="${comment.userCanModify}">
+              <button onclick="toggleModifybtn('${comment.id}');" id="modify-btn-${comment.id}" class="btn btn-outline btn-xs btn-success">수정</button>
+              <button onclick="doModifyReply('${comment.id}');" style="display: none;" id="save-btn-${comment.id}" class="btn btn-outline btn-xs">저장</button>
+            </c:if>
+          </td>
+
+          <!-- 삭제 버튼 -->
+          <td style="text-align: center;">
+            <c:if test="${comment.userCanDelete}">
+              <a class="btn btn-outline btn-xs btn-error" onclick="if(confirm('정말 삭제?') == false) return false;" href="/usr/comment/doDelete?id=${comment.id}">삭제</a>
+            </c:if>
+          </td>
+        </tr>
+      </c:forEach>
+
+      <c:if test="${empty comments}">
+        <tr>
+          <td colspan="6" style="text-align: center;">댓글이 없습니다</td>
+        </tr>
+      </c:if>
+    </tbody>
+  </table>
+</div>
 	</section>
+
+<script>
+  $(document).ready(function () {
+  $(".comment-like-btn").click(function () {
+    const $btn = $(this);
+    const relId = $btn.data("rel-id");
+    const $heart = $btn.find(".heart");
+    const $likeCount = $btn.find(".like-count"); // ← 여기 위치를 위로 올려야 함
+
+    $.post("/usr/comment/toggleLike", { relId }, function (data) {
+      if (data.resultCode?.startsWith("S-")) {
+        const result = data.data1;
+        $likeCount.text(result.likeCount);
+        $btn.data("liked", result.liked);
+        $heart.text(result.liked ? "❤️" : "🤍");
+      } else {
+        if (data.resultCode === 'F-1') {
+          alert(data.msg);
+          const currentUrl = location.href;
+          location.href = `/usr/member/login?redirectUrl=` + encodeURIComponent(currentUrl);
+        } else {
+          alert(data.msg);
+        }
+      }
+    });
+  });
+});
+</script>
+
 
 <script>
 	document.addEventListener('DOMContentLoaded', function () {

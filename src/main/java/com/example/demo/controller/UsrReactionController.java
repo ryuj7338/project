@@ -27,30 +27,27 @@ public class UsrReactionController {
 
     @RequestMapping("/usr/reaction/doLike")
     @ResponseBody
-    public ResultData<?> doLike(String relTypeCode, int relId) {
-        if (!rq.isLogined()) {
-            String redirectUrl = "/usr/member/login?redirectUrl=" + rq.getCurrentUri();
-            return ResultData.from("F-L", "로그인이 필요합니다.", "redirectUrl", redirectUrl);
-        }
+    public ResultData doLike(String relTypeCode, int relId, String replaceUri){
 
-        int memberId = rq.getLoginedMemberId();
-        ResultData usersReactionRd = reactionService.usersReaction(memberId, relTypeCode, relId);
+        ResultData usersReactionRd = reactionService.usersReaction(rq.getLoginedMemberId(), relTypeCode, relId);
+
         int usersReaction = (int) usersReactionRd.getData1();
 
-        if (usersReaction == 1) {
-            ResultData<?> rd = reactionService.deleteLikeReaction(memberId, relTypeCode, relId);
+        if(usersReaction == 1){
+            ResultData rd = reactionService.deleteLikeReaction(rq.getLoginedMemberId(), relTypeCode, relId);
+
             int like = postService.getLike(relId);
-            // ✅ data1: like, data2: isLiked = false
-            return ResultData.from(rd.getResultCode(), rd.getMsg(), "like", like, "isLiked", false);
+
+            return ResultData.from("S-1", "좋아요 취소", "like", like);
         }
 
-        ResultData<?> reactionRd = reactionService.addLikeReaction(memberId, relTypeCode, relId);
-        if (reactionRd.isFail()) {
-            return reactionRd;
+        ResultData reactionRd = reactionService.addLikeReaction(rq.getLoginedMemberId(), relTypeCode, relId);
+
+        if(reactionRd.isFail()){
+            return ResultData.from(reactionRd.getResultCode(), reactionRd.getMsg());
         }
 
         int like = postService.getLike(relId);
-        // ✅ data1: like, data2: isLiked = true
-        return ResultData.from(reactionRd.getResultCode(), reactionRd.getMsg(), "like", like, "isLiked", true);
+        return ResultData.from(reactionRd.getResultCode(), reactionRd.getMsg(), "like", like);
     }
 }

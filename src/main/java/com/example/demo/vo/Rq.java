@@ -147,4 +147,9 @@ public class Rq {
     public boolean isAdmin() {
         return isLogined() && loginedMember != null && loginedMember.getAuthLevel() == 7;
     }
+
+
+    public boolean isLogout() {
+        return getLoginedMemberId() == 0;
+    }
 }

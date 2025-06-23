@@ -5,25 +5,35 @@
 
 <mapper namespace="com.example.demo.repository.ReactionRepository">
 
+    <!-- 좋아요 추가 -->
     <insert id="addLikeReaction">
         INSERT INTO `like`
         SET regDate = NOW(),
-		updateDate =
-		NOW(),
-		memberId = #{memberId},
+            updateDate = NOW(),
+            memberId = #{memberId},
             relTypeCode = #{relTypeCode},
             relId = #{relId},
             `like` = 1
     </insert>
 
-    <select id="getSumReaction">
-        SELECT IFNULL(SUM(L.like), 0)
+    <!-- 특정 유저가 좋아요 눌렀는지 -->
+    <select id="getSumReaction" resultType="int">
+        SELECT IFNULL(SUM(L.`like`), 0)
         FROM `like` L
         WHERE L.relTypeCode = #{relTypeCode}
           AND L.relId = #{relId}
           AND L.memberId = #{memberId}
     </select>
 
+    <!-- 전체 좋아요 수 -->
+    <select id="getSumReactionTotal" resultType="int">
+        SELECT IFNULL(SUM(L.`like`), 0)
+        FROM `like` L
+        WHERE L.relTypeCode = #{relTypeCode}
+          AND L.relId = #{relId}
+    </select>
+
+    <!-- 좋아요 취소 -->
     <delete id="deleteLikeReaction">
         DELETE FROM `like`
         WHERE memberId = #{memberId}

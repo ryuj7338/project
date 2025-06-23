@@ -15,6 +15,8 @@ import java.util.List;
 public class CommentService {
 
     @Autowired
+    private ReactionService reactionService;
+    @Autowired
     private CommentRepository commentRepository;
 
     public CommentService(CommentRepository commentRepository) {
@@ -26,7 +28,12 @@ public class CommentService {
         List<Comment> comments = commentRepository.getForPrintComments(loginedMemberId, relTypeCode, id);
 
         for (Comment comment : comments) {
+
             controlForPrintData(loginedMemberId, comment);
+
+            boolean alreadyLiked = reactionService.isAlreadyAddLikeRp(loginedMemberId, comment.getId(), "comment");
+
+            comment.setAlreadyLiked(alreadyLiked);
         }
 
         return comments;
@@ -81,4 +88,6 @@ public class CommentService {
 
         commentRepository.modifyComment(id, body);
     }
+
+
 }
