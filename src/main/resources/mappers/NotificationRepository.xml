@@ -1,31 +1,35 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="com.example.demo.repository.NotificationRepository">
 
-    <resultMap id="NotificationResultMap" type="com.example.demo.vo.Notification">
-        <id property="id" column="id" />
-        <result property="memberId" column="memberId" />
-        <result property="title" column="title" />
-        <result property="link" column="link" />
-        <result property="regDate" column="regDate" />
-        <result property="isRead" column="isRead" />
-    </resultMap>
-
-    <select id="findByMemberIdOrderByRegDateDesc" parameterType="int" resultMap="NotificationResultMap">
-        SELECT * FROM notification WHERE memberId = #{memberId} ORDER BY regDate DESC
+    <select id="findByMemberIdOrderByRegDateDesc" resultType="com.example.demo.vo.Notification" parameterType="int">
+        SELECT *
+        FROM notification
+        WHERE memberId = #{memberId}
+        ORDER BY regDate DESC
     </select>
 
-    <select id="existsByMemberIdAndTitleAndLink" resultType="boolean" parameterType="map">
-        SELECT CASE WHEN COUNT(*) > 0 THEN TRUE ELSE FALSE END
-        FROM notification
-        WHERE memberId = #{memberId} AND title = #{title} AND link = #{link}
+    <select id="existsByMemberIdAndTitleAndLink" resultType="boolean">
+        SELECT EXISTS (
+            SELECT 1 FROM notification
+            WHERE memberId = #{memberId}
+              AND title = #{title}
+              AND link = #{link}
+        )
     </select>
 
     <insert id="save" parameterType="com.example.demo.vo.Notification" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO notification (memberId, title, link, regDate, isRead)
-        VALUES (#{memberId}, #{title}, #{link}, #{regDate}, #{isRead})
+        VALUES (#{memberId}, #{title}, #{link}, #{regDate}, #{read})
     </insert>
+
+    <select id="findById" resultType="com.example.demo.vo.Notification" parameterType="int">
+        SELECT *
+        FROM notification
+        WHERE id = #{notificationId}
+    </select>
 
 </mapper>

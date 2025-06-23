@@ -483,6 +483,25 @@ public class UsrPostController {
         return "/usr/job/favorite";
     }
 
+    @RequestMapping("/usr/job/detail")
+    public String showJobDetail(@RequestParam int id,
+                                @RequestParam(required = false) Integer notificationId,
+                                Model model) {
+
+        // 알림 읽음 처리 (notificationId가 있을 때만)
+        if (notificationId != null) {
+            int memberId = rq.getLoginedMemberId();  // rq 객체를 주입받아야 함
+            notificationService.markAsRead(memberId, notificationId);
+        }
+
+        JobPosting jobPosting = jobPostingService.getById(id);
+        if (jobPosting == null) {
+            return "redirect:/usr/job/list";
+        }
+        model.addAttribute("jobPosting", jobPosting);
+        return "usr/job/detail";
+    }
+
     @RequestMapping("/usr/job/list")
     public String jobList(HttpServletRequest req, Model model, @RequestParam(required = false, defaultValue = "recent") String sortBy
 , @RequestParam(defaultValue = "11") int boardId, @RequestParam(defaultValue = "title") String searchType, @RequestParam(required = false) String keyword, @RequestParam(defaultValue = "1") int page) {

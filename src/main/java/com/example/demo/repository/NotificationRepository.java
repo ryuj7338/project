@@ -5,6 +5,7 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 @Mapper
 public interface NotificationRepository {
@@ -14,4 +15,6 @@ public interface NotificationRepository {
     boolean existsByMemberIdAndTitleAndLink(@Param("memberId") int memberId, @Param("title") String title, @Param("link") String link);
 
     int save(Notification notification);
+
+    Optional<Notification> findById(int notificationId);
 }

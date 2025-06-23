@@ -2,12 +2,12 @@ package com.example.demo.controller;
 
 import com.example.demo.service.NotificationService;
 import com.example.demo.vo.Notification;
+import com.example.demo.vo.ResultData;
 import com.example.demo.vo.Rq;  // 로그인 관련 객체 가정
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.ZoneId;
 import java.util.Date;
@@ -46,5 +46,21 @@ public class NotificationController {
         return "usr/notification/list";
     }
 
+    @PostMapping("/markAsRead")
+    @ResponseBody
+    public ResultData markAsRead(@RequestParam int notificationId) {
+        if (!rq.isLogined()) {
+            return ResultData.from("F-1", "로그인이 필요합니다.");
+        }
 
+        int memberId = rq.getLoginedMemberId();
+
+        boolean success = notificationService.markAsRead(memberId, notificationId);
+
+        if (success) {
+            return ResultData.from("S-1", "읽음 처리되었습니다.");
+        } else {
+            return ResultData.from("F-1", "읽음 처리 실패 또는 권한 없음.");
+        }
+    }
 }

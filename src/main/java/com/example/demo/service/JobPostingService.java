@@ -138,6 +138,10 @@ public class JobPostingService {
     public List<String> findTitlesByKeyword(String keyword) {
         return jobPostingRepository.findTitlesByKeyword(keyword);
     }
+
+    public JobPosting getById(int id) {
+        return jobPostingRepository.findById((long) id).orElse(null);
+    }
 }
 
 

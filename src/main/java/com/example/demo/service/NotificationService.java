@@ -39,4 +39,18 @@ public class NotificationService {
     public List<Notification> getNotificationsByMemberId(int memberId) {
         return notificationRepository.findByMemberIdOrderByRegDateDesc(memberId);
     }
+
+    public boolean markAsRead(int memberId, int notificationId) {
+        Notification notification = notificationRepository.findById(notificationId).orElse(null);
+
+        if (notification == null || !notification.getMemberId().equals(memberId)) {
+            return false; // 알림이 없거나, 회원이 다르면 실패
+        }
+
+        notification.setRead(true);
+        notificationRepository.save(notification);
+
+        return true;
+    }
+
 }

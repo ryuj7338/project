@@ -22,7 +22,7 @@
     </thead>
     <tbody>
     <c:forEach var="notification" items="${notifications}">
-        <tr class="cursor-pointer hover:bg-gray-100" onclick="location.href='${notification.link}'">
+        <tr class="cursor-pointer hover:bg-gray-100" onclick="location.href='${notification.link}&notificationId=${notification.id}'">
             <td class="border px-4 py-2">${notification.title}</td>
             <td class="border px-4 py-2">
                 <fmt:formatDate value="${notification.regDate}" pattern="yyyy-MM-dd HH:mm:ss"/>
