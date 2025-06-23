@@ -14,10 +14,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Controller
@@ -471,7 +468,8 @@ public class UsrPostController {
     }
 
     @RequestMapping("/usr/job/list")
-    public String jobList(HttpServletRequest req, Model model, @RequestParam(defaultValue = "11") int boardId, @RequestParam(defaultValue = "title") String searchType, @RequestParam(required = false) String keyword, @RequestParam(defaultValue = "1") int page) {
+    public String jobList(HttpServletRequest req, Model model, @RequestParam(required = false, defaultValue = "recent") String sortBy
+, @RequestParam(defaultValue = "11") int boardId, @RequestParam(defaultValue = "title") String searchType, @RequestParam(required = false) String keyword, @RequestParam(defaultValue = "1") int page) {
 
         Rq rq = (Rq) req.getAttribute("rq");
         int memberId = rq.getLoginedMemberId();
@@ -516,6 +514,14 @@ public class UsrPostController {
                 filteredJobs = allJobs.stream()
                         .filter(job -> job.getCompanyName().contains(trimmedKeyword))
                         .collect(Collectors.toList());
+            }else if("certificate".equals(searchType)) {
+                filteredJobs = allJobs.stream()
+                        .filter(job -> job.getCertificate() != null && job.getCertificate().contains(trimmedKeyword))
+                        .collect(Collectors.toList());
+            }else if ("endDate".equals(searchType)) {
+                filteredJobs = allJobs.stream()
+                        .filter(job -> job.getEndDate() != null && job.getEndDate().contains(trimmedKeyword))
+                        .collect(Collectors.toList());
             }
 
             if (filteredJobs.isEmpty()) {
@@ -526,6 +532,25 @@ public class UsrPostController {
             // 검색 안 했거나, 빈 검색어지만 클라이언트에서 JS로 이미 걸러짐
             filteredJobs = allJobs;
         }
+
+        // 기존 필터링 끝난 후 ↓ 여기에 추가
+        Comparator<JobPosting> comparator;
+
+        switch (sortBy) {
+            case "ddayAsc":
+                comparator = Comparator.comparing(JobPosting::getDday, Comparator.nullsLast(Comparator.naturalOrder()));
+                break;
+            case "ddayDesc":
+                comparator = Comparator.comparing(JobPosting::getDday, Comparator.nullsLast(Comparator.reverseOrder()));
+                break;
+            case "recent":
+            default:
+                comparator = Comparator.comparing(JobPosting::getId).reversed(); // id 기준 최신순
+                break;
+        }
+
+        filteredJobs.sort(comparator);
+
 
         // 페이징 처리
         int itemsPerPage = 10;
@@ -561,6 +586,7 @@ public class UsrPostController {
         model.addAttribute("hasNext", hasNext);
         model.addAttribute("prevPage", prevPage);
         model.addAttribute("nextPage", nextPage);
+        model.addAttribute("sortBy", sortBy);
 
         return "/usr/job/joblist";
     }

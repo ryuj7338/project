@@ -81,18 +81,31 @@
 
 </script>
 
-<!-- 검색 폼 -->
-<form method="get" action="/usr/job/list" onsubmit="SearchForm__submit(this); return false;">
+<!-- 기존 검색 폼 -->
+<form method="get" action="/usr/job/list" onsubmit="SearchForm__submit(this); return false;" style="display: inline-block;">
   <input type="hidden" name="boardId" value="11" />
 
   <select name="searchType">
     <option value="title" ${searchType == 'title' ? 'selected' : ''}>공고 제목</option>
     <option value="companyName" ${searchType == 'companyName' ? 'selected' : ''}>회사 이름</option>
+    <option value="certificate" ${searchType == 'certificate' ? 'selected' : ''}>우대자격증</option>
+    <option value="endDate" ${searchType == 'endDate' ? 'selected' : ''}>마감일</option>
   </select>
 
   <input type="text" name="keyword" value="${keyword}" placeholder="검색어 입력" />
   <button type="submit">검색</button>
 </form>
+
+<!-- 정렬 전용 드롭다운 -->
+<form method="get" action="/usr/job/list" style="display: inline-block; margin-left: 10px;" id="SortForm">
+  <input type="hidden" name="boardId" value="11" />
+  <select name="sortBy" onchange="document.getElementById('SortForm').submit();">
+    <option value="recent" ${sortBy == 'recent' ? 'selected' : ''}>최신 등록순</option>
+    <option value="ddayAsc" ${sortBy == 'ddayAsc' ? 'selected' : ''}>마감일 빠른순</option>
+    <option value="ddayDesc" ${sortBy == 'ddayDesc' ? 'selected' : ''}>마감일 늦은순</option>
+  </select>
+</form>
+
 
 <hr/>
 
@@ -139,29 +152,32 @@
 
   <!-- ◀ 이전 -->
   <c:if test="${hasPrev}">
-    <a href="/usr/job/list?page=${prevPage}
-        <c:if test='${not empty keyword}'> &amp;searchType=${searchType}&amp;keyword=${keyword} </c:if>">
-      ◀ 이전
-    </a>
+    <a href="/usr/job/list?page=${prevPage}&amp;sortBy=${sortBy}
+    <c:if test='${not empty keyword}'> &amp;searchType=${searchType}&amp;keyword=${keyword} </c:if>">
+  ◀ 이전
+</a>
+
     &nbsp;
   </c:if>
 
   <!-- 페이지 숫자 -->
   <c:forEach var="i" begin="${startPage}" end="${endPage}">
-    <a href="/usr/job/list?page=${i}
-        <c:if test='${not empty keyword}'> &amp;searchType=${searchType}&amp;keyword=${keyword} </c:if>"
-       style="${i == page ? 'font-weight:bold; color:red;' : ''}">
-        ${i}
-    </a>
+    <a href="/usr/job/list?page=${i}&amp;sortBy=${sortBy}
+    <c:if test='${not empty keyword}'> &amp;searchType=${searchType}&amp;keyword=${keyword} </c:if>"
+   style="${i == page ? 'font-weight:bold; color:red;' : ''}">
+    ${i}
+</a>
+
     &nbsp;
   </c:forEach>
 
   <!-- 다음 ▶ -->
   <c:if test="${hasNext}">
-    <a href="/usr/job/list?page=${nextPage}
-        <c:if test='${not empty keyword}'> &amp;searchType=${searchType}&amp;keyword=${keyword} </c:if>">
-      다음 ▶
-    </a>
+    <a href="/usr/job/list?page=${nextPage}&amp;sortBy=${sortBy}
+    <c:if test='${not empty keyword}'> &amp;searchType=${searchType}&amp;keyword=${keyword} </c:if>">
+  다음 ▶
+</a>
+
   </c:if>
 
 </div>
