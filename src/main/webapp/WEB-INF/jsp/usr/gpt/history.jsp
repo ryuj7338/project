@@ -20,7 +20,6 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <meta name="_csrf" content="${_csrf.token}" />
     <meta name="_csrf_header" content="${_csrf.headerName}" />
-
 </head>
 <body class="bg-gray-50">
 
@@ -124,25 +123,27 @@
                 </c:when>
                 <c:otherwise>
                     <div class="text-center text-gray-600 py-20">
-                        <p class="mb-4 text-lg font-semibold">로그인 후 확인할 수 있습니다.</p>
+                        <p class="mb-4 text-lg font-semibold">로그인이 필요합니다.</p>
                         <a href="/usr/member/login?redirectUrl=${pageContext.request.requestURI}"
                            class="inline-block bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition">
                             로그인 하러 가기
                         </a>
                     </div>
                 </c:otherwise>
+
             </c:choose>
         </div>
 
     </main>
 </div>
 
-
 <script>
     $(document).on("click", ".delete-btn", function(event) {
         event.stopPropagation();
 
-        const id = $(this).data("id");
+        const btn = event.currentTarget;
+
+        const id = $(btn).data("id");
         if (!id) {
             alert("삭제할 ID가 없습니다.");
             return;
@@ -162,7 +163,12 @@
             .then(result => {
                 if (result.resultCode === "S-1") {
                     alert("삭제되었습니다.");
-                    $(this).closest("tr").remove();
+                    $(btn).closest("tr").remove();
+                } else if (result.resultCode === "F-L") {
+                    alert("로그인이 필요합니다.");
+                    window.setTimeout(() => {
+                        location.href = "/usr/member/login?redirectUrl=" + encodeURIComponent(location.pathname + location.search);
+                    }, 100);
                 } else {
                     alert(result.msg || "삭제에 실패했습니다.");
                 }

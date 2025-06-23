@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.demo.repository.JobPostingRepository">
+
+    <select id="findTitlesByKeyword" parameterType="string" resultType="string">
+        SELECT `title`
+        FROM job_posting
+        WHERE `title` LIKE CONCAT('%', #{keyword}, '%')
+        ORDER BY id DESC
+            LIMIT 10
+    </select>
+
+</mapper>

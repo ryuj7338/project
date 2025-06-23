@@ -135,7 +135,9 @@ public class JobPostingService {
     }
 
 
-
+    public List<String> findTitlesByKeyword(String keyword) {
+        return jobPostingRepository.findTitlesByKeyword(keyword);
+    }
 }
 
 

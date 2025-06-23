@@ -191,5 +191,14 @@
         WHERE id = #{id}
     </update>
 
+    <select id="findTitlesByKeyword" parameterType="string" resultType="string">
+        SELECT title
+        FROM post
+        WHERE title LIKE CONCAT('%', #{keyword}, '%')
+        ORDER BY id DESC
+            LIMIT 10
+    </select>
+
+
 
 </mapper>

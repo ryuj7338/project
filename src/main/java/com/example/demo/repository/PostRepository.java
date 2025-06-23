@@ -46,5 +46,8 @@ public interface PostRepository {
     void write(Post post);
 
     void update(Post post);
+
+
+    List<String> findTitlesByKeyword(String keyword);
 }
 

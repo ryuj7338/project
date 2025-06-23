@@ -53,7 +53,7 @@ public class UsrMemberController {
 
         // ✅ redirectUrl이 없다면 기본값 지정
         if (Ut.isEmptyOrNull(redirectUrl)) {
-            redirectUrl = "/";
+            redirectUrl = "/home";
         }
 
         return Ut.jsReplace("S-1", Ut.f("%s님 환영합니다.", member.getNickname()), redirectUrl);

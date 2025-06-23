@@ -199,5 +199,12 @@ public class PostService {
     public void update(Post post) {
         postRepository.update(post);
     }
+
+
+    public List<String> getAutocompleteSuggestions(String keyword) {
+        // DB 쿼리 호출해서 title 컬럼에서 부분 일치하는 제목 최대 10개 반환
+        return postRepository.findTitlesByKeyword(keyword);
+    }
+
 }
 
