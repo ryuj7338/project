@@ -1,55 +1,53 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 
-<c:set var="pageTitle" value="MAIN PAGE"></c:set>
-<%@ include file="../common/head.jspf"%>
+<c:set var="pageTitle" value=""></c:set>
+<%@ include file="../common/head.jspf" %>
 
-<body class="bg-gray-900 relative">
+<body class="bg-gray-900 text-gray-50 min-h-screen">
 
+  <!-- 메인 이미지 영역 -->
+  <section class="flex justify-center space-x-4 mt-8 max-w-6xl mx-auto">
+    <img src="/path/to/image1.jpg" alt="경호 이미지1" class="w-1/2 h-64 object-cover rounded-lg shadow-lg" />
+    <img src="/path/to/image2.jpg" alt="경호 이미지2" class="w-1/2 h-64 object-cover rounded-lg shadow-lg" />
+  </section>
 
-    <!-- 제이쿼리 -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+  <!-- 최신 뉴스 -->
+  <section class="max-w-6xl mx-auto mt-12 text-center">
+    <h2 class="text-xl font-semibold mb-4">최신 뉴스</h2>
+    <div class="bg-gray-700 rounded-lg h-48 animate-pulse"></div>
+  </section>
 
-    <!-- 폰트어썸 -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
-    <!-- 폰트어썸 FREE 아이콘 리스트 : https://fontawesome.com/v5.15/icons?d=gallery&p=2&m=free -->
+  <!-- 하단 정보 영역 -->
+  <section class="max-w-6xl mx-auto mt-10 grid grid-cols-3 gap-6 px-4">
 
-    <!-- 테일윈드 -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.1.4/tailwind.min.css">
-    <!-- 테일윈드 치트시트 : https://nerdcave.com/tailwind-cheat-sheet -->
+    <!-- 왼쪽 -->
+    <div class="space-y-6">
+      <div>
+        <h3 class="font-semibold mb-2">채용 정보</h3>
+        <div class="bg-gray-700 rounded-lg h-32 animate-pulse"></div>
+      </div>
 
-
-    <div class="image_box">
-
+      <div>
+        <h3 class="font-semibold mb-2">자격증 정보</h3>
+        <div class="bg-gray-700 rounded-lg h-32 animate-pulse"></div>
+      </div>
     </div>
 
-    <section class=" flex flex-col items-center">
-        <div class="h-full news_box flex flex-col items-center">
-            <div class="relative mt-20 text-3xl font-bold text-center z-10 py-2 text-gray-50 ">
-                뉴스 소식
-            </div>
-            <div class=" w-full overflow-x-auto overflow-y-hidden whitespace-nowrap border border-solid border-8 border-blue-400 rounded-xl">
-                <div class="flex w-max bg-white">
-                    <div class="w-96 h-80 bg-red-400 m-4 flex-shrink-0">1111</div>
-                    <div class="w-96 h-80 bg-red-400 m-4 flex-shrink-0">2222</div>
-                    <div class="w-96 h-80 bg-red-400 m-4 flex-shrink-0">3333</div>
-                    <div class="w-96 h-80 bg-red-400 m-4 flex-shrink-0">4444</div>
-                    <div class="w-96 h-80 bg-red-400 m-4 flex-shrink-0">5555</div>
-                    <div class="w-96 h-80 bg-red-400 m-4 flex-shrink-0">6666</div>
-                </div>
-            </div>
-        </div>
-    </section>
-
+    <!-- 오른쪽 상단 -->
     <div>
-
+      <h3 class="font-semibold mb-2">커뮤니티</h3>
+      <div class="bg-gray-700 rounded-lg h-40 animate-pulse"></div>
     </div>
 
-    <div class="bg-white border-black border"></div>
+    <!-- 오른쪽 하단 -->
+    <div>
+      <h3 class="font-semibold mb-2">자료실</h3>
+      <div class="bg-gray-700 rounded-lg h-72 animate-pulse"></div>
+    </div>
 
-
+  </section>
 
 </body>
 
-
-<%@ include file="../common/foot.jspf"%>
+<%@ include file="../common/foot.jspf" %>
