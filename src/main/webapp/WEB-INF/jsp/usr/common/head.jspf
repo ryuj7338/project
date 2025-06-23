@@ -81,47 +81,46 @@
 </header>
 
 <script>
-    $(function() {
-        $('#alertBtn').on('click', function(e) {
-            e.stopPropagation();
-            $('#alertDropdown').toggle();
+    $('#alertBtn').on('click', function(e) {
+        e.stopPropagation();
 
-            if ($('#alertDropdown').is(':visible')) {
-                $.ajax({
-                    url: '/usr/notifications/recent',
-                    method: 'GET',
-                    dataType: 'json',
-                    success: function(data) {
-                        const $list = $('#alertList');
-                        $list.empty();
-                        if (data.length === 0) {
-                            $list.append('<li class="p-4 text-center text-gray-500">새 알림이 없습니다.</li>');
-                        } else {
-                            data.forEach(alert => {
-                                $list.append(`
-                                <li class="p-4 hover:bg-gray-100 cursor-pointer" onclick="location.href='${alert.link}'">
-                                    <div class="font-semibold">${alert.title}</div>
-                                    <div class="text-xs text-gray-500">${alert.timeAgo}</div>
-                                </li>
-                            `);
-                            });
-                        }
-                    },
-                    error: function() {
-                        const $list = $('#alertList');
-                        $list.empty();
-                        $list.append('<li class="p-4 text-center text-red-500">알림을 불러오는 중 오류가 발생했습니다.</li>');
-                    }
-                });
+        $.ajax({
+            url: '/usr/notifications/recent',
+            method: 'GET',
+            dataType: 'json',
+            success: function(data) {
+                const $list = $('#alertList');
+                $list.empty();
+                if (data.length === 0) {
+                    $list.append('<li class="p-4 text-center text-gray-500">새 알림이 없습니다.</li>');
+                } else {
+                    data.forEach(alert => {
+                        $list.append(`
+                        <li class="p-4 hover:bg-gray-100 cursor-pointer" onclick="location.href='${alert.link}'">
+                            <div class="font-semibold">${alert.title}</div>
+                            <div class="text-xs text-gray-500">${alert.timeAgo}</div>
+                        </li>
+                    `);
+                    });
+                }
+                $('#alertDropdown').show();
+            },
+            error: function(xhr) {
+                const $list = $('#alertList');
+                $list.empty();
+
+                if (xhr.status === 401) {
+                    // 로그인 안 했을 때 메시지
+                    $list.append('<li class="p-4 text-center text-gray-500">로그인 후 확인하세요.</li>');
+                    $('#alertDropdown').show();
+                } else {
+                    $list.append('<li class="p-4 text-center text-red-500">알림을 불러오는 중 오류가 발생했습니다.</li>');
+                    $('#alertDropdown').show();
+                }
             }
-        });
-
-        $(document).on('click', function() {
-            $('#alertDropdown').hide();
         });
     });
 </script>
 
-<h1>${pageTitle }</h1>
 </body>
 </html>
