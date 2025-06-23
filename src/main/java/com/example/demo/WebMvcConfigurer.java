@@ -63,8 +63,17 @@ public class WebMvcConfigurer implements org.springframework.web.servlet.config.
     //  좋아요 관련
         ir.addPathPatterns("/usr/reaction/doLike");
 
-    // 찜 관련
+    // 채용공고 관련
         ir.addPathPatterns("/usr/job/favorite/toggle");
+        ir.addPathPatterns("/usr/job/favorite/list");
+        ir.addPathPatterns("/usr/job/favorite/delete");
+        ir.addPathPatterns("/usr/job/favorite/modify");
+
+//      gpt 면접/ 자기소개서
+        ir.addPathPatterns("/usr/gpt/interview");
+        ir.addPathPatterns("/usr/gpt/selfintro");
+        ir.addPathPatterns("/usr/gpt/doAsk");
+        ir.addPathPatterns("/usr/gpt/history");
 
     //  로그아웃 필요
         ir = registry.addInterceptor(needLogoutInterceptor);

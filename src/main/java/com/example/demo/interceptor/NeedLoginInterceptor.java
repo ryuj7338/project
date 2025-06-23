@@ -1,12 +1,13 @@
 package com.example.demo.interceptor;
 
-import com.example.demo.vo.ResultData;
 import com.example.demo.vo.Rq;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
+
+import java.net.URLEncoder;
 
 @Component
 public class NeedLoginInterceptor implements HandlerInterceptor {
@@ -16,7 +17,6 @@ public class NeedLoginInterceptor implements HandlerInterceptor {
 
     @Override
     public boolean preHandle(HttpServletRequest req, HttpServletResponse resp, Object handler) throws Exception {
-
         Rq rq = (Rq) req.getAttribute("rq");
 
         if (!rq.isLogined()) {
@@ -26,13 +26,13 @@ public class NeedLoginInterceptor implements HandlerInterceptor {
             if (isAjax) {
                 resp.setContentType("application/json; charset=UTF-8");
                 resp.getWriter().write("{\"resultCode\":\"F-L\", \"msg\":\"로그인이 필요합니다.\"}");
+                return false;
             } else {
-                rq.printHistoryBack("로그인이 필요합니다.");
+
+                return true;
             }
-
-            return false;
         }
-
-        return HandlerInterceptor.super.preHandle(req, resp, handler);
+        return true;
     }
+
 }

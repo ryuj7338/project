@@ -56,4 +56,13 @@ public class ResultData<DT> {
 
         return rd;
     }
+
+    public static <DT> ResultData<DT> from(String resultCode, String msg, DT data) {
+        ResultData<DT> rd = new ResultData<>();
+        rd.ResultCode = resultCode;
+        rd.msg = msg;
+        rd.data1 = data;
+        return rd;
+    }
+
 }

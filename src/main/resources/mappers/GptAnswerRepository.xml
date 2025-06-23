@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.demo.repository.GptAnswerRepository">
+
+    <insert id="save" parameterType="com.example.demo.vo.GptAnswer">
+        INSERT INTO gpt_answer
+            (memberId, regDate, updateDate, question, answer, category)
+        VALUES
+            (#{memberId}, NOW(), NOW(), #{question}, #{answer}, #{category})
+    </insert>
+
+    <select id="findByMemberId" resultType="com.example.demo.vo.GptAnswer">
+        SELECT *
+        FROM gpt_answer
+        WHERE memberId = #{memberId}
+        ORDER BY regDate DESC
+    </select>
+
+    <select id="findByMemberIdOrderByRegDateDesc" resultType="com.example.demo.vo.GptAnswer">
+        SELECT *
+        FROM gpt_answer
+        WHERE memberId = #{memberId}
+        ORDER BY regDate DESC
+    </select>
+
+    <select id="findById" parameterType="int" resultType="com.example.demo.vo.GptAnswer">
+        SELECT *
+        FROM gpt_answer
+        WHERE id = #{id}
+    </select>
+
+    <select id="findByMemberIdAndCategoryOrderByRegDateDesc" parameterType="map" resultType="GptAnswer">
+        SELECT * FROM gpt_answer
+        WHERE memberId = #{memberId}
+          AND category = #{category}
+        ORDER BY regDate DESC
+    </select>
+
+    <select id="selectByMemberIdAndCategoryIncludingFeedback" resultType="com.example.demo.vo.GptAnswer" parameterType="map">
+        SELECT *
+        FROM gpt_answer
+        WHERE memberId = #{memberId}
+          AND (
+            category = #{category}
+                OR category = CONCAT(#{category}, '-피드백')
+            )
+        ORDER BY reg_date DESC
+    </select>
+
+    <select id="selectByMemberId" resultType="com.example.demo.vo.GptAnswer" parameterType="int">
+        SELECT *
+        FROM gpt_answer
+        WHERE memberId = #{memberId}
+        ORDER BY regDate DESC
+    </select>
+
+    <select id="findByMemberIdAndCategoryLikeOrCategoryLikeOrderByRegDateDesc" parameterType="map" resultType="com.example.demo.vo.GptAnswer">
+        SELECT * FROM gpt_answer
+        WHERE memberId = #{memberId}
+          AND (
+            category LIKE #{category1}
+                OR category LIKE #{category2}
+            )
+        ORDER BY regDate DESC
+    </select>
+
+
+
+</mapper>
