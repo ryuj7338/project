@@ -13,12 +13,13 @@ CREATE TABLE post (
 );
 
 ALTER TABLE post MODIFY COLUMN `body` LONGTEXT;
-# 나중에 추가할 것
-image VARCHAR(250) NOT NULL;
+
+DROP TABLE post;
 
 SELECT * FROM post;
 SELECT title FROM post WHERE title LIKE '%모집%' LIMIT 10;
 
+UPDATE post SET boardId = 5 WHERE boardId = 20;
 
 # 게시판 테이블 생성
 CREATE TABLE board (
@@ -54,24 +55,45 @@ CREATE TABLE `member` (
 
 # 자료실 테이블 생성
 CREATE TABLE resources (
-id INT(10) UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
-memberId INT(10) UNSIGNED NOT NULL,
-boardId INT(10) UNSIGNED NOT NULL,
-regDate DATETIME NOT NULL,
-updateDate DATETIME NOT NULL,
-title VARCHAR(50) NOT NULL,
-`body` TEXT NOT NULL,
-image VARCHAR(250) NOT NULL,
-pdf VARCHAR(250) NOT NULL,
-zip VARCHAR(250) NOT NULL
+                           id INT(10) UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
+                           memberId INT(10) UNSIGNED NOT NULL,
+                           boardId INT(10) UNSIGNED NOT NULL,
+                           regDate DATETIME NOT NULL,
+                           updateDate DATETIME NOT NULL,
+                           title VARCHAR(50) NOT NULL,
+                           `body` TEXT NOT NULL,
+                           image VARCHAR(250) NOT NULL,
+                           pdf VARCHAR(250) NOT NULL,
+                           zip VARCHAR(250) NOT NULL
 );
 
-select * from resources;
-alter table resources add column hwp varchar(255) not null after zip;
+SHOW COLUMNS FROM resources;
+
+DROP TABLE resources;
+
+SELECT * FROM resources WHERE saved_name LIKE '%e1d5678b-6e2f-41f1-9065-6d70acc8c986%';
+SELECT saved_name FROM resources WHERE saved_name LIKE '%308120bc-0374-4b67-b7de-9ffe72e4417c%';
+SELECT saved_name FROM resources WHERE saved_name = 'e1d5678b-6e2f-41f1-9065-6d70acc8c986_★경호관리사 1차 학습자료(객관식 50문항).xlsx';
+
+ALTER TABLE resources ADD COLUMN auto TINYINT(1) NOT NULL DEFAULT 0;
+
+
+SELECT * FROM resources;
+ALTER TABLE resources ADD COLUMN hwp VARCHAR(255) NOT NULL AFTER zip;
 ALTER TABLE resources ADD COLUMN word VARCHAR(255) NOT NULL AFTER hwp;
-alter table resources add column xlsx varChar(255) not null after word;
-ALTER TABLE resources ADD COLUMN pptx varChar(255) NOT NULL AFTER xlsx;
-alter table resources add column postId int(10) unsigned not null after id;
+ALTER TABLE resources ADD COLUMN xlsx VARCHAR(255) NOT NULL AFTER word;
+ALTER TABLE resources ADD COLUMN pptx VARCHAR(255) NOT NULL AFTER xlsx;
+ALTER TABLE resources ADD COLUMN docx VARCHAR(255) NOT NULL AFTER pptx;
+ALTER TABLE resources ADD COLUMN postId INT(10) UNSIGNED NOT NULL AFTER id;
+
+ALTER TABLE resources MODIFY COLUMN BODY VARCHAR(255);
+
+SELECT * FROM resources WHERE postId = 5;
+
+SHOW FULL COLUMNS FROM resources LIKE 'saved_name';
+
+INSERT INTO resources (postId, memberId, boardId, regDate, updateDate, title, BODY, image, pdf, zip, hwp, word, xlsx, pptx, docx, original_name, saved_name)
+VALUES (0, 0, 0, NOW(), NOW(), 'test', 'test body', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'test_original.pdf', 'uuid_testfile.pdf');
 
 ALTER TABLE resources
     MODIFY pdf VARCHAR(255) NULL,
@@ -80,7 +102,21 @@ ALTER TABLE resources
     MODIFY word VARCHAR(255) NULL,
     MODIFY xlsx VARCHAR(255) NULL,
     MODIFY zip VARCHAR(255) NULL,
-    MODIFY image VARCHAR(255) NULL;
+    MODIFY image VARCHAR(255) NULL,
+    MODIFY docx VARCHAR(255) NULL;
+
+SELECT COUNT(*)
+FROM resources
+WHERE `body` LIKE '308120bc-0374-4b67-b7de-9ffe72e4417c_20250313_신변보호사_2차_실기시험_(2025)(0).pdf%';
+
+SELECT saved_name FROM resources WHERE saved_name LIKE '%97023338-ae25-4d58-91f8-393d18d07d5b_경비지도사2차(경비업법)20151121(교사용).pdf%';
+
+
+ALTER TABLE resources ADD COLUMN original_name VARCHAR(255);
+ALTER TABLE resources ADD COLUMN saved_name VARCHAR(255);
+
+ALTER TABLE resources MODIFY title VARCHAR(50) NULL;
+ALTER TABLE resources MODIFY `body` VARCHAR(50) NULL;
 
 
 # 좋아요 테이블 생성
@@ -106,7 +142,7 @@ CREATE TABLE `comment` (
                            `body` TEXT NOT NULL
 );
 
-select * from `comment`;
+SELECT * FROM `comment`;
 
 # 자격증 테이블
 CREATE TABLE qualifications(
@@ -117,7 +153,7 @@ CREATE TABLE qualifications(
                                grade VARCHAR(30) DEFAULT NULL COMMENT '급수 (해당 시에만 입력)',
                                category_code VARCHAR(50) DEFAULT NULL COMMENT '무도, 응급, 경호, 그 외 등 내부 분류용(UI에 표시 안함)',
                                `type` VARCHAR(50) DEFAULT NULL COMMENT '자격증 종류 (예: 국가기술, 민간, 국제 등)',
-                               applyUrl varchar(300) comment '접수 사이트 링크'
+                               applyUrl VARCHAR(300) COMMENT '접수 사이트 링크'
 );
 
 SELECT * FROM qualifications;
@@ -131,8 +167,8 @@ CREATE TABLE job_posting(
                             title VARCHAR(255) NOT NULL,	-- 공고 제목
                             company_name VARCHAR(255) NOT NULL,	-- 기업명
                             certificate TEXT NOT NULL,	-- 우대 자격
-                            start_date date NOT NULL,	-- 시작일
-                            end_date date NOT NULL,	-- 마감일
+                            start_date DATE NOT NULL,	-- 시작일
+                            end_date DATE NOT NULL,	-- 마감일
                             originalUrl VARCHAR(255)   -- 개별 페이지
 );
 
@@ -148,11 +184,11 @@ CREATE TABLE job_favorite(
 
 SELECT * FROM job_favorite;
 
-alter table job_favorite
-drop column job_posting_id,
-drop column member_id,
-drop column reg_date,
-drop column update_date;
+ALTER TABLE job_favorite
+DROP COLUMN job_posting_id,
+DROP COLUMN member_id,
+DROP COLUMN reg_date,
+DROP COLUMN update_date;
 
 # 자소서/면접 저장 테이블
 CREATE TABLE interview_answers (
@@ -176,15 +212,15 @@ CREATE TABLE notification (
                               isRead BOOLEAN NOT NULL DEFAULT FALSE  -- 읽음 여부
 );
 
-select * from notification;
+SELECT * FROM notification;
 
 ALTER TABLE notification DROP COLUMN member_id;
 ALTER TABLE notification DROP COLUMN is_read;
 ALTER TABLE notification DROP COLUMN reg_date;
 
-rename table interview_answers to gpt_answer;
+RENAME TABLE interview_answers TO gpt_answer;
 
-select * from gpt_answer;
+SELECT * FROM gpt_answer;
 
 SELECT * FROM job_posting;
 
@@ -202,7 +238,7 @@ ALTER TABLE post ADD COLUMN memberId INT(10) UNSIGNED NOT NULL AFTER updateDate;
 ## 게시판 번호 추가
 ALTER TABLE post ADD COLUMN boardId INT(10) NOT NULL AFTER `memberId`;
 
-alter table post add column hit int(10) unsigned not null default 0;
+ALTER TABLE post ADD COLUMN hit INT(10) UNSIGNED NOT NULL DEFAULT 0;
 
 # 게시글 테스트 데이터 생성
 INSERT INTO post
@@ -225,8 +261,8 @@ title = '제목3',
 
 
 # 게시판 데이터 생성
-insert into board
-set regDate = now(),
+INSERT INTO board
+SET regDate = NOW(),
 updateDate = NOW(),
 `code` = 'Q&A',
 `name` = '질문 게시판';
@@ -293,8 +329,8 @@ updateDate = NOW(),
 
 
 # 자격증 데이터 생성
-insert into qualifications
-set `name` = '경비지도사',
+INSERT INTO qualifications
+SET `name` = '경비지도사',
 issuing_agency = '한국산업인력공단',
 organizing_agency = '경찰청 생활안전과',
 grade = '일반/기계',
@@ -349,7 +385,7 @@ INSERT INTO qualification_schedule
 VALUES
 (1, '2025년 제1회', '통합', '정기', '2025-09-22', '2025-09-26', '2025-11-15', '2025-11-15', '2025-12-31', NULL, 'https://www.q-net.or.kr/crf005.do?id=crf00502&jmCd=3120');
 
-select * from qualifications;
+SELECT * FROM qualifications;
 
 # 회원 테스트 데이터 생성
 
@@ -395,6 +431,7 @@ nickname = '회원3',
 cellphone = '01078787878',
 email = 'shinJJang@gmail.com';
 
+SELECT * FROM resources WHERE id = 96;
 
 ALTER TABLE job_posting ADD COLUMN dday INT DEFAULT NULL;
 
@@ -416,3 +453,10 @@ SET memberId = 5
 WHERE id = 4;
 
 SELECT * FROM board;
+
+SELECT * FROM post;
+
+SELECT * FROM resources;
+
+SELECT saved_name, original_name FROM resources WHERE postId = 2;
+SELECT postId, saved_name, original_name FROM resources WHERE postId = 96;
