@@ -24,7 +24,7 @@
         <!-- 로고 -->
         <a href="/" class="flex items-center space-x-2">
             <img class="w-16 h-16" src="https://velog.velcdn.com/images/ryuj7338/post/b891e272-de6f-4c1e-b605-b3b733f58f87/image.png" alt="Logo"/>
-            <span class="font-bold text-xl text-gray-800">경호</span>
+            <span class="font-bold text-xl text-gray-800">Guardium</span>
         </a>
 
         <!-- 메뉴바 -->

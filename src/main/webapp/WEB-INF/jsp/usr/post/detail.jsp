@@ -164,33 +164,34 @@ function doModifyReply(commentId) {
     			<th>다운로드 파일</th>
     			<td>
         			<c:forEach var="resource" items="${resourceList}">
+
             			<c:if test="${not empty resource.image}">
                 			🖼 이미지:
-                			<a href="/file/download?path=${fn:substringAfter(resource.image, '/')}&original=이미지파일.gif" target="_blank">[다운로드]</a><br/>
+                			<a href="#" class="download-link" data-path="${resource.image}" data-name="${fn:substringAfter(resource.image, '/')}">[다운로드]</a></br>
             			</c:if>
             			<c:if test="${not empty resource.pdf}">
                 			📄 PDF:
-                			<a href="/file/download?path=${fn:substringAfter(resource.pdf, '/')}&original=문서.pdf" target="_blank">[다운로드]</a><br/>
+                			<a href="#" class="download-link" data-path="${resource.pdf}" data-name="${fn:substringAfter(resource.pdf, '/')}">[다운로드]</a></br>
             			</c:if>
             			<c:if test="${not empty resource.hwp}">
                 			📑 HWP:
-                			<a href="/file/download?path=${fn:substringAfter(resource.hwp, '/')}&original=한글문서.hwp" target="_blank">[다운로드]</a><br/>
+                			<a href="#" class="download-link" data-path="${resource.hwp}" data-name="${fn:substringAfter(resource.hwp, '/')}">[다운로드]</a></br>
             			</c:if>
             			<c:if test="${not empty resource.word}">
                 			📄 Word:
-               	 			<a href="/file/download?path=${fn:substringAfter(resource.word, '/')}&original=워드파일.docx" target="_blank">[다운로드]</a><br/>
+               	 			<a href="#" class="download-link" data-path="${resource.docx}" data-name="${fn:substringAfter(resource.docx, '/')}">[다운로드]</a></br>
             			</c:if>
             			<c:if test="${not empty resource.xlsx}">
                 			📊 Excel:
-                			<a href="/file/download?path=${fn:substringAfter(resource.xlsx, '/')}&original=엑셀.xlsx" target="_blank">[다운로드]</a><br/>
+                			<a href="#" class="download-link" data-path="${resource.xlsx}" data-name="${fn:substringAfter(resource.xlsx, '/')}">[다운로드]</a></br>
             			</c:if>
            	 			<c:if test="${not empty resource.pptx}">
                 			📽 PPTX:
-                			<a href="/file/download?path=${fn:substringAfter(resource.pptx, '/')}&original=발표자료.pptx" target="_blank">[다운로드]</a><br/>
+                			<a href="#" class="download-link" data-path="${resource.pptx}" data-name="${fn:substringAfter(resource.pptx, '/')}">[다운로드]</a></br>
             			</c:if>
             			<c:if test="${not empty resource.zip}">
                 			📦 ZIP:
-                			<a href="/file/download?path=${fn:substringAfter(resource.zip, '/')}&original=자료.zip" target="_blank">[다운로드]</a><br/>
+                			<a href="#" class="download-link" data-path="${resource.zip}" data-name="${fn:substringAfter(resource.zip, '/')}">[다운로드]</a></br>
             			</c:if>
         			</c:forEach>
     			</td>
@@ -227,10 +228,10 @@ function doModifyReply(commentId) {
 	<!-- 댓글 -->
 	<section class="mt-24 text-xl px-4">
 		<c:if test="${rq.isLogined() }">
-			<form action="../usr/comment/doWrite" method="POST" onsubmit="CommentWrite__submit(this); return false;" )>
+			<form action="/usr/comment/doWrite" method="POST" onsubmit="CommentWrite__submit(this); return false;" )>
 				<table class="table" border="1" cellspacing="0" cellpadding="5" style="width: 100%; border-collapse: collapse;">
-					<input type="hidden" name="relTypeCode" value="article" />
-					<input type="hidden" name="relId" value="${article.id }" />
+					<input type="hidden" name="relTypeCode" value="post" />
+					<input type="hidden" name="relId" value="${post.id }" />
 					<tbody>
 
 						<tr>
@@ -345,7 +346,19 @@ function doModifyReply(commentId) {
   });
 });
 </script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  document.querySelectorAll('.download-link').forEach(link => {
+    const fullPath = link.dataset.path;
 
+    if (!fullPath) return;
+
+    const fileName = fullPath.substring(fullPath.lastIndexOf('/') + 1); // 예: abc.xlsx
+    const encodedName = encodeURIComponent(fileName);
+    link.href = `/file/download?path=${encodedName}&original=${encodedName}`;
+  });
+});
+</script>
 
 <script>
 	document.addEventListener('DOMContentLoaded', function () {

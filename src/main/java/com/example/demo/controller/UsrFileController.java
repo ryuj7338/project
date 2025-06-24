@@ -25,48 +25,53 @@ public class UsrFileController {
 
     @PostMapping("/upload")
     @ResponseBody
-    public Map<String, Object> uploadFiles(@RequestParam("files") MultipartFile[] files, HttpServletRequest req) {
+    public Map<String, Object> uploadFiles(@RequestParam("files") MultipartFile[] files) {
         Map<String, Object> result = new HashMap<>();
-        List<String> fileUrls = new ArrayList<>();
+        List<String> fileInfos = new ArrayList<>();
 
-        Rq rq = (Rq) req.getAttribute("rq");
-        int memberId = rq.getLoginedMemberId();
-
-        String userPath = uploadDirPath + "/user/" + memberId;
-        File folder = new File(userPath);
+        String uploadPath = "uploadFiles"; // 루트 기준 외부 저장소
+        File folder = new File(uploadPath);
         if (!folder.exists()) folder.mkdirs();
 
         for (MultipartFile file : files) {
-            String originalFilename = file.getOriginalFilename();
-            String ext = StringUtils.getFilenameExtension(originalFilename);
-            String uuid = UUID.randomUUID().toString();
-            String savedFileName = uuid + "." + ext;
+            String originalFileName = file.getOriginalFilename();
+            String savedFileName = originalFileName;
+
+            File targetFile = new File(folder, savedFileName);
+            int count = 1;
+            while (targetFile.exists()) {
+                savedFileName = originalFileName.replaceFirst("(\\.[^.]+)$", "_" + count + "$1");
+                targetFile = new File(folder, savedFileName);
+                count++;
+            }
+
 
             try {
-                file.transferTo(new File(userPath + "/" + savedFileName));
-                // 다운로드용 링크 삽입
-                String downloadUrl = "/file/download?path=" + uuid + "." + ext + "&original=" + URLEncoder.encode(originalFilename, StandardCharsets.UTF_8);
-                fileUrls.add(downloadUrl);
+                file.transferTo(targetFile);
+
+                fileInfos.add(savedFileName);
             } catch (IOException e) {
                 e.printStackTrace();
             }
+
         }
 
+
         result.put("success", true);
-        result.put("fileUrls", fileUrls);
+        result.put("fileUrls", fileInfos);
         return result;
     }
 
 
 
+
+
     @PostMapping("/uploadImage")
     @ResponseBody
-    public Map<String, Object> uploadImage(@RequestParam("file") MultipartFile file, HttpServletRequest req) {
+    public Map<String, Object> uploadImage(@RequestParam("file") MultipartFile file) {
         Map<String, Object> result = new HashMap<>();
-        Rq rq = (Rq) req.getAttribute("rq");
-        int memberId = rq.getLoginedMemberId();
 
-        String uploadPath = uploadDirPath + "/user/" + memberId;
+        String uploadPath = "uploadFiles/images"; // 외부 경로로 변경
         File dir = new File(uploadPath);
         if (!dir.exists()) dir.mkdirs();
 
@@ -75,8 +80,11 @@ public class UsrFileController {
         String savedFileName = uuid + "." + ext;
 
         try {
-            file.transferTo(new File(uploadPath + "/" + savedFileName));
-            String fileUrl = "/upload/user/" + memberId + "/" + savedFileName;
+            File targetFile = new File(dir, savedFileName);
+            file.transferTo(targetFile);
+
+            // 접근 가능한 정적 경로 URL
+            String fileUrl = "/uploadFiles/images/" + savedFileName;
             result.put("url", fileUrl);
         } catch (IOException e) {
             e.printStackTrace();
@@ -85,4 +93,6 @@ public class UsrFileController {
 
         return result;
     }
+
+
 }

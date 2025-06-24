@@ -18,30 +18,26 @@ public class FileDownloadController {
     private String uploadDirPath;
 
     @GetMapping("/download")
-    public void download(@RequestParam String path, HttpServletResponse response) throws IOException {
-        // 보안 체크: 디렉토리 이탈 방지
-        if (path.contains("..")) {
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST);
-            return;
-        }
+    public void download(@RequestParam String path, @RequestParam String original, HttpServletResponse response) throws IOException {
 
-        File file = new File(uploadDirPath, new File(path).getName());
+        String fileName = Paths.get(path).getFileName().toString();
+        File file = new File(uploadDirPath, fileName);
 
         if (!file.exists()) {
             response.sendError(HttpServletResponse.SC_NOT_FOUND);
             return;
         }
 
-        // Content Type 자동 설정
-        String contentType = Files.probeContentType(file.toPath());
-        response.setContentType(contentType != null ? contentType : "application/octet-stream");
+        String encodedFilename = URLEncoder.encode(original, StandardCharsets.UTF_8).replaceAll("\\+", "%20");
 
-        response.setHeader("Content-Disposition", "attachment; filename=\"" + URLEncoder.encode(file.getName(), StandardCharsets.UTF_8) + "\"");
+        response.setContentType("application/octet-stream");
+        response.setHeader("Content-Disposition", "attachment; filename=\"" + encodedFilename + "\"");
         response.setContentLengthLong(file.length());
 
-        // 파일 스트림 복사
-        try (InputStream in = new FileInputStream(file); OutputStream out = response.getOutputStream()) {
+        try (InputStream in = new FileInputStream(file);
+             OutputStream out = response.getOutputStream()) {
             in.transferTo(out);
         }
     }
+
 }

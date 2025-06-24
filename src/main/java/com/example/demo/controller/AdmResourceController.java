@@ -26,7 +26,7 @@ public class AdmResourceController {
     @RequestMapping("/autoUpload")
     @ResponseBody
     public String autoUpload() {
-        String[] types = {"pdf", "pptx", "image", "hwp", "xlsx"};
+        String[] types = {"pdf", "pptx", "image", "hwp", "xlsx", "docx"};
         int count = 0;
 
         for (String type : types) {

@@ -24,4 +24,5 @@ public class Resource {
     private String word;
     private String xlsx;
     private String pptx;
+    private String docx;
 }
