@@ -2,6 +2,7 @@ package com.example.demo.repository;
 
 import org.apache.ibatis.annotations.Mapper;
 import com.example.demo.vo.Post;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
@@ -53,5 +54,14 @@ public interface PostRepository {
     List<Post> findByTitleContainingAndBoardId(String keyword, Integer boardId);
 
     List<Post> findByTitleContaining(String keyword);
-}
 
+    boolean existsByBodyContains(String fileUrl);
+
+    void insert(Post post);
+
+    Post getPostByTitle(String title);
+
+    void updatePostBody(@Param("postId") int postId, @Param("body") String body);
+
+    Post getById(int id);
+}

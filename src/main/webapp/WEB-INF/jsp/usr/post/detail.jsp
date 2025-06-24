@@ -5,11 +5,13 @@
 <%@ include file="../common/head.jspf" %>
 <%@ include file="../common/toastUiEditorLib.jspf" %>
 
-<!-- Toast UI Viewer -->
+<!-- Toast UI Viewer CSS/JS -->
 <link rel="stylesheet" href="https://uicdn.toast.com/editor/latest/toastui-editor.min.css"/>
 <script src="https://uicdn.toast.com/editor/latest/toastui-editor-all.min.js"></script>
 
 <c:set var="pageTitle" value="게시글 상세보기"/>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
 <script>
     $(function () {
@@ -38,10 +40,7 @@
             dataType: 'json',
             success: function (data) {
                 if (data.resultCode === 'F-L') {
-                    // ✅ 1. 먼저 alert
                     alert(data.msg);
-
-                    // ✅ 2. 그리고 로그인 페이지로 이동
                     if (data.data1) {
                         location.href = data.data1;
                     } else {
@@ -81,12 +80,9 @@
     }
 </script>
 
-<!-- 댓글 수정 -->
+<!-- 댓글 수정 스크립트 -->
 <script>
     function toggleModifybtn(commentId) {
-
-        console.log(commentId);
-
         $('#modify-btn-' + commentId).hide();
         $('#save-btn-' + commentId).show();
         $('#reply-' + commentId).hide();
@@ -94,24 +90,13 @@
     }
 
     function doModifyReply(commentId) {
-        console.log(commentId); // 디버깅을 위해 commentId 콘솔에 출력
-
-        // form 요소를 정확하게 선택
         var form = $('#modify-form-' + commentId);
-        console.log(form); // 디버깅을 위해 form을 콘솔에 출력
-
-        // form 내의 input 요소의 값을 가져옵니다
         var text = form.find('input[name="reply-text-' + commentId + '"]').val();
-        console.log(text); // 디버깅을 위해 text를 콘솔에 출력
-
-        // form의 action 속성 값을 가져옵니다
-        var action = form.attr('action');
-        console.log(action); // 디버깅을 위해 action을 콘솔에 출력
 
         $.post({
-            url: '/usr/comment/doModify', // 수정된 URL
-            type: 'POST', // GET에서 POST로 변경
-            data: {id: commentId, body: text}, // 서버에 전송할 데이터
+            url: '/usr/comment/doModify',
+            type: 'POST',
+            data: {id: commentId, body: text},
             success: function (data) {
                 $('#modify-form-' + commentId).hide();
                 $('#comment-' + commentId).text(data);
@@ -122,11 +107,16 @@
             error: function (xhr, status, error) {
                 alert('댓글 수정에 실패했습니다: ' + error);
             }
-        })
+        });
     }
 </script>
 
 <section class="mt-8 text-xl px-4">
+    <c:forEach var="resource" items="${resourceList}">
+        <div>
+            savedName: ${resource.savedName}, originalName: ${resource.originalName}
+        </div>
+    </c:forEach>
     <div class="mx-auto">
         <table border="1" cellspacing="0" cellpadding="5" style="width: 100%; border-collapse: collapse;">
             <tr>
@@ -163,12 +153,11 @@
                         </c:choose>
                         <span id="likeCount" class="likeCount">${post.like}</span>
                     </button>
-
                 </td>
             </tr>
             <tr>
                 <th style="text-align: center">댓글수</th>
-                <td style="text-align: center"><span class="post-detail_comment-count">${post.commentsCount}</span></td>
+                <td style="text-align: center">${commentsCount}</td>
             </tr>
             <tr>
                 <th>제목</th>
@@ -178,81 +167,86 @@
                 <th>내용</th>
                 <td>
                     <div id="viewer"></div>
-                    <textarea id="viewerContent" style="display:none;"><c:out value="${post.body}"/>
-                    <c:out value="${resource.body}"/>
+                    <textarea id="viewerContent" style="display:none;">
+                        <c:out value="${filteredBody}" escapeXml="false"/>
                     </textarea>
                 </td>
             </tr>
             <tr>
-                <th>다운로드 파일</th>
-
+                <th>첨부파일</th>
                 <td>
                     <c:forEach var="resource" items="${resourceList}">
-                        <c:if test="${empty resource.postId or resource.postId eq 0}">
-                            <c:if test="${not empty resource.image}">
-                                <c:set var="fileName" value="${fn:substringAfter(resource.image, '_')}"/>
-                                🖼 이미지:
-                                <a class="download-link"
-                                   href="/file/download?path=${resource.zip}&amp;original=${fileName}">
-                                        ${fileName} [다운로드]
-                                </a><br/>
-                            </c:if>
-                            <c:if test="${not empty resource.pdf}">
-                                <c:set var="fileName" value="${fn:substringAfter(resource.pdf, '_')}"/>
-                                📄 PDF:
-                                <a class="download-link"
-                                   href="/file/download?path=${resource.zip}&amp;original=${fileName}">
-                                        ${fileName} [다운로드]
-                                </a><br/>
-                            </c:if>
-                            <c:if test="${not empty resource.hwp}">
-                                <c:set var="fileName" value="${fn:substringAfter(resource.hwp, '_')}"/>
-                                📑 HWP:
-                                <a class="download-link"
-                                   href="/file/download?path=${resource.zip}&amp;original=${fileName}">
-                                        ${fileName} [다운로드]
-                                </a><br/>
-                            </c:if>
-
-                            <c:if test="${not empty resource.docx}">
-                                <c:set var="fileName" value="${fn:substringAfter(resource.docx, '_')}"/>
-                                📄 Word:
-                                <a class="download-link"
-                                   href="/file/download?path=${resource.zip}&amp;original=${fileName}">
-                                        ${fileName} [다운로드]
-                                </a><br/>
-                            </c:if>
-
-                            <c:if test="${not empty resource.xlsx}">
-                                <c:set var="fileName" value="${fn:substringAfter(resource.xlsx, '_')}"/>
-                                📊 Excel:
-                                <a class="download-link"
-                                   href="/file/download?path=${resource.zip}&amp;original=${fileName}">
-                                        ${fileName} [다운로드]
-                                </a><br/>
-                            </c:if>
-
-                            <c:if test="${not empty resource.pptx}">
-                                <c:set var="fileName" value="${fn:substringAfter(resource.pptx, '_')}"/>
-                                📽 PPTX:
-                                <a class="download-link"
-                                   href="/file/download?path=${resource.zip}&amp;original=${fileName}">
-                                        ${fileName} [다운로드]
-                                </a><br/>
-                            </c:if>
-
-                            <c:if test="${not empty resource.zip}">
-                                <c:set var="fileName" value="${fn:substringAfter(resource.zip, '_')}"/>
-                                📦 ZIP:
-                                <a class="download-link"
-                                   href="/file/download?path=${resource.zip}&amp;original=${fileName}">
-                                        ${fileName} [다운로드]
-                                </a><br/>
-                            </c:if>
-                        </c:if>
-
+                        <div>
+                            savedName: ${resource.savedName}, originalName: ${resource.originalName}
+                        </div>
+                        <a class="download-link"
+                           data-path="${resource.savedName}"
+                           data-original="${resource.originalName}"
+                           href="/file/download?path=${resource.savedName}&original=${resource.originalName}">
+                            다운로드 ${resource.originalName}
+                        </a>
                     </c:forEach>
+                    <c:forEach var="resource" items="${resourceList}">
+                        <c:if test="${not empty resource.image}">
+                            <c:set var="fileName" value="${fn:substringAfter(resource.image, '_')}"/>
+                            🖼 이미지:
+                            <a class="download-link" data-path="${resource.image}"
+                               data-original="${fileName}" href="#">
+                                    ${fileName} [다운로드]
+                            </a><br/>
+                        </c:if>
+                        <c:if test="${not empty resource.pdf}">
+                            <c:set var="fileName" value="${fn:substringAfter(resource.pdf, '_')}"/>
+                            📄 PDF:
+                            <a class="download-link" data-path="${resource.pdf}"
+                               data-original="${resource.originalName}" href="#">
+                                    ${fileName} [다운로드]
+                            </a><br/>
+                        </c:if>
+                        <c:if test="${not empty resource.hwp}">
+                            <c:set var="fileName" value="${fn:substringAfter(resource.hwp, '_')}"/>
+                            📑 HWP:
+                            <a class="download-link" data-path="${resource.hwp}" data-original="${fileName}" href="#">
+                                    ${fileName} [다운로드]
+                            </a><br/>
+                        </c:if>
+                        <c:if test="${not empty resource.word}">
+                            <c:set var="fileName" value="${fn:substringAfter(resource.word, '_')}"/>
+                            📄 Word:
+                            <a class="download-link" data-path="${resource.word}" data-original="${fileName}" href="#">
+                                    ${fileName} [다운로드]
+                            </a><br/>
+                        </c:if>
+                        <c:if test="${not empty resource.xlsx}">
+                            <c:set var="fileName" value="${fn:substringAfter(resource.xlsx, '_')}"/>
+                            📊 Excel:
+                            <a class="download-link" data-path="${resource.xlsx}" data-original="${fileName}" href="#">
+                                <div>savedName: ${resource.savedName}, originalName: ${resource.originalName}</div>
 
+                                    ${fileName} [다운로드]
+                            </a><br/>
+                        </c:if>
+                        <c:if test="${not empty resource.pptx}">
+                            <c:set var="fileName" value="${fn:substringAfter(resource.pptx, '_')}"/>
+                            📽 PPTX:
+                            <a class="download-link" data-path="${resource.pptx}" data-original="${fileName}" href="#">
+                                    ${fileName} [다운로드]
+                            </a><br/>
+                        </c:if>
+                        <c:if test="${not empty resource.zip}">
+                            <c:set var="fileName" value="${fn:substringAfter(resource.zip, '_')}"/>
+                            📦 ZIP:
+                            <a class="download-link" data-path="${resource.zip}" data-original="${fileName}" href="#">
+                                    ${fileName} [다운로드]
+                            </a><br/>
+                        </c:if>
+                        <a class="download-link"
+                           data-path="${resource.savedName}"
+                           data-original="${resource.originalName}"
+                           href="#">
+                                ${fn:substringAfter(resource.savedName, '_')} [다운로드]
+                        </a><br/>
+                    </c:forEach>
                 </td>
             </tr>
         </table>
@@ -268,54 +262,52 @@
         </div>
     </div>
 </section>
+
 <script>
     function CommentWrite__submit(form) {
-        console.log(form.body.value);
-
         form.body.value = form.body.value.trim();
-
         if (form.body.value.length < 3) {
             alert('3글자 이상 입력하세요');
             form.body.focus();
             return;
         }
-
         form.submit();
     }
 </script>
 
-<!-- 댓글 -->
+<!-- 댓글 작성 폼 -->
 <section class="mt-24 text-xl px-4">
-    <c:if test="${rq.isLogined() }">
-        <form action="/usr/comment/doWrite" method="POST" onsubmit="CommentWrite__submit(this); return false;" )>
+    <c:if test="${rq.isLogined()}">
+        <form action="/usr/comment/doWrite" method="POST" onsubmit="CommentWrite__submit(this); return false;">
             <table class="table" border="1" cellspacing="0" cellpadding="5"
                    style="width: 100%; border-collapse: collapse;">
                 <input type="hidden" name="relTypeCode" value="post"/>
-                <input type="hidden" name="relId" value="${post.id }"/>
+                <input type="hidden" name="relId" value="${post.id}"/>
                 <tbody>
-
                 <tr>
                     <th>댓글 내용 입력</th>
-                    <td style="text-align: center;"><textarea class="input input-bordered input-sm w-full max-w-xs"
-                                                              name="body" autocomplete="off" type="text"
-                                                              placeholder="내용을 입력하세요"></textarea></td>
+                    <td style="text-align: center;">
+                        <textarea class="input input-bordered input-sm w-full max-w-xs" name="body" autocomplete="off"
+                                  placeholder="내용을 입력하세요"></textarea>
+                    </td>
                 </tr>
                 <tr>
                     <th></th>
                     <td style="text-align: center;">
                         <button class="btn btn-outline">작성</button>
                     </td>
-
                 </tr>
                 </tbody>
             </table>
         </form>
     </c:if>
-
-    <c:if test="${!rq.isLogined() }">
+    <c:if test="${!rq.isLogined()}">
         댓글 작성을 위해 <a class="btn btn-outline btn-primary" href="../member/login">로그인</a>이 필요합니다
     </c:if>
-    <!-- 댓글 리스트 -->
+</section>
+
+<!-- 댓글 리스트 -->
+<section class="mt-8 text-xl px-4">
     <div class="mx-auto">
         <table class="table" border="1" cellspacing="0" cellpadding="5" style="width: 100%; border-collapse: collapse;">
             <thead>
@@ -340,20 +332,13 @@
                             <input type="text" value="${comment.body}" name="reply-text-${comment.id}"/>
                         </form>
                     </td>
-
-                    <!-- ✅ 좋아요 버튼 영역 -->
                     <td style="text-align: center;">
-                        <button class="comment-like-btn"
-                                data-rel-id="${comment.id}"
+                        <button class="comment-like-btn" data-rel-id="${comment.id}"
                                 data-liked="${comment.alreadyLiked}">
-              <span class="heart">
-                      ${comment.alreadyLiked ? '❤️' : '🤍'}
-              </span>
+                            <span class="heart">${comment.alreadyLiked ? '❤️' : '🤍'}</span>
                             <span class="like-count">${comment.like}</span>
                         </button>
                     </td>
-
-                    <!-- 수정 버튼 -->
                     <td style="text-align: center;">
                         <c:if test="${comment.userCanModify}">
                             <button onclick="toggleModifybtn('${comment.id}');" id="modify-btn-${comment.id}"
@@ -364,18 +349,14 @@
                             </button>
                         </c:if>
                     </td>
-
-                    <!-- 삭제 버튼 -->
                     <td style="text-align: center;">
                         <c:if test="${comment.userCanDelete}">
-                            <a class="btn btn-outline btn-xs btn-error"
-                               onclick="if(confirm('정말 삭제?') == false) return false;"
+                            <a class="btn btn-outline btn-xs btn-error" onclick="if(!confirm('정말 삭제?')) return false;"
                                href="/usr/comment/doDelete?id=${comment.id}">삭제</a>
                         </c:if>
                     </td>
                 </tr>
             </c:forEach>
-
             <c:if test="${empty comments}">
                 <tr>
                     <td colspan="6" style="text-align: center;">댓글이 없습니다</td>
@@ -392,7 +373,7 @@
             const $btn = $(this);
             const relId = $btn.data("rel-id");
             const $heart = $btn.find(".heart");
-            const $likeCount = $btn.find(".like-count"); // ← 여기 위치를 위로 올려야 함
+            const $likeCount = $btn.find(".like-count");
 
             $.post("/usr/comment/toggleLike", {relId}, function (data) {
                 if (data.resultCode?.startsWith("S-")) {
@@ -413,34 +394,26 @@
         });
     });
 </script>
+
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
+    document.addEventListener('DOMContentLoaded', () => {
         document.querySelectorAll('.download-link').forEach(link => {
             const path = link.getAttribute('data-path');
+            const original = link.getAttribute('data-original');
 
-            if (!path) return;
+            if (!path || !original) {
+                console.warn('다운로드 링크에 data-path 또는 data-original이 없습니다.', link);
+                return;
+            }
 
-            // 🔽 파일명 추출 (마지막 슬래시 이후)
-            const fileName = path.substring(path.lastIndexOf('/') + 1);
-
-            // 🔽 인코딩 처리
             const encodedPath = encodeURIComponent(path);
-            const encodedName = encodeURIComponent(fileName);
+            const encodedOriginal = encodeURIComponent(original);
 
-            // 🔽 href 설정
-            link.href = `/file/download?path=${encodedPath}&original=${encodedName}`;
-
-            // 🔽 텍스트도 보기 좋게 설정
-            link.textContent = `${fileName} [다운로드]`;
-
-            // 디버깅용 로그
-            console.log("추출된 파일명:", fileName);
-            console.log("encodedPath:", encodedPath);
-            console.log("encodedName:", encodedName);
+            link.href = `/file/download?path=${encodedPath}&original=${encodedOriginal}`;
         });
     });
-</script>
 
+</script>
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         const content = document.querySelector('#viewerContent').value.trim();

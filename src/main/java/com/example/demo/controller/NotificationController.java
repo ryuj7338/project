@@ -3,7 +3,7 @@ package com.example.demo.controller;
 import com.example.demo.service.NotificationService;
 import com.example.demo.vo.Notification;
 import com.example.demo.vo.ResultData;
-import com.example.demo.vo.Rq;  // 로그인 관련 객체 가정
+import com.example.demo.vo.Rq;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;

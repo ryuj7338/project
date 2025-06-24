@@ -32,4 +32,6 @@ kakao:
   redirect_uri: http://localhost:8080/login/oauth2/code/kakao
 
 custom:
-  uploadDirPath: C:/Users/admin/IdeaProjects/project/uploadFiles
+  uploadDirPath: C:/Users/rjh73/IdeaProjects/project/uploadFiles
+
+

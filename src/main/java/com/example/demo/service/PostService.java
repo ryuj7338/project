@@ -1,11 +1,13 @@
 package com.example.demo.service;
 
 import com.example.demo.repository.PostRepository;
+import com.example.demo.repository.ResourceRepository;
 import com.example.demo.util.Ut;
 import com.example.demo.vo.FileInfo;
 import com.example.demo.vo.Post;
 import com.example.demo.vo.ResultData;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -17,9 +19,26 @@ public class PostService {
     @Autowired
     private PostRepository postRepository;
 
-    public PostService (PostRepository postRepository) {
+    @Autowired
+    private ResourceRepository resourceRepository;
+
+
+    public PostService(PostRepository postRepository) {
         this.postRepository = postRepository;
 
+    }
+
+
+    @Autowired
+    private ApplicationContext context;
+
+    public void printPostServiceBeans() {
+        String[] beanNames = context.getBeanNamesForType(PostService.class);
+        System.out.println("PostService 빈 개수: " + beanNames.length);
+        for (String name : beanNames) {
+            Object bean = context.getBean(name);
+            System.out.println("Bean name: " + name + ", Class: " + bean.getClass() + ", Hash: " + bean.hashCode());
+        }
     }
 
 
@@ -37,7 +56,23 @@ public class PostService {
 
         int id = postRepository.getLastInsertId();
 
-        return ResultData.from("S-1", Ut.f("%d번 글이 등록되었습니다.", id), "등록된 게시글 id",  id);
+        return ResultData.from("S-1", Ut.f("%d번 글이 등록되었습니다.", id), "등록된 게시글 id", id);
+    }
+
+    public Post writePostAndReturnPost(int memberId, int boardId, String title, String body) {
+        System.out.println("[DEBUG] writePostAndReturnPost 시작: " + title);
+        Post post = new Post();
+        post.setMemberId(memberId);
+        post.setBoardId(boardId);
+        post.setTitle(title);
+        post.setBody(body);
+
+        postRepository.insert(post);
+        System.out.println("[DEBUG] insert 후 Post ID: " + post.getId());
+        Post savedPost = postRepository.getById(post.getId());
+
+        System.out.println("[DEBUG] getById 후 Post: " + savedPost);
+        return post;
     }
 
     public Post getPostById(int id) {
@@ -62,7 +97,7 @@ public class PostService {
 
     public ResultData userCanModify(int loginedMemberId, Post post) {
 
-        if(post.getMemberId() != loginedMemberId) {
+        if (post.getMemberId() != loginedMemberId) {
             return ResultData.from("F-A", Ut.f("%d번 게시글에 대한 권한이 없습니다.", post.getId()));
         }
 
@@ -71,7 +106,7 @@ public class PostService {
 
     public ResultData userCanDelete(int loginedMemberId, Post post) {
 
-        if(post.getMemberId() != loginedMemberId) {
+        if (post.getMemberId() != loginedMemberId) {
             return ResultData.from("F-A", Ut.f("%d번 게시글에 대한 삭제 권한이 없습니다.", post.getId()));
         }
 
@@ -79,17 +114,16 @@ public class PostService {
     }
 
     public Post getForPrintPost(int loginedMemberId, int id) {
-
         Post post = postRepository.getForPrintPost(id);
-
+        System.out.println("getForPrintPost 조회된 body: " + (post != null ? post.getBody() : "post is null"));
         controlForPrintData(loginedMemberId, post);
-
         return post;
     }
 
+
     private void controlForPrintData(int loginedMemberId, Post post) {
 
-        if(post == null) {
+        if (post == null) {
             return;
         }
 
@@ -104,7 +138,7 @@ public class PostService {
         int affectedRow = postRepository.increaseHitCount(id);
 
         System.out.println(affectedRow);
-        if(affectedRow == 0) {
+        if (affectedRow == 0) {
             return ResultData.from("F-1", "해당 게시글은 없습니다.", "id", id);
         }
 
@@ -120,7 +154,7 @@ public class PostService {
 
         int affectedRow = postRepository.increaseLikeReaction(relId);
 
-        if(affectedRow == 0) {
+        if (affectedRow == 0) {
             return ResultData.from("F-1", "없는 게시물입니다.");
         }
 
@@ -131,7 +165,7 @@ public class PostService {
 
         int affectedRow = postRepository.decreaseLikeReaction(relId);
 
-        if(affectedRow == 0) {
+        if (affectedRow == 0) {
             return ResultData.from("F-1", "없는 게시물입니다.");
         }
 
@@ -142,9 +176,6 @@ public class PostService {
         return postRepository.getLike(relId);
     }
 
-    public boolean existsByTitle(String title) {
-        return postRepository.existsByTitle(title);
-    }
 
     public void write(int boardId, String nickname, int memberId, String title, String body) {
         Post post = new Post();
@@ -222,5 +253,41 @@ public class PostService {
                 .toList();
     }
 
-}
 
+    public Post getPostByTitle(String title) {
+        return postRepository.getPostByTitle(title);
+    }
+
+    public void updatePostBody(int postId, String body) {
+        System.out.println("updatePostBody 호출: postId=" + postId + ", Body=" + body);
+        postRepository.updatePostBody(postId, body);
+        System.out.println("updatePostBody 종료");
+    }
+
+
+    public boolean existsByTitle(String originalName) {
+        printPostServiceBeans();
+        System.out.println("[existsByTitle] 검사 대상: " + originalName);
+        boolean exists = postRepository.existsByTitle(originalName);
+        System.out.println("[existsByTitle] 결과: " + exists);
+        return exists;
+//        return postRepository.existsByTitle(originalName);
+    }
+
+
+
+//    public boolean existsByBodyContains(String relativePath) {
+//        try {
+//            System.out.println("[PostService] existsByBodyContains 호출됨, parameter: " + relativePath);
+//            boolean exists = postRepository.existsByBodyContains(relativePath);
+//            System.out.println("[PostService] existsByBodyContains 결과: " + exists);
+//            return exists;
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            return false;
+//        }
+//
+////        return postRepository.existsByBodyContains(relativePath);
+//    }
+
+}

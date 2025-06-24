@@ -1,9 +1,12 @@
 package com.example.demo.controller;
 
 
+import java.net.URLDecoder;
 import com.example.demo.vo.Resource;
+import java.net.URLDecoder;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -13,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.*;
+import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -65,23 +69,37 @@ public class FileController {
     }
 
 
-    @GetMapping("/download")
-    public void downloadFile(@RequestParam String path,
-                             @RequestParam String original,
-                             HttpServletResponse response) throws IOException {
-        File file = new File(uploadDirPath + File.separator + path.replace("uploadFiles/", ""));
 
-        if (!file.exists()) {
+
+    @GetMapping("/download")
+    public void downloadFile(@RequestParam String path, @RequestParam String original, HttpServletResponse response) throws IOException {
+        String decodedPath = URLDecoder.decode(path, "UTF-8");
+        String uploadDir = "C:/Users/rjh73/IdeaProjects/project/uploadFiles/";
+        File file = new File(uploadDir, decodedPath);
+
+        System.out.println("downloadFile 호출 - 전체 경로: " + file.getAbsolutePath());
+        System.out.println("파일명(path 파라미터): '" + path + "'");
+        System.out.println("디코딩된 파일명(decodedPath): '" + decodedPath + "'");
+        System.out.println("파일 존재 여부: " + file.exists());
+        System.out.println("파일 읽기 가능 여부: " + file.canRead());
+        System.out.println("파일인지 여부: " + file.isFile());
+
+        if (!file.exists() || !file.canRead() || !file.isFile()) {
             response.sendError(HttpServletResponse.SC_NOT_FOUND);
             return;
         }
 
         response.setContentType("application/octet-stream");
-        response.setHeader("Content-Disposition", "attachment; filename=\"" +
-                URLEncoder.encode(original, StandardCharsets.UTF_8) + "\"");
+        response.setHeader("Content-Disposition", "attachment; filename=\"" + URLEncoder.encode(original, "UTF-8") + "\"");
 
-        Files.copy(file.toPath(), response.getOutputStream());
-        response.getOutputStream().flush();
+        try (InputStream is = new FileInputStream(file);
+             OutputStream os = response.getOutputStream()) {
+            byte[] buffer = new byte[8192];
+            int length;
+            while ((length = is.read(buffer)) > 0) {
+                os.write(buffer, 0, length);
+            }
+        }
     }
 
 }

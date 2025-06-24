@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -170,6 +171,7 @@ public class UsrPostController {
         post.setBody(body);
         post.setMemberId(rq.getLoginedMemberId());
 
+
         postService.write(post);
 
         // 2. 파일 업로드 디버깅
@@ -182,13 +184,6 @@ public class UsrPostController {
         // 3. 파일 저장
         if (files != null && files.length > 0) {
             for (MultipartFile file : files) {
-
-                System.out.println("======== 파일 업로드 디버깅 ========");
-                System.out.println("원본 파일 이름: " + file.getOriginalFilename());
-                System.out.println("파일 크기: " + file.getSize());
-                System.out.println("파일 비었나? : " + file.isEmpty());
-                System.out.println("컨텐트 타입: " + file.getContentType());
-                System.out.println("=================================");
 
                 if (file.isEmpty()) continue;
 
@@ -213,8 +208,6 @@ public class UsrPostController {
                     file.transferTo(destFile);
 
                     String fileUrl = "/uploadFiles/" + savedFileName;
-
-                    // 본문에 파일 링크 삽입
                     finalBody.append("<br><a href='").append(fileUrl)
                             .append("' target='_blank'>[파일: ").append(safeFilename).append("]</a>");
 
@@ -225,6 +218,7 @@ public class UsrPostController {
                     resource.setBoardId(boardId);
                     resource.setTitle(title);
                     resource.setBody(body);
+                    resource.setAuto(true);
 
                     switch (ext) {
                         case "pdf": resource.setPdf(fileUrl); break;
@@ -242,7 +236,9 @@ public class UsrPostController {
                         case "zip": resource.setZip(fileUrl); break;
                     }
 
+                    System.out.println("[DEBUG] save 호출 직전 resource.pdf = " + resource.getPdf());
                     resourceService.save(resource);
+                    System.out.println("[DEBUG] save 호출 직후");
 
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -264,38 +260,56 @@ public class UsrPostController {
         Rq rq = (Rq) req.getAttribute("rq");
         int loginedMemberId = rq.getLoginedMemberId();
 
+        // 1. 게시글 정보 가져오기
         Post post = postService.getForPrintPost(loginedMemberId, id);
+        if (post == null) {
+            return "error/404"; // 적절한 에러 페이지로
+        }
 
+        // 2. 댓글, 좋아요 등 추가 정보
         ResultData usersReactionRd = reactionService.usersReaction(loginedMemberId, "post", id);
         if (usersReactionRd.isSuccess()) {
             model.addAttribute("userCanMakeReaction", true);
         }
+        List<Comment> comments = commentService.getForPrintComments(loginedMemberId, "post", id);
 
-        List<Comment> comments = commentService.getForPrintComments(rq.getLoginedMemberId(), "post", id);
+        // 3. 자동 업로드 파일과 직접 업로드 파일 모두 가져오기
+        List<Resource> autoUploadedFiles = resourceService.getAutoFilesByPostId(id);
+        List<Resource> directUploadedFiles = resourceService.getDirectFilesByPostId(id);
 
-        int commentsCount = comments.size();
 
-        // ✅ 첨부파일 조회
-        List<Resource> resourceList = resourceService.getListByPostId(id);
-        model.addAttribute("resourceList", resourceList);
+        // 4. 둘을 합쳐서 JSP에 넘길 리스트 생성
+        List<Resource> resourceList = new ArrayList<>();
+        resourceList.addAll(autoUploadedFiles);
+        resourceList.addAll(directUploadedFiles);
 
-        List<Resource> autoResources = resourceService.getListByPostId(0);
-        model.addAttribute("autoResources", autoResources);
+        for (Resource r : resourceList) {
+            System.out.println("savedName: " + r.getSavedName() + ", originalName: " + r.getOriginalName());
+        }
 
-        Resource resource = resourceService.getByPostId(id); // 단일 조회용
-        model.addAttribute("resource", resource);
+        // 5. 본문 내 다운로드 링크 제거(필요 시)
+        String filteredBody = removeDownloadLinks(post.getBody());
 
-        String cleanedBody = Ut.removeFileLinks(post.getBody());
-        post.setBody(cleanedBody);
-
-        model.addAttribute("comments", comments);
-        model.addAttribute("commentsCount", commentsCount);
+        // 6. Model에 데이터 넣기
         model.addAttribute("post", post);
+        model.addAttribute("comments", comments);
+        model.addAttribute("commentsCount", comments.size());
         model.addAttribute("usersReaction", usersReactionRd.getData1());
         model.addAttribute("isAlreadyAddLikeRp", reactionService.isAlreadyAddLikeRp(loginedMemberId, id, "post"));
+        model.addAttribute("resourceList", resourceList);
+        model.addAttribute("filteredBody", filteredBody);
 
-        return "/usr/post/detail";
+        return "usr/post/detail";
     }
+
+    private String removeDownloadLinks(String body) {
+        if (body == null) return "";
+
+        // <a>태그 안에 [파일: ...] 혹은 [다운로드] 텍스트 포함된 링크 제거
+        return body.replaceAll("<a[^>]*>(\\[파일:.*?\\]|\\[다운로드\\])</a>", "");
+    }
+
+
 
 
 
@@ -344,7 +358,7 @@ public class UsrPostController {
         model.addAttribute("board", board);
         model.addAttribute("page", page);
 
-        return "/usr/post/list";
+        return "usr/post/list";
     }
 
     @RequestMapping("/usr/news/list")
@@ -508,7 +522,7 @@ public class UsrPostController {
 
     @RequestMapping("/usr/job/list")
     public String jobList(HttpServletRequest req, Model model, @RequestParam(required = false, defaultValue = "recent") String sortBy
-, @RequestParam(defaultValue = "11") int boardId, @RequestParam(defaultValue = "title") String searchType, @RequestParam(required = false) String keyword, @RequestParam(defaultValue = "1") int page) {
+            , @RequestParam(defaultValue = "11") int boardId, @RequestParam(defaultValue = "title") String searchType, @RequestParam(required = false) String keyword, @RequestParam(defaultValue = "1") int page) {
 
         Rq rq = (Rq) req.getAttribute("rq");
         int memberId = rq.getLoginedMemberId();
