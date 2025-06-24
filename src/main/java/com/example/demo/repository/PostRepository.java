@@ -49,5 +49,9 @@ public interface PostRepository {
 
 
     List<String> findTitlesByKeyword(String keyword);
+
+    List<Post> findByTitleContainingAndBoardId(String keyword, Integer boardId);
+
+    List<Post> findByTitleContaining(String keyword);
 }
 

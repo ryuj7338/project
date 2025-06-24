@@ -54,16 +54,16 @@ CREATE TABLE `member` (
 
 # 자료실 테이블 생성
 CREATE TABLE resources (
-                           id INT(10) UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
-                           memberId INT(10) UNSIGNED NOT NULL,
-                           boardId INT(10) UNSIGNED NOT NULL,
-                           regDate DATETIME NOT NULL,
-                           updateDate DATETIME NOT NULL,
-                           title VARCHAR(50) NOT NULL,
-                           `body` TEXT NOT NULL,
-                           image VARCHAR(250) NOT NULL,
-                           pdf VARCHAR(250) NOT NULL,
-                           zip VARCHAR(250) NOT NULL
+id INT(10) UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
+memberId INT(10) UNSIGNED NOT NULL,
+boardId INT(10) UNSIGNED NOT NULL,
+regDate DATETIME NOT NULL,
+updateDate DATETIME NOT NULL,
+title VARCHAR(50) NOT NULL,
+`body` TEXT NOT NULL,
+image VARCHAR(250) NOT NULL,
+pdf VARCHAR(250) NOT NULL,
+zip VARCHAR(250) NOT NULL
 );
 
 select * from resources;

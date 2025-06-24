@@ -166,6 +166,47 @@
     });
   });
 </script>
+<script>
+  const $keyword = document.getElementById('keyword');
+  const $list = document.getElementById('autocompleteList');
+
+  $keyword.addEventListener('input', function () {
+    const query = this.value.trim();
+    if (query.length < 1) {
+      $list.style.display = 'none';
+      $list.innerHTML = '';
+      return;
+    }
+
+    fetch(`/usr/autocomplete/law?keyword=${query}`)
+            .then(res => res.json())
+            .then(data => {
+              if (data.length === 0) {
+                $list.style.display = 'none';
+                $list.innerHTML = '';
+                return;
+              }
+
+              $list.innerHTML = data.map(item => `<li style="padding: 5px; cursor: pointer;">${item}</li>`).join('');
+              $list.style.display = 'block';
+            });
+  });
+
+  $list.addEventListener('click', function (e) {
+    if (e.target.tagName === 'LI') {
+      $keyword.value = e.target.textContent;
+      $list.style.display = 'none';
+      $list.innerHTML = '';
+    }
+  });
+
+  document.addEventListener('click', function (e) {
+    if (!e.target.closest('#autocompleteList') && e.target !== $keyword) {
+      $list.style.display = 'none';
+    }
+  });
+</script>
+
 
 </body>
 </html>

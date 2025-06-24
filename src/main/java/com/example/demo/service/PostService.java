@@ -206,5 +206,21 @@ public class PostService {
         return postRepository.findTitlesByKeyword(keyword);
     }
 
+    public List<String> getAutocompleteSuggestions(String keyword, Integer boardId) {
+        List<Post> posts;
+
+        if (boardId != null) {
+            posts = postRepository.findByTitleContainingAndBoardId(keyword, boardId);
+        } else {
+            posts = postRepository.findByTitleContaining(keyword);
+        }
+
+        return posts.stream()
+                .map(Post::getTitle)
+                .distinct()
+                .limit(10)
+                .toList();
+    }
+
 }
 
