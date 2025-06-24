@@ -18,8 +18,6 @@
 
 
 
-
-
     <update id="updateResource" parameterType="Resource">
         UPDATE resources
         SET updateDate = NOW(),
@@ -50,5 +48,11 @@
         SELECT * FROM resources WHERE postId = #{postId}
     </select>
 
+    <insert id="save" parameterType="com.example.demo.vo.Resource">
+        INSERT INTO resources
+        (postId, original_name, saved_name, regDate)
+        VALUES
+        (#{postId}, #{originalName}, #{savedName}, NOW())
+    </insert>
 
 </mapper>

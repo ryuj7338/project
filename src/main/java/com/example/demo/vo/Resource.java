@@ -25,4 +25,7 @@ public class Resource {
     private String xlsx;
     private String pptx;
     private String docx;
+    private String originalName;
+    private String savedName;
+
 }
