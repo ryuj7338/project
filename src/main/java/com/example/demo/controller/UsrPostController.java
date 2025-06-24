@@ -279,8 +279,14 @@ public class UsrPostController {
         List<Resource> resourceList = resourceService.getListByPostId(id);
         model.addAttribute("resourceList", resourceList);
 
+        List<Resource> autoResources = resourceService.getListByPostId(0);
+        model.addAttribute("autoResources", autoResources);
+
         Resource resource = resourceService.getByPostId(id); // 단일 조회용
         model.addAttribute("resource", resource);
+
+        String cleanedBody = Ut.removeFileLinks(post.getBody());
+        post.setBody(cleanedBody);
 
         model.addAttribute("comments", comments);
         model.addAttribute("commentsCount", commentsCount);

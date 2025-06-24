@@ -21,4 +21,8 @@ public interface ResourceRepository {
     List<Resource> getListByPostId(int postId);
 
     Resource getByPostId(int postId); // postId로 첨부파일 조회 (상세페이지용)
+
+    int countBySavedName(String savedName);
+
+    void save(Resource resource);
 }

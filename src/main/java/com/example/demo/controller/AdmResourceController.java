@@ -2,6 +2,8 @@ package com.example.demo.controller;
 
 import com.example.demo.service.BoardService;
 import com.example.demo.service.PostService;
+import com.example.demo.service.ResourceService;
+import com.example.demo.vo.Resource;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -16,10 +18,8 @@ import java.io.File;
 public class AdmResourceController {
 
     @Autowired
-    private PostService postService;
+    private ResourceService resourceService;
 
-    @Autowired
-    private final BoardService boardService;
 
     private final String basePath = "src/main/resources/static/uploadFiles";
 
@@ -54,34 +54,41 @@ public class AdmResourceController {
             } else {
                 String title = file.getName();
 
-
                 String relativePath = file.getAbsolutePath()
-                    .replace("\\", "/")
-                    .replace(new File(basePath).getAbsolutePath().replace("\\", "/"), "");
+                        .replace("\\", "/")
+                        .replace(new File(basePath).getAbsolutePath().replace("\\", "/"), "");
                 String fileUrl = "/uploadFiles" + relativePath;
 
                 // 중복 방지
-                if (postService.existsByTitle(title)){
+                if (resourceService.existsBySavedName(title)) {
                     System.out.println("[SKIP] 이미 등록됨");
                     continue;
                 }
 
-                postService.writePost(1, 5, title,
-                "<a href='" + fileUrl + "' target='_blank'>[다운로드]</a>");
+                Resource resource = new Resource();
+                resource.setSavedName(title);
+                resource.setOriginalName(title);
+                resource.setType(type); // optional
 
+                // ✅ body에 다운로드 링크 자동 삽입
+                String downloadLink = "<a href='" + fileUrl + "' download>" + title + " [다운로드]</a>";
+                resource.setBody(downloadLink);
+
+                // ✅ 파일 경로를 컬럼에 저장
+                switch (type) {
+                    case "pdf" -> resource.setPdf(fileUrl);
+                    case "pptx" -> resource.setPptx(fileUrl);
+                    case "xlsx" -> resource.setXlsx(fileUrl);
+                    case "hwp" -> resource.setHwp(fileUrl);
+                    case "docx" -> resource.setDocx(fileUrl);
+                    case "image" -> resource.setImage(fileUrl);
+                }
+
+                resourceService.save(resource);
                 count++;
             }
         }
         return count;
     }
 
-
-    private int getBoardIdByType(String type) {
-        switch (type) {
-            case "pdf": return 20;
-            case "pptx": return 21;
-            case "image": return 22;
-            default: return 0;
-        }
-    }
 }

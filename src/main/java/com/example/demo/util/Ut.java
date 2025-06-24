@@ -120,4 +120,13 @@ public class Ut {
             return null;
         }
     }
+
+    public static String removeFileLinks(String html) {
+        if (html == null) return null;
+
+        // <a href=".../uploadFiles/...">...</a> 태그 전체 제거
+        return html.replaceAll("<a[^>]+/uploadFiles/[^>]+>[^<]*</a>", "");
+    }
+
+
 }

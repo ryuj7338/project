@@ -48,11 +48,20 @@
         SELECT * FROM resources WHERE postId = #{postId}
     </select>
 
+
+    <select id="countBySavedName" resultType="int">
+        SELECT COUNT(*)
+        FROM resources
+        WHERE saved_name = #{savedName}
+    </select>
+
     <insert id="save" parameterType="com.example.demo.vo.Resource">
         INSERT INTO resources
-        (postId, original_name, saved_name, regDate)
+        (postId, memberId, boardId, regDate, updateDate, title, body,
+         image, pdf, zip, hwp, word, xlsx, pptx, docx, original_name, saved_name)
         VALUES
-        (#{postId}, #{originalName}, #{savedName}, NOW())
+            (#{postId}, #{memberId}, #{boardId}, #{regDate}, #{updateDate}, #{title}, #{body},
+             #{image}, #{pdf}, #{zip}, #{hwp}, #{word}, #{xlsx}, #{pptx}, #{docx}, #{originalName}, #{savedName})
     </insert>
 
 </mapper>

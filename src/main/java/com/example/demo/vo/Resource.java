@@ -17,6 +17,7 @@ public class Resource {
     private String updateDate;
     private String title;
     private String body;
+
     private String image;
     private String pdf;
     private String zip;
@@ -25,7 +26,9 @@ public class Resource {
     private String xlsx;
     private String pptx;
     private String docx;
+
     private String originalName;
     private String savedName;
 
+    private String type;
 }

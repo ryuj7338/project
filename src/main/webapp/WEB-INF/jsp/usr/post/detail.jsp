@@ -178,7 +178,9 @@
                 <th>내용</th>
                 <td>
                     <div id="viewer"></div>
-                    <textarea id="viewerContent" style="display:none;"><c:out value="${post.body}"/></textarea>
+                    <textarea id="viewerContent" style="display:none;"><c:out value="${post.body}"/>
+                    <c:out value="${resource.body}"/>
+                    </textarea>
                 </td>
             </tr>
             <tr>
@@ -186,65 +188,67 @@
 
                 <td>
                     <c:forEach var="resource" items="${resourceList}">
-                        <c:if test="${not empty resource.image}">
-                            <c:set var="fileName" value="${fn:substringAfter(resource.image, '_')}"/>
-                            🖼 이미지:
-                            <a class="download-link"
-                               href="/file/download?path=${resource.zip}&amp;original=${fileName}">
-                                    ${fileName} [다운로드]
-                            </a><br/>
-                        </c:if>
-                        <c:if test="${not empty resource.pdf}">
-                            <c:set var="fileName" value="${fn:substringAfter(resource.pdf, '_')}"/>
-                            📄 PDF:
-                            <a class="download-link"
-                               href="/file/download?path=${resource.zip}&amp;original=${fileName}">
-                                    ${fileName} [다운로드]
-                            </a><br/>
-                        </c:if>
-                        <c:if test="${not empty resource.hwp}">
-                            <c:set var="fileName" value="${fn:substringAfter(resource.hwp, '_')}"/>
-                            📑 HWP:
-                            <a class="download-link"
-                               href="/file/download?path=${resource.zip}&amp;original=${fileName}">
-                                    ${fileName} [다운로드]
-                            </a><br/>
-                        </c:if>
+                        <c:if test="${empty resource.postId or resource.postId eq 0}">
+                            <c:if test="${not empty resource.image}">
+                                <c:set var="fileName" value="${fn:substringAfter(resource.image, '_')}"/>
+                                🖼 이미지:
+                                <a class="download-link"
+                                   href="/file/download?path=${resource.zip}&amp;original=${fileName}">
+                                        ${fileName} [다운로드]
+                                </a><br/>
+                            </c:if>
+                            <c:if test="${not empty resource.pdf}">
+                                <c:set var="fileName" value="${fn:substringAfter(resource.pdf, '_')}"/>
+                                📄 PDF:
+                                <a class="download-link"
+                                   href="/file/download?path=${resource.zip}&amp;original=${fileName}">
+                                        ${fileName} [다운로드]
+                                </a><br/>
+                            </c:if>
+                            <c:if test="${not empty resource.hwp}">
+                                <c:set var="fileName" value="${fn:substringAfter(resource.hwp, '_')}"/>
+                                📑 HWP:
+                                <a class="download-link"
+                                   href="/file/download?path=${resource.zip}&amp;original=${fileName}">
+                                        ${fileName} [다운로드]
+                                </a><br/>
+                            </c:if>
 
-                        <c:if test="${not empty resource.docx}">
-                            <c:set var="fileName" value="${fn:substringAfter(resource.docx, '_')}"/>
-                            📄 Word:
-                            <a class="download-link"
-                               href="/file/download?path=${resource.zip}&amp;original=${fileName}">
-                                    ${fileName} [다운로드]
-                            </a><br/>
-                        </c:if>
+                            <c:if test="${not empty resource.docx}">
+                                <c:set var="fileName" value="${fn:substringAfter(resource.docx, '_')}"/>
+                                📄 Word:
+                                <a class="download-link"
+                                   href="/file/download?path=${resource.zip}&amp;original=${fileName}">
+                                        ${fileName} [다운로드]
+                                </a><br/>
+                            </c:if>
 
-                        <c:if test="${not empty resource.xlsx}">
-                            <c:set var="fileName" value="${fn:substringAfter(resource.xlsx, '_')}"/>
-                            📊 Excel:
-                            <a class="download-link"
-                               href="/file/download?path=${resource.zip}&amp;original=${fileName}">
-                                    ${fileName} [다운로드]
-                            </a><br/>
-                        </c:if>
+                            <c:if test="${not empty resource.xlsx}">
+                                <c:set var="fileName" value="${fn:substringAfter(resource.xlsx, '_')}"/>
+                                📊 Excel:
+                                <a class="download-link"
+                                   href="/file/download?path=${resource.zip}&amp;original=${fileName}">
+                                        ${fileName} [다운로드]
+                                </a><br/>
+                            </c:if>
 
-                        <c:if test="${not empty resource.pptx}">
-                            <c:set var="fileName" value="${fn:substringAfter(resource.pptx, '_')}"/>
-                            📽 PPTX:
-                            <a class="download-link"
-                               href="/file/download?path=${resource.zip}&amp;original=${fileName}">
-                                    ${fileName} [다운로드]
-                            </a><br/>
-                        </c:if>
+                            <c:if test="${not empty resource.pptx}">
+                                <c:set var="fileName" value="${fn:substringAfter(resource.pptx, '_')}"/>
+                                📽 PPTX:
+                                <a class="download-link"
+                                   href="/file/download?path=${resource.zip}&amp;original=${fileName}">
+                                        ${fileName} [다운로드]
+                                </a><br/>
+                            </c:if>
 
-                        <c:if test="${not empty resource.zip}">
-                            <c:set var="fileName" value="${fn:substringAfter(resource.zip, '_')}"/>
-                            📦 ZIP:
-                            <a class="download-link"
-                               href="/file/download?path=${resource.zip}&amp;original=${fileName}">
-                                    ${fileName} [다운로드]
-                            </a><br/>
+                            <c:if test="${not empty resource.zip}">
+                                <c:set var="fileName" value="${fn:substringAfter(resource.zip, '_')}"/>
+                                📦 ZIP:
+                                <a class="download-link"
+                                   href="/file/download?path=${resource.zip}&amp;original=${fileName}">
+                                        ${fileName} [다운로드]
+                                </a><br/>
+                            </c:if>
                         </c:if>
 
                     </c:forEach>
@@ -293,10 +297,8 @@
                 <tr>
                     <th>댓글 내용 입력</th>
                     <td style="text-align: center;"><textarea class="input input-bordered input-sm w-full max-w-xs"
-                                                              name="body"
-                                                              autocomplete="off" type="text"
+                                                              name="body" autocomplete="off" type="text"
                                                               placeholder="내용을 입력하세요"></textarea></td>
-
                 </tr>
                 <tr>
                     <th></th>

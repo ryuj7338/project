@@ -37,4 +37,8 @@ public class ResourceService {
     public Resource getByPostId(int postId) {
         return resourceRepository.getByPostId(postId); // 상세 페이지 조회용 메서드
     }
+
+    public boolean existsBySavedName(String savedName) {
+        return resourceRepository.countBySavedName(savedName) > 0;
+    }
 }
