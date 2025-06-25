@@ -19,15 +19,10 @@ public class AdmResourceController {
     @Autowired
     private AutoUploadService autoUploadService;
 
-
-
     @RequestMapping("/autoUpload")
     @ResponseBody
     public String autoUpload() {
         int count = autoUploadService.autoUpload();
-
         return count + "개의 파일을 업로드했습니다.";
     }
-
-
 }

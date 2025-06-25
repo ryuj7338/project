@@ -81,8 +81,6 @@
     </insert>
 
 
-
-
     <select id="getListByPostId" resultMap="ResourceResultMap">
         SELECT * FROM resources WHERE postId = #{postId}
     </select>
@@ -99,5 +97,14 @@
         WHERE postId = #{postId}
           AND auto = #{auto}
     </select>
+
+    <select id="existsBySavedNameAndAuto" resultType="boolean" parameterType="map">
+        SELECT EXISTS (
+            SELECT 1 FROM resources
+            WHERE saved_name = #{savedName}
+              AND auto = #{auto}
+        )
+    </select>
+
 
 </mapper>

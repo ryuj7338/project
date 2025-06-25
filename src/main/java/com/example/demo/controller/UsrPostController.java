@@ -6,6 +6,7 @@ import com.example.demo.vo.*;
 import jakarta.servlet.http.HttpServletRequest;
 import com.example.demo.util.Ut;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -57,6 +58,9 @@ public class UsrPostController {
 
     @Autowired
     private NotificationService notificationService;
+
+    @Value("${custom.uploadDirPath}")
+    private String uploadDirPath;
 
     UsrPostController(BeforeActionInterceptor beforeActionInterceptor) {
         this.beforeActionInterceptor = beforeActionInterceptor;
@@ -152,6 +156,10 @@ public class UsrPostController {
                           @RequestParam(defaultValue = "1") int boardId,
                           @RequestParam(name = "files", required = false) MultipartFile[] files) {
 
+        System.out.println("[DEBUG] >>> doWrite() 호출됨");
+        System.out.println("[DEBUG] uploadDirPath = " + uploadDirPath);
+        System.out.println("[DEBUG] files.length = " + (files != null ? files.length : 0));
+
         Rq rq = (Rq) req.getAttribute("rq");
 
         // 권한 체크
@@ -171,20 +179,17 @@ public class UsrPostController {
         post.setBody(body);
         post.setMemberId(rq.getLoginedMemberId());
 
-
         postService.write(post);
 
-        // 2. 파일 업로드 디버깅
-        System.out.println(">> 파일 배열 null 여부: " + (files == null));
-        System.out.println(">> 파일 개수: " + (files != null ? files.length : 0));
-
+        // 2. 파일 저장
         StringBuilder finalBody = new StringBuilder(body);
         List<String> allowedExtensions = List.of("pdf", "ppt", "pptx", "hwp", "doc", "docx", "xls", "xlsx", "jpg", "jpeg", "png", "gif", "zip");
 
-        // 3. 파일 저장
+        File uploadDir = new File(uploadDirPath);
+        if (!uploadDir.exists()) uploadDir.mkdirs();
+
         if (files != null && files.length > 0) {
             for (MultipartFile file : files) {
-
                 if (file.isEmpty()) continue;
 
                 try {
@@ -199,11 +204,6 @@ public class UsrPostController {
                     String uuid = UUID.randomUUID().toString();
                     String savedFileName = uuid + "_" + safeFilename;
 
-                    String uploadDirPath = new File("").getAbsolutePath() + "/uploadFiles";
-
-                    File uploadDir = new File(uploadDirPath);
-                    if (!uploadDir.exists()) uploadDir.mkdirs();
-
                     File destFile = new File(uploadDir, savedFileName);
                     file.transferTo(destFile);
 
@@ -211,49 +211,29 @@ public class UsrPostController {
                     finalBody.append("<br><a href='").append(fileUrl)
                             .append("' target='_blank'>[파일: ").append(safeFilename).append("]</a>");
 
-                    // 리소스 객체 생성
+                    // 리소스 저장
                     Resource resource = new Resource();
                     resource.setPostId(post.getId());
                     resource.setMemberId(rq.getLoginedMemberId());
                     resource.setBoardId(boardId);
-                    resource.setTitle(title);
-                    resource.setBody(body);
-                    resource.setAuto(true);
-
+                    resource.setTitle(originalFilename); // 파일 제목
+                    resource.setBody("첨부파일"); // 간단 설명
+                    resource.setOriginalName(originalFilename);
+                    resource.setSavedName(savedFileName);
+                    resource.setAuto(false); // ✅ 직접 업로드임
 
                     switch (ext) {
-                        case "pdf":
-                            resource.setPdf(fileUrl);
-                            break;
-                        case "ppt":
-                        case "pptx":
-                            resource.setPptx(fileUrl);
-                            break;
-                        case "hwp":
-                            resource.setHwp(fileUrl);
-                            break;
-                        case "doc":
-                        case "docx":
-                            resource.setWord(fileUrl);
-                            break;
-                        case "xls":
-                        case "xlsx":
-                            resource.setXlsx(fileUrl);
-                            break;
-                        case "jpg":
-                        case "jpeg":
-                        case "png":
-                        case "gif":
-                            resource.setImage(fileUrl);
-                            break;
-                        case "zip":
-                            resource.setZip(fileUrl);
-                            break;
+                        case "pdf" -> resource.setPdf(savedFileName);
+                        case "ppt", "pptx" -> resource.setPptx(savedFileName);
+                        case "hwp" -> resource.setHwp(savedFileName);
+                        case "doc", "docx" -> resource.setWord(savedFileName);
+                        case "xls", "xlsx" -> resource.setXlsx(savedFileName);
+                        case "jpg", "jpeg", "png", "gif" -> resource.setImage(savedFileName);
+                        case "zip" -> resource.setZip(savedFileName);
                     }
 
-                    System.out.println("[DEBUG] save 호출 직전 resource.pdf = " + resource.getPdf());
                     resourceService.save(resource);
-                    System.out.println("[DEBUG] save 호출 직후");
+                    System.out.println("[DEBUG] 저장 완료: " + savedFileName);
 
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -262,7 +242,7 @@ public class UsrPostController {
             }
         }
 
-        // 4. 본문 업데이트
+        // 3. 본문 파일 링크 포함하여 업데이트
         post.setBody(finalBody.toString());
         postService.update(post);
 
