@@ -80,7 +80,7 @@ public class NotificationService {
 
     public boolean markAllAsRead(int loginedMemberId) {
         notificationRepository.updateAllAsReadByMemberId(loginedMemberId);
-        return false;
+        return true;
     }
 
     public Notification findById(int id) {

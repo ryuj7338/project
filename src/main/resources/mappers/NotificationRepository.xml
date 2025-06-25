@@ -50,9 +50,8 @@
     <!-- 전체 읽음 처리 -->
     <update id="updateAllAsReadByMemberId">
         UPDATE notification
-        SET isRead = TRUE
+        SET isRead = true
         WHERE memberId = #{memberId}
-          AND isRead = FALSE
     </update>
 
 
