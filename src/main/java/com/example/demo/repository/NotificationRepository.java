@@ -19,4 +19,5 @@ public interface NotificationRepository {
     Optional<Notification> findById(int notificationId);
 
 
+    void insert(Notification notification);
 }

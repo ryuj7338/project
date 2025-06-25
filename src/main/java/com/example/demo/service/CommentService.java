@@ -2,8 +2,11 @@ package com.example.demo.service;
 
 
 import com.example.demo.repository.CommentRepository;
+import com.example.demo.repository.MemberRepository;
+import com.example.demo.repository.PostRepository;
 import com.example.demo.util.Ut;
 import com.example.demo.vo.Comment;
+import com.example.demo.vo.Post;
 import com.example.demo.vo.ResultData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -18,6 +21,15 @@ public class CommentService {
     private ReactionService reactionService;
     @Autowired
     private CommentRepository commentRepository;
+
+    @Autowired
+    private PostRepository postRepository;
+
+    @Autowired
+    private MemberRepository memberRepository;
+
+    @Autowired
+    private NotificationService notificationService;
 
     public CommentService(CommentRepository commentRepository) {
         this.commentRepository = commentRepository;
@@ -40,13 +52,25 @@ public class CommentService {
     }
 
     public ResultData writeComment(int loginedMemberId, String body, String relTypeCode, int relId) {
-
+        // 1. 댓글 저장
         commentRepository.writeComment(loginedMemberId, body, relTypeCode, relId);
-
         int id = commentRepository.getLastInsertId();
+
+        // 2. relTypeCode가 post인 경우, 게시글 작성자에게 알림
+        if (relTypeCode.equals("post")) {
+            Post post = postRepository.getPostById(relId);
+            if (post != null && post.getMemberId() != loginedMemberId) { // 자기 댓글은 알림 X
+                String nickname = memberRepository.getNicknameById(loginedMemberId);
+                String message = "💬 " + nickname + "님이 회원님의 글에 댓글을 달았습니다.";
+                String link = "/usr/post/detail?id=" + relId + "#comment-" + id;
+
+                notificationService.notifyMember(post.getMemberId(), message, link);
+            }
+        }
 
         return ResultData.from("S-1", Ut.f("%d번 댓글이 등록되었습니다.", id), "등록된 댓글의 id", id);
     }
+
 
     private void controlForPrintData(int loginedMemberId, Comment comment) {
 
