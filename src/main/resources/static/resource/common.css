@@ -71,3 +71,8 @@ header {
     z-index: 9999;
     box-shadow: 0 2px 12px rgba(0,0,0,0.15);
 }
+
+.notification-item.read {
+    background-color: #f4f4f4;
+    color: gray;
+}

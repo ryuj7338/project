@@ -72,23 +72,24 @@ public class UsrNotificationController {
         return "usr/notification/list";
     }
 
-    @PostMapping("/markAsRead")
-    @ResponseBody
-    public ResultData markAsRead(@RequestParam int notificationId) {
-        if (!rq.isLogined()) {
-            return ResultData.from("F-1", "로그인이 필요합니다.");
-        }
-
-        int memberId = rq.getLoginedMemberId();
-
-        boolean success = notificationService.markAsRead(memberId, notificationId);
-
-        if (success) {
-            return ResultData.from("S-1", "읽음 처리되었습니다.");
-        } else {
-            return ResultData.from("F-1", "읽음 처리 실패 또는 권한 없음.");
-        }
-    }
+//    개별 알림 읽음 처리
+//    @PostMapping("/markAsRead")
+//    @ResponseBody
+//    public ResultData markAsRead(@RequestParam int notificationId) {
+//        if (!rq.isLogined()) {
+//            return ResultData.from("F-1", "로그인이 필요합니다.");
+//        }
+//
+//        int memberId = rq.getLoginedMemberId();
+//
+//        boolean success = notificationService.markAsRead(memberId, notificationId);
+//
+//        if (success) {
+//            return ResultData.from("S-1", "읽음 처리되었습니다.");
+//        } else {
+//            return ResultData.from("F-1", "읽음 처리 실패 또는 권한 없음.");
+//        }
+//    }
 
     @GetMapping("/unreadCount")
     @ResponseBody
@@ -101,6 +102,7 @@ public class UsrNotificationController {
         return ResultData.from("S-1", "성공", "count", count);
     }
 
+//    모든 알림 읽음 처리
     @PostMapping("/markAllAsRead")
     @ResponseBody
     public ResultData markAllAsRead() {
@@ -111,6 +113,7 @@ public class UsrNotificationController {
         notificationService.markAllAsRead(rq.getLoginedMemberId());
         return ResultData.from("S-1", "모든 알림을 읽음 처리했습니다.");
     }
+
 
     @GetMapping("/readAndGo")
     public String readAndRedirect(@RequestParam int id) {

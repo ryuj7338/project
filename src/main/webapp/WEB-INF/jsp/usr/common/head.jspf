@@ -91,6 +91,7 @@
 
                 <ul id="alertList" class="divide-y divide-gray-200 p-0 m-0 list-none">
                     <!-- AJAX로 알림 항목 추가 -->
+
                 </ul>
 
                 <div class="text-center py-2 border-t">
@@ -104,13 +105,13 @@
     </div>
 </header>
 
+
+
 <script>
     $('#alertBtn').on('click', function (e) {
         e.stopPropagation();
 
         const $dropdown = $('#alertDropdown');
-
-        // 토글로 열고 닫기 처리
         if ($dropdown.is(':visible')) {
             $dropdown.hide();
             return;
@@ -125,21 +126,23 @@
                 $list.empty();
 
                 if (data.length === 0) {
-                    $list.append(
-                        '<li class="p-4 text-center text-gray-500">새 알림이 없습니다.</li>'
-                    );
+                    $list.append('<li class="p-4 text-center text-gray-500">새 알림이 없습니다.</li>');
                 } else {
-                    data.forEach((alert) => {
-                        $list.append(`
-                            <li
-                                class="p-4 hover:bg-gray-100 cursor-pointer"
-                                onclick="location.href='${alert.link}'"
-                            >
-                                <div class="font-semibold">${alert.title}</div>
-                                <div class="text-xs text-gray-500">${alert.timeAgo}</div>
-                            </li>
-                        `);
+                    data.forEach(function (noti, i) {
+                        console.log(`✅ ${i + 1}번째 알림 객체:`, noti);
+
+                        const $li = $('<li>')
+                            .addClass('notification-item p-4 hover:bg-gray-100 cursor-pointer')
+                            .attr('data-id', noti.id)
+                            .attr('data-link', noti.link)
+                            .append(
+                                $('<div>').addClass('font-semibold').text(noti.title),
+                                $('<div>').addClass('text-xs text-gray-500').text(noti.timeAgo || '')
+                            );
+
+                        $('#alertList').append($li);
                     });
+
                 }
                 $dropdown.show();
             },
@@ -148,30 +151,53 @@
                 $list.empty();
 
                 if (xhr.status === 401) {
-                    $list.append(`
-      <li class="p-4 text-center text-gray-500">
-        로그인 후 확인할 수 있습니다.<br/>
-        <a href="/usr/member/login" class="text-blue-600 hover:underline text-sm mt-1 inline-block">로그인 하러 가기</a>
-      </li>
-    `);
+                    $list.append(`<li class="p-4 text-center text-gray-500">
+                        로그인 후 확인할 수 있습니다.<br/>
+                        <a href="/usr/member/login" class="text-blue-600 hover:underline text-sm mt-1 inline-block">로그인 하러 가기</a>
+                    </li>`);
                 } else {
-                    $list.append(
-                        '<li class="p-4 text-center text-red-500">알림을 불러오는 중 오류가 발생했습니다.</li>'
-                    );
+                    $list.append('<li class="p-4 text-center text-red-500">알림을 불러오는 중 오류가 발생했습니다.</li>');
                 }
                 $dropdown.show();
-        },
+            }
+        });
     });
-    })
-    ;
 
-    // 드롭다운 외부 클릭 시 닫기
-    $(document).on('click', function (e) {
-        const $dropdown = $('#alertDropdown');
-        if (!$(e.target).closest('#alertBtn, #alertDropdown').length) {
-            $dropdown.hide();
+    // ✅ 클릭된 알림 처리
+    $(document).on('click', '.notification-item', function () {
+        const $li = $(this);
+        const notificationId = $li.data('id');
+        const link = $li.data('link');
+
+        console.log("🟢 클릭된 알림 ID:", notificationId);
+        console.log("🟢 클릭된 알림 링크:", link);
+
+        if (!notificationId || isNaN(notificationId)) {
+            console.warn("⚠ 잘못된 알림 ID:", notificationId);
+            return;
         }
+
+
     });
+
+    $('#alertList').on('click', '.notification-item', function () {
+        const id = $(this).data('id');
+        const link = $(this).data('link');
+
+        // 전체 읽음 처리 (선택)
+        fetch('/usr/notifications/markAllAsRead', {
+            method: 'POST'
+        }).then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    // 새 창으로 링크 열기
+                    if (link) {
+                        window.open(link, '_blank', 'width=800,height=600,scrollbars=yes');
+                    }
+                }
+            });
+    });
+
 </script>
 
 <script>

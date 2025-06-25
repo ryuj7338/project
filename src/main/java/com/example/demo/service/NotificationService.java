@@ -2,7 +2,6 @@ package com.example.demo.service;
 
 import com.example.demo.repository.NotificationRepository;
 import com.example.demo.vo.Notification;
-import org.checkerframework.checker.units.qual.A;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -79,8 +78,9 @@ public class NotificationService {
         return notificationRepository.countUnreadByMemberId(loginedMemberId);
     }
 
-    public void markAllAsRead(int loginedMemberId) {
+    public boolean markAllAsRead(int loginedMemberId) {
         notificationRepository.updateAllAsReadByMemberId(loginedMemberId);
+        return false;
     }
 
     public Notification findById(int id) {

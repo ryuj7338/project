@@ -1,4 +1,5 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <!DOCTYPE html>
 <html>
 <head>
@@ -9,9 +10,29 @@
             padding: 20px;
             font-size: 14px;
         }
+
         .noti {
-            border-bottom: 1px solid #ccc;
             padding: 10px 0;
+            border-bottom: 1px solid #ccc;
+        }
+
+        .noti.read {
+            background-color: #f4f4f4;
+            color: gray;
+        }
+
+        .noti a {
+            text-decoration: none;
+            color: #333;
+        }
+
+        .noti.read a {
+            color: #888;
+        }
+
+        .noti-time {
+            font-size: 12px;
+            color: #888;
         }
     </style>
 </head>
@@ -24,22 +45,16 @@
         <p>📭 알림이 없습니다.</p>
     </c:when>
     <c:otherwise>
-        <c:forEach var="n" items="${notifications}">
-            <div class="p-3 border-b">
-                <a href="${n.link}">${n.title}</a>
-                <div style="font-size: 12px; color: gray;">${n.regDate}</div>
-            </div>
-        </c:forEach>
+    <c:forEach var="noti" items="${notifications}">
+        <div class="noti">
+            <c:if test='${noti.read}'> read</c:if>
+
+            <a href="${noti.link}" target="_blank">${noti.title}</a>
+            <div class="noti-time">${noti.regDate}</div>
+        </div>
+    </c:forEach>
     </c:otherwise>
 </c:choose>
-
-<c:forEach var="noti" items="${notifications}">
-    <div class="noti">
-        <a href="${noti.link}" target="_blank">${noti.title}</a>
-        <div style="font-size: 12px; color: gray;">${noti.regDate}</div>
-    </div>
-</c:forEach>
-
 
 </body>
 </html>
