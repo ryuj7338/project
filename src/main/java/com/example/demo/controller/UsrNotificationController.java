@@ -4,11 +4,17 @@ import com.example.demo.service.NotificationService;
 import com.example.demo.vo.Notification;
 import com.example.demo.vo.ResultData;
 import com.example.demo.vo.Rq;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.Collections;
 import java.util.List;
 
@@ -28,23 +34,34 @@ public class UsrNotificationController {
     }
 
     @GetMapping("/recent")
-    @ResponseBody
-    public List<Notification> getRecentNotifications() {
+    public ResponseEntity<?> getRecentNotifications() {
         if (!rq.isLogined()) {
-            return Collections.emptyList(); // 비로그인 시 빈 리스트 반환
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인이 필요합니다.");
         }
+
         int memberId = rq.getLoginedMemberId();
-        return notificationService.getRecentNotifications(memberId);
+        List<Notification> list = notificationService.getRecentNotifications(memberId);
+        return ResponseEntity.ok(list);
     }
+
+
 
 
     // 알림 목록 페이지
     @GetMapping("/list")
-    public String showNotificationList(Model model) {
-        if (!rq.isLogined()) {
-            return "redirect:/usr/member/login";
-        }
+    public String showNotificationList(HttpServletRequest request, HttpServletResponse response, Model model) {
 
+        if (!rq.isLogined()) {
+            try {
+                response.setContentType("text/html; charset=UTF-8");
+                PrintWriter out = response.getWriter();
+                out.println("<script>alert('로그인이 필요합니다.'); window.close();</script>");
+                out.close();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            return null; // JSP 렌더링 안 하고 종료
+        }
         int memberId = rq.getLoginedMemberId();
 
         List<Notification> notifications = notificationService.getNotificationsByMemberId(memberId);
