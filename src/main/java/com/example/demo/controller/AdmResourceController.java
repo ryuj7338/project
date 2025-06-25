@@ -19,21 +19,7 @@ public class AdmResourceController {
     @Autowired
     private AutoUploadService autoUploadService;
 
-    @Autowired
-    private PostService postService;
 
-
-    private final String basePath = "src/main/resources/static/uploadFiles";
-    @Autowired
-    private ResourceService resourceService;
-
-
-    @GetMapping("/testExistsByBodyContains")
-    @ResponseBody
-    public String testExistsByBodyContains() {
-        boolean exists = resourceService.existsBySavedNameContains("테스트 경로");
-        return "existsByBodyContains 호출, 결과: " + exists;
-    }
 
     @RequestMapping("/autoUpload")
     @ResponseBody

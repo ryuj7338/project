@@ -1,8 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-<!DOCTYPE html>
-<html>
-<head>
+
     <meta charset="UTF-8" />
 
     <!-- 공통 CSS/JS -->
@@ -17,13 +15,12 @@
 
     <!-- 테일윈드 -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.1.4/tailwind.min.css" rel="stylesheet" />
-</head>
+
 <body>
 <header>
     <div class="flex h-16 items-center bg-white w-full max-w-full px-6 relative">
         <!-- 로고 -->
         <a href="/" class="flex items-center space-x-2">
-            <img class="w-16 h-16" src="https://velog.velcdn.com/images/ryuj7338/post/b891e272-de6f-4c1e-b605-b3b733f58f87/image.png" alt="Logo"/>
             <span class="font-bold text-xl text-gray-800">Guardium</span>
         </a>
 

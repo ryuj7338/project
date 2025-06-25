@@ -1,33 +1,30 @@
 package com.example.demo.controller;
 
 
-import java.net.URLDecoder;
-import com.example.demo.vo.Resource;
-import java.net.URLDecoder;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.InputStreamResource;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.*;
-import java.net.URLDecoder;
+
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.util.*;
 
 @Controller
 @RequestMapping("/file")
 public class FileController {
 
-    @Value("${custom.uploadDirPath}")
+    @Value("${custom.uploadDirPath}")  // 예: "C:/프로젝트경로/uploadFiles/"
     private String uploadDirPath;
+
+    @Autowired
+    private ResourceLoader resourceLoader;
 
     // ✅ 1. 일반 파일 업로드
     @PostMapping("/upload")
@@ -49,19 +46,22 @@ public class FileController {
             try {
                 file.transferTo(destFile);
 
-                Resource resource = new Resource();
-                resource.setOriginalName(originalName);
-                resource.setSavedName(savedName);
+                // com.example.demo.vo.Resource 인스턴스 생성
+                com.example.demo.vo.Resource resourceVo = new com.example.demo.vo.Resource();
+                resourceVo.setOriginalName(originalName);
+                resourceVo.setSavedName(savedName);
 
                 Map<String, String> fileInfo = new HashMap<>();
                 fileInfo.put("savedPath", savedName);
                 fileInfo.put("originalName", originalName);
                 uploadedFiles.add(fileInfo);
+
+                // 필요 시 DB 저장 등 추가 작업
+
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
-
 
         result.put("success", true);
         result.put("files", uploadedFiles);
@@ -69,35 +69,26 @@ public class FileController {
     }
 
 
-
-
     @GetMapping("/download")
     public void downloadFile(@RequestParam String path, @RequestParam String original, HttpServletResponse response) throws IOException {
-        String decodedPath = URLDecoder.decode(path, "UTF-8");
-        String uploadDir = "C:/Users/rjh73/IdeaProjects/project/uploadFiles/";
-        File file = new File(uploadDir, decodedPath);
+        File file = new File(uploadDirPath, path);
 
-        System.out.println("downloadFile 호출 - 전체 경로: " + file.getAbsolutePath());
-        System.out.println("파일명(path 파라미터): '" + path + "'");
-        System.out.println("디코딩된 파일명(decodedPath): '" + decodedPath + "'");
-        System.out.println("파일 존재 여부: " + file.exists());
-        System.out.println("파일 읽기 가능 여부: " + file.canRead());
-        System.out.println("파일인지 여부: " + file.isFile());
-
-        if (!file.exists() || !file.canRead() || !file.isFile()) {
-            response.sendError(HttpServletResponse.SC_NOT_FOUND);
+        if (!file.exists() || !file.isFile() || !file.canRead()) {
+            response.sendError(HttpServletResponse.SC_NOT_FOUND, "파일을 찾을 수 없거나 읽을 수 없습니다.");
             return;
         }
 
         response.setContentType("application/octet-stream");
         response.setHeader("Content-Disposition", "attachment; filename=\"" + URLEncoder.encode(original, "UTF-8") + "\"");
+        response.setHeader("Content-Length", String.valueOf(file.length()));
 
         try (InputStream is = new FileInputStream(file);
              OutputStream os = response.getOutputStream()) {
+
             byte[] buffer = new byte[8192];
-            int length;
-            while ((length = is.read(buffer)) > 0) {
-                os.write(buffer, 0, length);
+            int len;
+            while ((len = is.read(buffer)) != -1) {
+                os.write(buffer, 0, len);
             }
         }
     }

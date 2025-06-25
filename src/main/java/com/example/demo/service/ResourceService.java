@@ -34,9 +34,6 @@ public class ResourceService {
     }
 
 
-
-
-
     public void updateResource(Resource resource) {
         resourceRepository.updateResource(resource);
     }
@@ -56,6 +53,7 @@ public class ResourceService {
         }
         return resources;
     }
+
     public List<Resource> getByPostId(int postId) {
         return resourceRepository.getByPostId(postId);
     }
@@ -89,8 +87,6 @@ public class ResourceService {
     }
 
 
-
-
     public boolean existsBySavedNameContains(String savedName) {
         System.out.println("[ResourceService] existsBySavedNameContains 호출: " + savedName);
         boolean exists = resourceRepository.existsBySavedNameContains(savedName);
@@ -114,4 +110,7 @@ public class ResourceService {
         return files;
     }
 
+    public List<Resource> getFilesByPostId(int postId) {
+        return resourceRepository.getListByPostId(postId);
+    }
 }

@@ -31,4 +31,7 @@ public class Resource {
     private String savedName;
 
     private boolean auto;
+
+    public boolean exists;
+
 }

@@ -112,11 +112,6 @@
 </script>
 
 <section class="mt-8 text-xl px-4">
-    <c:forEach var="resource" items="${resourceList}">
-        <div>
-            savedName: ${resource.savedName}, originalName: ${resource.originalName}
-        </div>
-    </c:forEach>
     <div class="mx-auto">
         <table border="1" cellspacing="0" cellpadding="5" style="width: 100%; border-collapse: collapse;">
             <tr>
@@ -163,6 +158,7 @@
                 <th>제목</th>
                 <td>${post.title}</td>
             </tr>
+
             <tr>
                 <th>내용</th>
                 <td>
@@ -175,77 +171,13 @@
             <tr>
                 <th>첨부파일</th>
                 <td>
-                    <c:forEach var="resource" items="${resourceList}">
+                    <c:forEach var="file" items="${resourceList}">
                         <div>
-                            savedName: ${resource.savedName}, originalName: ${resource.originalName}
+                            📁 ${file.originalName}
+                            <a href="#" class="download-link"
+                               data-path="${file.savedName}"
+                               data-original="${file.originalName}">[다운로드]</a>
                         </div>
-                        <a class="download-link"
-                           data-path="${resource.savedName}"
-                           data-original="${resource.originalName}"
-                           href="/file/download?path=${resource.savedName}&original=${resource.originalName}">
-                            다운로드 ${resource.originalName}
-                        </a>
-                    </c:forEach>
-                    <c:forEach var="resource" items="${resourceList}">
-                        <c:if test="${not empty resource.image}">
-                            <c:set var="fileName" value="${fn:substringAfter(resource.image, '_')}"/>
-                            🖼 이미지:
-                            <a class="download-link" data-path="${resource.image}"
-                               data-original="${fileName}" href="#">
-                                    ${fileName} [다운로드]
-                            </a><br/>
-                        </c:if>
-                        <c:if test="${not empty resource.pdf}">
-                            <c:set var="fileName" value="${fn:substringAfter(resource.pdf, '_')}"/>
-                            📄 PDF:
-                            <a class="download-link" data-path="${resource.pdf}"
-                               data-original="${resource.originalName}" href="#">
-                                    ${fileName} [다운로드]
-                            </a><br/>
-                        </c:if>
-                        <c:if test="${not empty resource.hwp}">
-                            <c:set var="fileName" value="${fn:substringAfter(resource.hwp, '_')}"/>
-                            📑 HWP:
-                            <a class="download-link" data-path="${resource.hwp}" data-original="${fileName}" href="#">
-                                    ${fileName} [다운로드]
-                            </a><br/>
-                        </c:if>
-                        <c:if test="${not empty resource.word}">
-                            <c:set var="fileName" value="${fn:substringAfter(resource.word, '_')}"/>
-                            📄 Word:
-                            <a class="download-link" data-path="${resource.word}" data-original="${fileName}" href="#">
-                                    ${fileName} [다운로드]
-                            </a><br/>
-                        </c:if>
-                        <c:if test="${not empty resource.xlsx}">
-                            <c:set var="fileName" value="${fn:substringAfter(resource.xlsx, '_')}"/>
-                            📊 Excel:
-                            <a class="download-link" data-path="${resource.xlsx}" data-original="${fileName}" href="#">
-                                <div>savedName: ${resource.savedName}, originalName: ${resource.originalName}</div>
-
-                                    ${fileName} [다운로드]
-                            </a><br/>
-                        </c:if>
-                        <c:if test="${not empty resource.pptx}">
-                            <c:set var="fileName" value="${fn:substringAfter(resource.pptx, '_')}"/>
-                            📽 PPTX:
-                            <a class="download-link" data-path="${resource.pptx}" data-original="${fileName}" href="#">
-                                    ${fileName} [다운로드]
-                            </a><br/>
-                        </c:if>
-                        <c:if test="${not empty resource.zip}">
-                            <c:set var="fileName" value="${fn:substringAfter(resource.zip, '_')}"/>
-                            📦 ZIP:
-                            <a class="download-link" data-path="${resource.zip}" data-original="${fileName}" href="#">
-                                    ${fileName} [다운로드]
-                            </a><br/>
-                        </c:if>
-                        <a class="download-link"
-                           data-path="${resource.savedName}"
-                           data-original="${resource.originalName}"
-                           href="#">
-                                ${fn:substringAfter(resource.savedName, '_')} [다운로드]
-                        </a><br/>
                     </c:forEach>
                 </td>
             </tr>
@@ -396,24 +328,22 @@
 </script>
 
 <script>
-    document.addEventListener('DOMContentLoaded', () => {
-        document.querySelectorAll('.download-link').forEach(link => {
-            const path = link.getAttribute('data-path');
-            const original = link.getAttribute('data-original');
+    document.querySelectorAll('.download-link').forEach(link => {
+        link.addEventListener('click', function (e) {
+            e.preventDefault();
 
-            if (!path || !original) {
-                console.warn('다운로드 링크에 data-path 또는 data-original이 없습니다.', link);
-                return;
-            }
+            const path = this.dataset.path;
+            const original = this.dataset.original;
 
-            const encodedPath = encodeURIComponent(path);
-            const encodedOriginal = encodeURIComponent(original);
+            const url = "/file/download?path=" + encodeURIComponent(path)
+                + "&original=" + encodeURIComponent(original);
 
-            link.href = `/file/download?path=${encodedPath}&original=${encodedOriginal}`;
+            window.location.href = url;
         });
     });
-
 </script>
+
+
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         const content = document.querySelector('#viewerContent').value.trim();

@@ -63,13 +63,13 @@ public class UsrPostController {
     }
 
     @RequestMapping("/usr/post/modify")
-    public String showModify(HttpServletRequest req, Model model, int id){
+    public String showModify(HttpServletRequest req, Model model, int id) {
 
         Rq rq = (Rq) req.getAttribute("rq");
 
         Post post = postService.getForPrintPost(rq.getLoginedMemberId(), id);
 
-        if(post == null){
+        if (post == null) {
             return Ut.jsHistoryBack("F-1", Ut.f("%d번 게시글은 없습니다.", id));
         }
 
@@ -92,10 +92,10 @@ public class UsrPostController {
 
         ResultData userCanModifyRd = postService.userCanModify(rq.getLoginedMemberId(), post);
 
-        if(userCanModifyRd.isFail()){
+        if (userCanModifyRd.isFail()) {
             return Ut.jsHistoryBack(userCanModifyRd.getResultCode(), userCanModifyRd.getMsg());
         }
-        if(userCanModifyRd.isSuccess()){
+        if (userCanModifyRd.isSuccess()) {
             postService.modifyPost(id, title, body);
         }
 
@@ -118,11 +118,11 @@ public class UsrPostController {
 
         ResultData userCanDeleteRd = postService.userCanDelete(rq.getLoginedMemberId(), post);
 
-        if(userCanDeleteRd.isFail()){
+        if (userCanDeleteRd.isFail()) {
             return Ut.jsHistoryBack(userCanDeleteRd.getResultCode(), userCanDeleteRd.getMsg());
         }
 
-        if(userCanDeleteRd.isSuccess()){
+        if (userCanDeleteRd.isSuccess()) {
             postService.deletePost(id);
         }
 
@@ -136,7 +136,7 @@ public class UsrPostController {
 
         Rq rq = (Rq) req.getAttribute("rq");
 
-        if (boardId == 5 && !rq.getIsAdmin()){
+        if (boardId == 5 && !rq.getIsAdmin()) {
             return rq.historyBackOnView("관리자 권한이 필요합니다.");
         }
 
@@ -220,20 +220,35 @@ public class UsrPostController {
                     resource.setBody(body);
                     resource.setAuto(true);
 
+
                     switch (ext) {
-                        case "pdf": resource.setPdf(fileUrl); break;
+                        case "pdf":
+                            resource.setPdf(fileUrl);
+                            break;
                         case "ppt":
-                        case "pptx": resource.setPptx(fileUrl); break;
-                        case "hwp": resource.setHwp(fileUrl); break;
+                        case "pptx":
+                            resource.setPptx(fileUrl);
+                            break;
+                        case "hwp":
+                            resource.setHwp(fileUrl);
+                            break;
                         case "doc":
-                        case "docx": resource.setWord(fileUrl); break;
+                        case "docx":
+                            resource.setWord(fileUrl);
+                            break;
                         case "xls":
-                        case "xlsx": resource.setXlsx(fileUrl); break;
+                        case "xlsx":
+                            resource.setXlsx(fileUrl);
+                            break;
                         case "jpg":
                         case "jpeg":
                         case "png":
-                        case "gif": resource.setImage(fileUrl); break;
-                        case "zip": resource.setZip(fileUrl); break;
+                        case "gif":
+                            resource.setImage(fileUrl);
+                            break;
+                        case "zip":
+                            resource.setZip(fileUrl);
+                            break;
                     }
 
                     System.out.println("[DEBUG] save 호출 직전 resource.pdf = " + resource.getPdf());
@@ -260,37 +275,21 @@ public class UsrPostController {
         Rq rq = (Rq) req.getAttribute("rq");
         int loginedMemberId = rq.getLoginedMemberId();
 
-        // 1. 게시글 정보 가져오기
         Post post = postService.getForPrintPost(loginedMemberId, id);
-        if (post == null) {
-            return "error/404"; // 적절한 에러 페이지로
-        }
+        if (post == null) return "error/404";
 
-        // 2. 댓글, 좋아요 등 추가 정보
         ResultData usersReactionRd = reactionService.usersReaction(loginedMemberId, "post", id);
         if (usersReactionRd.isSuccess()) {
             model.addAttribute("userCanMakeReaction", true);
         }
+
         List<Comment> comments = commentService.getForPrintComments(loginedMemberId, "post", id);
 
-        // 3. 자동 업로드 파일과 직접 업로드 파일 모두 가져오기
-        List<Resource> autoUploadedFiles = resourceService.getAutoFilesByPostId(id);
-        List<Resource> directUploadedFiles = resourceService.getDirectFilesByPostId(id);
+        // 🔁 이제는 하나의 리스트만 사용
+        List<Resource> resourceList = resourceService.getFilesByPostId(id);
 
-
-        // 4. 둘을 합쳐서 JSP에 넘길 리스트 생성
-        List<Resource> resourceList = new ArrayList<>();
-        resourceList.addAll(autoUploadedFiles);
-        resourceList.addAll(directUploadedFiles);
-
-        for (Resource r : resourceList) {
-            System.out.println("savedName: " + r.getSavedName() + ", originalName: " + r.getOriginalName());
-        }
-
-        // 5. 본문 내 다운로드 링크 제거(필요 시)
         String filteredBody = removeDownloadLinks(post.getBody());
 
-        // 6. Model에 데이터 넣기
         model.addAttribute("post", post);
         model.addAttribute("comments", comments);
         model.addAttribute("commentsCount", comments.size());
@@ -302,6 +301,7 @@ public class UsrPostController {
         return "usr/post/detail";
     }
 
+
     private String removeDownloadLinks(String body) {
         if (body == null) return "";
 
@@ -310,22 +310,18 @@ public class UsrPostController {
     }
 
 
-
-
-
     @RequestMapping("/usr/post/doIncreaseHitCountRd")
     @ResponseBody
-    public ResultData doIncreaseHitCount(int id){
+    public ResultData doIncreaseHitCount(int id) {
 
         ResultData increaseHitCountRd = postService.increaseHitCount(id);
 
-        if(increaseHitCountRd.isFail()){
+        if (increaseHitCountRd.isFail()) {
             return increaseHitCountRd;
         }
         int hitcount = (int) postService.getPostHitCount(id);
         return ResultData.newData(increaseHitCountRd, "hitCount", hitcount);
     }
-
 
 
     @RequestMapping("/usr/post/list")
@@ -335,10 +331,9 @@ public class UsrPostController {
 
         Board board = boardService.getBoardById(boardId);
 
-        if(board == null){
+        if (board == null) {
             return rq.historyBackOnView("존재하지 않는 게시판입니다.");
         }
-
 
 
         int postsCount = postService.getPostCount(boardId, searchKeyword, searchType);
@@ -392,8 +387,6 @@ public class UsrPostController {
 
         return "/usr/news/newslist";
     }
-
-
 
 
     @RequestMapping("/usr/law/list")
@@ -457,7 +450,6 @@ public class UsrPostController {
     }
 
 
-
     @RequestMapping("/usr/job/favorite/toggle")
     @ResponseBody
     public ResultData<?> toggleFavorite(@RequestParam int jobPostingId, HttpServletRequest req) {
@@ -481,7 +473,6 @@ public class UsrPostController {
 
         return toggleResult;
     }
-
 
 
     @RequestMapping("/usr/job/favorite/list")
@@ -528,14 +519,14 @@ public class UsrPostController {
         int memberId = rq.getLoginedMemberId();
 
         List<JobPosting> favoriteJobs = new ArrayList<>();
-        if(memberId != 0) {
+        if (memberId != 0) {
             favoriteJobs = jobFavoriteService.getFavoriteJobPostingsWithDday(memberId);
         }
 
         model.addAttribute("logined", memberId != 0);
 
         List<Long> favoriteJobId = new ArrayList<>();
-        for(JobPosting jobPosting : favoriteJobs) {
+        for (JobPosting jobPosting : favoriteJobs) {
             favoriteJobId.add(jobPosting.getId());
         }
 
@@ -567,11 +558,11 @@ public class UsrPostController {
                 filteredJobs = allJobs.stream()
                         .filter(job -> job.getCompanyName().contains(trimmedKeyword))
                         .collect(Collectors.toList());
-            }else if("certificate".equals(searchType)) {
+            } else if ("certificate".equals(searchType)) {
                 filteredJobs = allJobs.stream()
                         .filter(job -> job.getCertificate() != null && job.getCertificate().contains(trimmedKeyword))
                         .collect(Collectors.toList());
-            }else if ("endDate".equals(searchType)) {
+            } else if ("endDate".equals(searchType)) {
                 filteredJobs = allJobs.stream()
                         .filter(job -> job.getEndDate() != null && job.getEndDate().contains(trimmedKeyword))
                         .collect(Collectors.toList());
