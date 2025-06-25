@@ -9,15 +9,12 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.ZoneId;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/usr/notifications")
-public class NotificationController {
+public class UsrNotificationController {
 
     @Autowired
     private Rq rq;
@@ -75,4 +72,37 @@ public class NotificationController {
             return ResultData.from("F-1", "읽음 처리 실패 또는 권한 없음.");
         }
     }
+
+    @GetMapping("/unreadCount")
+    @ResponseBody
+    public ResultData getUnreadCount() {
+        if (!rq.isLogined()) {
+            return ResultData.from("S-1", "로그인 필요 없음", "count", 0);
+        }
+
+        int count = notificationService.getUnreadCount(rq.getLoginedMemberId());
+        return ResultData.from("S-1", "성공", "count", count);
+    }
+
+    @PostMapping("/markAllAsRead")
+    @ResponseBody
+    public ResultData markAllAsRead() {
+        if (!rq.isLogined()) {
+            return ResultData.from("F-1", "로그인이 필요합니다.");
+        }
+
+        notificationService.markAllAsRead(rq.getLoginedMemberId());
+        return ResultData.from("S-1", "모든 알림을 읽음 처리했습니다.");
+    }
+
+    @GetMapping("/readAndGo")
+    public String readAndRedirect(@RequestParam int id) {
+        Notification n = notificationService.findById(id);
+        if (n != null && rq.isLogined() && rq.getLoginedMemberId() == n.getMemberId()) {
+            notificationService.markAsRead(n.getMemberId(), n.getId());
+            return "redirect:" + n.getLink();
+        }
+        return "redirect:/"; // fallback
+    }
+
 }

@@ -42,4 +42,11 @@
             updateDate = NOW()
         WHERE id = #{id}
     </update>
+
+    <select id="findById" resultType="com.example.demo.vo.Comment">
+        SELECT *
+        FROM comment
+        WHERE id = #{id}
+    </select>
+
 </mapper>

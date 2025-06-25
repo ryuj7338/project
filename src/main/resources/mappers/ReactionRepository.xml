@@ -41,4 +41,27 @@
           AND relId = #{relId}
     </delete>
 
+    <delete id="delete">
+        DELETE FROM `like`
+        WHERE memberId = #{memberId}
+          AND relTypeCode = #{relTypeCode}
+          AND relId = #{relId}
+    </delete>
+
+    <select id="existsByMemberIdAndRelTypeCodeAndRelId" resultType="boolean">
+        SELECT COUNT(*) > 0
+        FROM `like`
+        WHERE memberId = #{memberId}
+          AND relTypeCode = #{relTypeCode}
+          AND relId = #{relId}
+    </select>
+
+    <insert id="insert">
+        INSERT INTO `like`
+        SET regDate = NOW(),
+            updateDate = NOW(),
+            memberId = #{memberId},
+            relTypeCode = #{relTypeCode},
+            relId = #{relId}
+    </insert>
 </mapper>

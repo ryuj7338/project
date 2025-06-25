@@ -74,4 +74,17 @@ public class NotificationService {
 
         notificationRepository.insert(notification);
     }
+
+    public int getUnreadCount(int loginedMemberId) {
+        return notificationRepository.countUnreadByMemberId(loginedMemberId);
+    }
+
+    public void markAllAsRead(int loginedMemberId) {
+        notificationRepository.updateAllAsReadByMemberId(loginedMemberId);
+    }
+
+    public Notification findById(int id) {
+
+        return notificationRepository.findById(id).orElse(null);
+    }
 }

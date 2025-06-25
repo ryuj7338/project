@@ -52,14 +52,13 @@ public class CommentService {
     }
 
     public ResultData writeComment(int loginedMemberId, String body, String relTypeCode, int relId) {
-        // 1. 댓글 저장
         commentRepository.writeComment(loginedMemberId, body, relTypeCode, relId);
         int id = commentRepository.getLastInsertId();
 
-        // 2. relTypeCode가 post인 경우, 게시글 작성자에게 알림
+        // 📌 일반 댓글 알림 (게시글에 댓글)
         if (relTypeCode.equals("post")) {
             Post post = postRepository.getPostById(relId);
-            if (post != null && post.getMemberId() != loginedMemberId) { // 자기 댓글은 알림 X
+            if (post != null && post.getMemberId() != loginedMemberId) {
                 String nickname = memberRepository.getNicknameById(loginedMemberId);
                 String message = "💬 " + nickname + "님이 회원님의 글에 댓글을 달았습니다.";
                 String link = "/usr/post/detail?id=" + relId + "#comment-" + id;
@@ -68,8 +67,35 @@ public class CommentService {
             }
         }
 
+        // 📌 대댓글 알림 (댓글에 답글)
+        if (relTypeCode.equals("comment")) {
+            Comment parentComment = commentRepository.findById(relId);
+            if (parentComment != null && parentComment.getMemberId() != loginedMemberId) {
+                String nickname = memberRepository.getNicknameById(loginedMemberId);
+
+                int postId = findPostIdByComment(parentComment);
+                String message = "🔁 " + nickname + "님이 회원님의 댓글에 답글을 남겼습니다.";
+                String link = "/usr/post/detail?id=" + postId + "#comment-" + id;
+
+                notificationService.notifyMember(parentComment.getMemberId(), message, link);
+            }
+        }
+
         return ResultData.from("S-1", Ut.f("%d번 댓글이 등록되었습니다.", id), "등록된 댓글의 id", id);
     }
+
+
+    // CommentService or CommentRepository에서
+    public int findPostIdByComment(Comment comment) {
+        if (comment.getRelTypeCode().equals("post")) {
+            return comment.getRelId();
+        } else if (comment.getRelTypeCode().equals("comment")) {
+            Comment parent = commentRepository.findById(comment.getRelId());
+            return parent.getRelId(); // 부모 댓글이 연결한 postId
+        }
+        return -1; // 오류 케이스
+    }
+
 
 
     private void controlForPrintData(int loginedMemberId, Comment comment) {

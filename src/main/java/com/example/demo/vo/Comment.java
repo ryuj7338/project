@@ -28,4 +28,5 @@ public class Comment {
     private int likeCount;             // 좋아요 개수 (명확한 이름)
     private boolean isAlreadyAddLikeRp; // 내가 좋아요 눌렀는지
 
+
 }

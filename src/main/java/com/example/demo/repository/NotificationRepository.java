@@ -18,6 +18,9 @@ public interface NotificationRepository {
 
     Optional<Notification> findById(int notificationId);
 
+    int countUnreadByMemberId(@Param("memberId") int memberId);
+
+    void updateAllAsReadByMemberId(@Param("memberId") int memberId);
 
     void insert(Notification notification);
 }
