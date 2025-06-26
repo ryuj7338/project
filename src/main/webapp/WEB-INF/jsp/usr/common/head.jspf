@@ -168,9 +168,9 @@
             e.stopPropagation();
             $('#alertBadge').addClass('hidden');
 
-            // 전체 읽음 처리
-            $.post(cp + '/usr/notifications/markAllAsRead', {}, function () {
-            }, 'json');
+            // // 전체 읽음 처리
+            // $.post(cp + '/usr/notifications/markAllAsRead', {}, function () {
+            // }, 'json');
 
             const $dd = $('#alertDropdown');
             if ($dd.is(':visible')) {
