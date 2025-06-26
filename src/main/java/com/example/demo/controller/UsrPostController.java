@@ -471,7 +471,7 @@ public class UsrPostController {
         favoriteJobs = jobPostingService.getFavoriteJobPostingsWithDday(favoriteJobs);
         model.addAttribute("favoriteJobs", favoriteJobs);
 
-        return "/usr/job/favorite";
+        return "usr/job/favorite";
     }
 
     @RequestMapping("/usr/job/detail")
@@ -488,31 +488,42 @@ public class UsrPostController {
             return "redirect:/usr/job/list";
         }
         model.addAttribute("jobPosting", jobPosting);
+
+        if (rq != null && rq.isLogined()) {
+            int memberId = rq.getLoginedMemberId();
+            boolean isFavorited = jobFavoriteService.isFavorited(memberId, id);
+            model.addAttribute("isFavorited", isFavorited);
+        }
         return "usr/job/detail";
     }
 
     @RequestMapping("/usr/job/list")
-    public String jobList(HttpServletRequest req, Model model, @RequestParam(required = false, defaultValue = "recent") String sortBy
-            , @RequestParam(defaultValue = "11") int boardId, @RequestParam(defaultValue = "title") String searchType, @RequestParam(required = false) String keyword, @RequestParam(defaultValue = "1") int page) {
+    public String jobList(HttpServletRequest req, Model model,
+                          @RequestParam(required = false, defaultValue = "recent") String sortBy,
+                          @RequestParam(defaultValue = "11") int boardId,
+                          @RequestParam(defaultValue = "title") String searchType,
+                          @RequestParam(required = false) String keyword,
+                          @RequestParam(defaultValue = "1") int page) {
 
         Rq rq = (Rq) req.getAttribute("rq");
         int memberId = rq.getLoginedMemberId();
 
-        List<JobPosting> favoriteJobs = new ArrayList<>();
+        List<Long> favoriteJobIds = new ArrayList<>();
         if (memberId != 0) {
-            favoriteJobs = jobFavoriteService.getFavoriteJobPostingsWithDday(memberId);
+            favoriteJobIds = jobFavoriteService.getFavoriteIdsByMemberId(memberId);
+            System.out.println("🔎 [찜 ID 목록] memberId = " + memberId + ", 찜된 jobPostingId = " + favoriteJobIds);
         }
+
+
+        // 🔄 Long → Integer 변환
+        List<Integer> favoriteJobId = favoriteJobIds.stream()
+                .map(Long::intValue)
+                .collect(Collectors.toList());
 
         model.addAttribute("logined", memberId != 0);
+        model.addAttribute("favoriteId", favoriteJobId); // ✅ 딱 한 번만 추가
 
-        List<Long> favoriteJobId = new ArrayList<>();
-        for (JobPosting jobPosting : favoriteJobs) {
-            favoriteJobId.add(jobPosting.getId());
-        }
-
-        model.addAttribute("favoriteJobs", favoriteJobs);
-        model.addAttribute("favoriteId", favoriteJobId);
-
+        // 게시판 정보
         Board board = boardService.getBoardById(boardId);
 
         try {
@@ -551,15 +562,12 @@ public class UsrPostController {
             if (filteredJobs.isEmpty()) {
                 message = "검색 결과가 없습니다.";
             }
-
         } else {
-            // 검색 안 했거나, 빈 검색어지만 클라이언트에서 JS로 이미 걸러짐
             filteredJobs = allJobs;
         }
 
-        // 기존 필터링 끝난 후 ↓ 여기에 추가
+        // 정렬
         Comparator<JobPosting> comparator;
-
         switch (sortBy) {
             case "ddayAsc":
                 comparator = Comparator.comparing(JobPosting::getDday, Comparator.nullsLast(Comparator.naturalOrder()));
@@ -569,14 +577,12 @@ public class UsrPostController {
                 break;
             case "recent":
             default:
-                comparator = Comparator.comparing(JobPosting::getId).reversed(); // id 기준 최신순
+                comparator = Comparator.comparing(JobPosting::getId).reversed();
                 break;
         }
-
         filteredJobs.sort(comparator);
 
-
-        // 페이징 처리
+        // 페이징
         int itemsPerPage = 10;
         int totalItems = filteredJobs.size();
         int pagesCount = (int) Math.ceil((double) totalItems / itemsPerPage);
@@ -584,7 +590,6 @@ public class UsrPostController {
         int toIndex = Math.min(fromIndex + itemsPerPage, totalItems);
         List<JobPosting> pagedJobs = filteredJobs.subList(fromIndex, toIndex);
 
-        // 페이지 블록
         int pageBlockSize = 10;
         int currentBlock = (int) Math.ceil((double) page / pageBlockSize);
         int startPage = (currentBlock - 1) * pageBlockSize + 1;
@@ -595,7 +600,7 @@ public class UsrPostController {
         int prevPage = startPage - 1;
         int nextPage = endPage + 1;
 
-        // 모델
+        // 모델에 전달
         model.addAttribute("jobPostings", pagedJobs);
         model.addAttribute("board", board);
         model.addAttribute("page", page);
@@ -603,7 +608,6 @@ public class UsrPostController {
         model.addAttribute("keyword", keyword);
         model.addAttribute("searchType", searchType);
         model.addAttribute("message", message);
-
         model.addAttribute("startPage", startPage);
         model.addAttribute("endPage", endPage);
         model.addAttribute("hasPrev", hasPrev);
@@ -612,8 +616,15 @@ public class UsrPostController {
         model.addAttribute("nextPage", nextPage);
         model.addAttribute("sortBy", sortBy);
 
-        return "/usr/job/joblist";
-    }
+        for (JobPosting job : pagedJobs) {
+            Long jobId = job.getId();
+            boolean isFavorited = jobId != null && favoriteJobIds.stream().anyMatch(id -> id.equals(jobId));
+            job.setFavorited(isFavorited);
+        }
 
+        model.addAttribute("jobPostings", pagedJobs);
+
+        return "usr/job/joblist";
+    }
 
 }

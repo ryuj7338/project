@@ -18,6 +18,8 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -26,23 +28,24 @@ public class JobPostingService {
     @Autowired
     private JobPostingRepository jobPostingRepository;
 
-
     public void saveFromExcel(String filePath) throws Exception {
         try (InputStream is = new FileInputStream(filePath);
              Workbook workbook = new XSSFWorkbook(is)) {
 
-            List<JobPosting> jobPostings = new ArrayList<>();
+            List<JobPosting> newJobPostings = new ArrayList<>();
             Sheet sheet = workbook.getSheetAt(0);
+
+            // 🔍 기존 DB에 있는 title + companyName 조합을 기준으로 중복 방지
+            List<JobPosting> existingJobs = jobPostingRepository.findAll();
+            Set<String> existingKeys = existingJobs.stream()
+                    .map(job -> job.getTitle() + "|" + job.getCompanyName())
+                    .collect(Collectors.toSet());
 
             for (int i = 1; i <= sheet.getLastRowNum(); i++) {
                 Row row = sheet.getRow(i);
                 if (row == null) continue;
 
                 JobPosting jobpost = new JobPosting();
-
-                String endDateStr = getString(row.getCell(3));
-
-                jobpost.setEndDate(endDateStr);
 
                 jobpost.setTitle(getString(row.getCell(0)));
                 jobpost.setCompanyName(getString(row.getCell(1)));
@@ -51,19 +54,24 @@ public class JobPostingService {
                 jobpost.setCertificate(getString(row.getCell(4)));
                 jobpost.setOriginalUrl(getString(row.getCell(5)));
 
-                if(!jobpost.getEndDate().isBlank()){
+                // 🔑 중복 체크
+                String uniqueKey = jobpost.getTitle() + "|" + jobpost.getCompanyName();
+                if (existingKeys.contains(uniqueKey)) continue;
+
+                // 🗓 D-Day 계산
+                if (!jobpost.getEndDate().isBlank()) {
                     try {
                         jobpost.setDday(calculateDday(jobpost.getEndDate()));
-                    }catch (Exception e){
+                    } catch (Exception e) {
                         jobpost.setDday(null);
                     }
                 }
-                jobPostings.add(jobpost);
+
+                newJobPostings.add(jobpost);
             }
 
-            // 기존 데이터 삭제 후 저장 (중복 방지)
-            jobPostingRepository.deleteAll();
-            jobPostingRepository.saveAll(jobPostings);
+            // ✅ 기존 데이터는 남겨두고 새로운 것만 저장
+            jobPostingRepository.saveAll(newJobPostings);
         }
     }
 
@@ -81,12 +89,11 @@ public class JobPostingService {
 
         endDateStr = endDateStr.trim();
 
-
         if (endDateStr.contains("(")) {
             endDateStr = endDateStr.substring(0, endDateStr.indexOf("(")).trim();
         }
 
-        if (endDateStr.contains("상시")){
+        if (endDateStr.contains("상시")) {
             return -1;
         }
 
@@ -95,7 +102,6 @@ public class JobPostingService {
         }
 
         DateTimeFormatter formatter;
-
         if (endDateStr.contains(".")) {
             formatter = DateTimeFormatter.ofPattern("yyyy.MM.dd");
         } else if (endDateStr.contains("-")) {
@@ -104,17 +110,8 @@ public class JobPostingService {
             throw new IllegalArgumentException("지원하지 않는 날짜 형식: " + endDateStr);
         }
 
-
         LocalDate endDate = LocalDate.parse(endDateStr, formatter);
-
-        return (int)  ChronoUnit.DAYS.between(LocalDate.now(), endDate);
-    }
-
-    private String getDdayStr(Integer dday) {
-        if (dday == null) return "마감";
-        if (dday == -1) return "상시채용";
-        if (dday < 0) return "마감";
-        return "D-" + dday;
+        return (int) ChronoUnit.DAYS.between(LocalDate.now(), endDate);
     }
 
     public List<JobPosting> getAll() {
@@ -134,7 +131,6 @@ public class JobPostingService {
         return favoriteJobs;
     }
 
-
     public List<String> findTitlesByKeyword(String keyword) {
         return jobPostingRepository.findTitlesByKeyword(keyword);
     }
@@ -143,6 +139,3 @@ public class JobPostingService {
         return jobPostingRepository.findById((long) id).orElse(null);
     }
 }
-
-
-

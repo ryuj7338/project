@@ -8,6 +8,8 @@ import com.example.demo.vo.ResultData;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -28,6 +30,8 @@ public class JobFavoriteService {
     private NotificationService notificationService;
 
     // 토글 찜 기능 + 알림 생성 포함
+    @RequestMapping("/usr/job/favorite/toggle")
+    @ResponseBody
     public ResultData<?> toggleFavorite(int memberId, int jobPostingId) {
 
         if (memberId == 0) {
@@ -97,4 +101,9 @@ public class JobFavoriteService {
         List<Long> jobPostingId = jobFavoriteRepository.findJobPostingIdByMemberId(memberId);
         return jobPostingRepository.findAllById(jobPostingId);
     }
+
+    public List<Long> getFavoriteIdsByMemberId(int memberId) {
+        return jobFavoriteRepository.findJobPostingIdByMemberId(memberId);
+    }
+
 }

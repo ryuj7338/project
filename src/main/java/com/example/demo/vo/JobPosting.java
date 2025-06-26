@@ -41,4 +41,6 @@ public class JobPosting {
     @Transient
     private String ddayStr;
 
+    private boolean favorited;
+
 }
