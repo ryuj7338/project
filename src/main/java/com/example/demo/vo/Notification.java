@@ -23,4 +23,6 @@ public class Notification {
     private String timeAgo;       // 클라이언트 표시용 (필요시)
 
 
+    private String type;        // 알림 종류 ("LIKE", "COMMENT", "REPLY" 등)
+    private Integer senderId;   // 알림 발생 유저 ID
 }

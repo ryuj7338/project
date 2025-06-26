@@ -29,4 +29,6 @@ public interface NotificationRepository {
     int updateRead(@Param("memberId") int memberId, @Param("notificationId") int notificationId);
 
     int deleteByLinkAndTitle(@Param("memberId") int memberId, @Param("link") String link, @Param("title") String title);
+
+    boolean existsByMemberIdAndTypeAndLink(@Param("memberId") int memberId, @Param("type") String type, @Param("link") String link);
 }

@@ -71,29 +71,5 @@ public class UsrCommentController {
         return Ut.jsReplace(writeCommentRd.getResultCode(), writeCommentRd.getMsg(), "../post/detail?id=" + relId);
     }
 
-    @RequestMapping("/usr/comment/toggleLike")
-    @ResponseBody
-    public ResultData<?> toggleCommentLike(HttpServletRequest req, @RequestParam int relId) {
-        Rq rq = (Rq) req.getAttribute("rq");
-
-        if (rq.isLogout()) {
-            return ResultData.from("F-1", "로그인이 필요합니다.");
-        }
-
-        int memberId = rq.getLoginedMemberId();
-        String relTypeCode = "comment";
-
-        boolean alreadyLiked = reactionService.isAlreadyAddLikeRp(memberId, relId, relTypeCode);
-
-        if (alreadyLiked) {
-            reactionService.deleteLikeReaction(memberId, relTypeCode, relId);
-            int likeCount = reactionService.getReactionPoint(relTypeCode, relId); // 변경된 like 수
-            return ResultData.from("S-2", "좋아요 취소됨", "data1", new LikeResult(likeCount, false));
-        }
-
-        reactionService.addLikeReaction(memberId, relTypeCode, relId);
-        int likeCount = reactionService.getReactionPoint(relTypeCode, relId); // 변경된 like 수
-        return ResultData.from("S-1", "좋아요 됨", "data1", new LikeResult(likeCount, true));
-    }
 
 }

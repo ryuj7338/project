@@ -57,12 +57,6 @@
     </update>
 
 
-    <insert id="insert" parameterType="com.example.demo.vo.Notification">
-        INSERT INTO notification
-            (memberId, title, link, isRead, regDate)
-        VALUES (#{memberId}, #{title}, #{link}, #{isRead}, #{regDate})
-    </insert>
-
     <delete id="deleteById">
         DELETE
         FROM notification
@@ -84,4 +78,11 @@
           AND link = #{link}
           AND title = #{title}
     </delete>
+
+    <insert id="insert" parameterType="Notification">
+        INSERT INTO notification
+            (memberId, title, link, regDate, isRead, type, sender_id)
+        VALUES
+            (#{memberId}, #{title}, #{link}, #{regDate}, #{read}, #{type}, #{senderId})
+    </insert>
 </mapper>

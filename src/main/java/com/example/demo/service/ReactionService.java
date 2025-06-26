@@ -1,9 +1,11 @@
 package com.example.demo.service;
 
 
+import com.example.demo.repository.CommentRepository;
 import com.example.demo.repository.MemberRepository;
 import com.example.demo.repository.PostRepository;
 import com.example.demo.repository.ReactionRepository;
+import com.example.demo.vo.Comment;
 import com.example.demo.vo.Post;
 import com.example.demo.vo.ResultData;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +27,9 @@ public class ReactionService {
 
     @Autowired
     private NotificationService notificationService;
+
+    @Autowired
+    private CommentRepository commentRepository;
 
     // 댓글/게시글 좋아요 수 조회
     public int getReactionPoint(int memberId, String relTypeCode, int relId) {
@@ -52,20 +57,7 @@ public class ReactionService {
 
         return ResultData.from("S-1", "좋아요 가능", "sumReactionByMemberId", sum);
     }
-
-    public ResultData addLikeReaction(int loginedMemberId, String relTypeCode, int relId) {
-        int affectedRow = reactionRepository.addLikeReaction(loginedMemberId, relTypeCode, relId);
-
-        if (affectedRow == -1) {
-            return ResultData.from("F-1", "좋아요 실패");
-        }
-
-        if ("post".equals(relTypeCode)) {
-            postService.increaseLikeReaction(relId);
-        }
-
-        return ResultData.from("S-1", "좋아요 성공");
-    }
+    
 
     public ResultData deleteLikeReaction(int loginedMemberId, String relTypeCode, int relId) {
         reactionRepository.deleteLikeReaction(loginedMemberId, relTypeCode, relId);
@@ -101,6 +93,66 @@ public class ReactionService {
         }
 
         return ResultData.from("S-1", "좋아요 성공");
+    }
+
+    public ResultData addLikeReaction(int loginedMemberId, String relTypeCode, int relId) {
+        int affectedRow = reactionRepository.addLikeReaction(loginedMemberId, relTypeCode, relId);
+
+        if (affectedRow == -1) {
+            return ResultData.from("F-1", "좋아요 실패");
+        }
+
+        if ("post".equals(relTypeCode)) {
+            postService.increaseLikeReaction(relId);
+
+            // 🔔 게시글 좋아요 알림 추가
+            Post post = postRepository.getPostById(relId);
+            if (post != null && post.getMemberId() != loginedMemberId) {
+                String nickname = memberRepository.getNicknameById(loginedMemberId);
+                String message = "❤️ " + nickname + "님이 회원님의 글을 좋아합니다.";
+                String link = "/usr/post/detail?id=" + relId;
+                notificationService.addNotification(
+                        post.getMemberId(),         // 알림 받을 사람
+                        loginedMemberId,            // 알림 발생자
+                        "LIKE_POST",                // 알림 유형
+                        message,
+                        link
+                );
+            }
+        } else if ("comment".equals(relTypeCode)) {
+            // 🔔 댓글 좋아요 알림 추가
+            Comment comment = commentRepository.getComment(relId);
+            if (comment != null && comment.getMemberId() != loginedMemberId) {
+                String nickname = memberRepository.getNicknameById(loginedMemberId);
+                int postId = comment.getRelTypeCode().equals("post") ? comment.getRelId() : findPostIdByComment(comment);
+                String message = "❤️ " + nickname + "님이 회원님의 댓글을 좋아합니다.";
+                String link = "/usr/post/detail?id=" + postId + "#comment-" + relId;
+                notificationService.addNotification(
+                        comment.getMemberId(),      // 알림 받을 사람
+                        loginedMemberId,            // 알림 발생자
+                        "LIKE_COMMENT",             // 알림 유형
+                        message,
+                        link
+                );
+            }
+        }
+
+        return ResultData.from("S-1", "좋아요 성공");
+    }
+
+    private int findPostIdByComment(Comment comment) {
+        // relTypeCode가 post면 이 댓글이 바로 게시글에 달린 것!
+        if ("post".equals(comment.getRelTypeCode())) {
+            return comment.getRelId();
+        }
+        // 아니면 상위 댓글을 찾아감
+        else if ("comment".equals(comment.getRelTypeCode())) {
+            Comment parent = commentRepository.getComment(comment.getRelId());
+            if (parent == null) return -1; // 예외/에러 처리
+            return findPostIdByComment(parent);
+        }
+
+        return -1;
     }
 
 }

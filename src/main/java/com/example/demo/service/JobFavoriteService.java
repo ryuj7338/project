@@ -51,7 +51,6 @@ public class JobFavoriteService {
             JobPosting jobPosting = jobPostingRepository.findById((long) jobPostingId).orElse(null);
             if (jobPosting != null) {
 
-
                 String title = "📌 찜한 채용공고가 등록되었습니다. (" + jobPosting.getTitle() + ")";
                 String link = "usr/job/detail?id=" + jobPosting.getId();    // 페이지 못 들어가게 할지 고민중
 
@@ -59,6 +58,8 @@ public class JobFavoriteService {
                 if(!exists) {
                     Notification notification = new Notification();
                     notification.setMemberId(memberId);
+                    notification.setSenderId(memberId); // 본인
+                    notification.setType("FAVORITE_JOB");
                     notification.setTitle(title);
                     notification.setLink(link);
                     notification.setRead(false);

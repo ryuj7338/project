@@ -22,17 +22,21 @@ public class NotificationService {
         this.notificationRepository = notificationRepository;
     }
 
-    public void addNotification(int memberId, String title, String link) {
+    public void addNotification(int memberId, int senderId, String type, String title, String link) {
+
         if (notificationRepository.existsByMemberIdAndTitleAndLink(memberId, title, link)) {
             return; // 중복 저장 방지
         }
 
         Notification notification = new Notification();
-        notification.setMemberId(memberId);
+        notification.setMemberId(memberId); // 받을 사람
+        notification.setSenderId(senderId); // 보낸 사람
+        notification.setType(type);
         notification.setTitle(title);
         notification.setLink(link);
-        notification.setRegDate(Date.from(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant()));
+        notification.setRegDate(new Date());
         notification.setRead(false);
+
 
         notificationRepository.insert(notification); // ✅ insert로 통일
     }

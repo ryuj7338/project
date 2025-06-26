@@ -35,6 +35,7 @@ public class UsrNotificationController {
 
     @GetMapping("/recent")
     public ResponseEntity<?> getRecentNotifications() {
+
         if (!rq.isLogined()) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인이 필요합니다.");
         }
