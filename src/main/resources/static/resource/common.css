@@ -73,6 +73,11 @@ header {
 }
 
 .notification-item.read {
-    background-color: #f4f4f4;
-    color: gray;
+    background-color: #f5f5f5;
+    color: #888888;
+}
+
+.notification-item.unread{
+    background: white;
+    color: black;
 }

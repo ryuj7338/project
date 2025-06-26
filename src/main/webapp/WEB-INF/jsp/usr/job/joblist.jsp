@@ -129,7 +129,6 @@
     <c:forEach var="job" items="${jobPostings}">
         <tr>
             <td>
-            <p>jobId: ${job.id}, favorited: ${job.favorited}</p>
                 <c:set var="jobId" value="${job.id.intValue()}"/>
                 <a href="${job.originalUrl}" target="_blank" class="no-underline text-black">${job.title}</a>
                 <c:choose>

@@ -106,7 +106,6 @@
 </header>
 
 
-
 <script>
     // 알림 도착 시 빨간 점 보이게 하기
     function showAlertBadge() {
@@ -143,6 +142,23 @@
 
 
 <script>
+    // 알림 뱃지(빨간 점) 표시
+    function showAlertBadge() {
+        const badge = document.getElementById("alertBadge");
+        if (badge) badge.classList.remove("hidden");
+    }
+
+    // 벨 아이콘 클릭 시: 빨간 점만 제거, markAllAsRead 호출 X
+    document.getElementById("alertBtn").addEventListener("click", function () {
+        document.getElementById("alertBadge").classList.add("hidden");
+    });
+
+    // DOM 로드 후 빨간 점 표시 조건부 처리
+    <c:if test="${hasUnreadNotification}">
+    window.addEventListener("DOMContentLoaded", showAlertBadge);
+    </c:if>
+
+    // 벨 아이콘 클릭 시 최근 알림 불러오기
     $('#alertBtn').on('click', function (e) {
         e.stopPropagation();
 
@@ -163,28 +179,24 @@
                 if (data.length === 0) {
                     $list.append('<li class="p-4 text-center text-gray-500">새 알림이 없습니다.</li>');
                 } else {
-                    data.forEach(function (noti, i) {
-                        console.log(`✅ ${i + 1}번째 알림 객체:`, noti);
-
+                    data.forEach(function (noti) {
                         const $li = $('<li>')
-                            .addClass('notification-item p-4 hover:bg-gray-100 cursor-pointer')
+                            .addClass('notification-item p-4 cursor-pointer')
+                            .addClass(noti.read ? 'read' : 'unread')
                             .attr('data-id', noti.id)
                             .attr('data-link', noti.link)
                             .append(
                                 $('<div>').addClass('font-semibold').text(noti.title),
                                 $('<div>').addClass('text-xs text-gray-500').text(noti.timeAgo || '')
                             );
-
-                        $('#alertList').append($li);
+                        $list.append($li);
                     });
-
                 }
                 $dropdown.show();
             },
             error: function (xhr) {
                 const $list = $('#alertList');
                 $list.empty();
-
                 if (xhr.status === 401) {
                     $list.append(`<li class="p-4 text-center text-gray-500">
                         로그인 후 확인할 수 있습니다.<br/>
@@ -198,48 +210,37 @@
         });
     });
 
-    // ✅ 클릭된 알림 처리
+    // 알림 항목 클릭 시 해당 알림만 읽음 처리
     $(document).on('click', '.notification-item', function () {
-        const $li = $(this);
-        const notificationId = $li.data('id');
-        const link = $li.data('link');
-
-        console.log("🟢 클릭된 알림 ID:", notificationId);
-        console.log("🟢 클릭된 알림 링크:", link);
-
-        if (!notificationId || isNaN(notificationId)) {
-            console.warn("⚠ 잘못된 알림 ID:", notificationId);
-            return;
-        }
-
-
-    });
-
-    $('#alertList').on('click', '.notification-item', function () {
         const id = $(this).data('id');
         const link = $(this).data('link');
+        const $this = $(this);
 
-        // 전체 읽음 처리 (선택)
-        fetch('/usr/notifications/markAllAsRead', {
-            method: 'POST'
-        }).then(res => res.json())
+        fetch(`/usr/notifications/markAsRead`, {
+            method: 'POST',
+            headers: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: 'notificationId=' + id
+        })
+            .then(res => res.json())
             .then(data => {
-                if (data.success) {
-                    // 새 창으로 링크 열기
+                if (data.resultCode === 'S-1') {
+                    $this.removeClass('unread').addClass('read');
                     if (link) {
-                        window.open(link, '_blank', 'width=800,height=600,scrollbars=yes');
+                        const fullLink = link.startsWith("/") ? link : "/" + link;
+                        window.open(fullLink, '_blank', 'width=800,height=600,scrollbars=yes');
                     }
+                } else {
+                    alert('읽음 처리 실패');
                 }
             });
     });
 
-</script>
-
-<script>
+    // 전체 알림 보기 팝업
     function openNotificationPopup() {
-        const popup = window.open('/usr/notifications/list', '알림함', 'width=500,height=600,resizable=no,scrollbars=yes');
+        window.open('/usr/notifications/list', '알림함', 'width=500,height=600,resizable=no,scrollbars=yes');
     }
-
 </script>
 
 

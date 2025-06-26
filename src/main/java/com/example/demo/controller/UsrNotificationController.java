@@ -87,11 +87,9 @@ public class UsrNotificationController {
 
         boolean success = notificationService.markAsRead(memberId, notificationId);
 
-        if (success) {
-            return ResultData.from("S-1", "읽음 처리되었습니다.");
-        } else {
-            return ResultData.from("F-1", "읽음 처리 실패 또는 권한 없음.");
-        }
+        return success
+                ? ResultData.from("S-1", "읽음 처리되었습니다.")
+                : ResultData.from("F-1", "읽음 처리 실패 또는 권한 없음.");
     }
 
     @GetMapping("/unreadCount")
