@@ -229,7 +229,7 @@
                     $this.removeClass('unread').addClass('read');
                     if (link) {
                         const fullLink = link.startsWith("/") ? link : "/" + link;
-                        window.open(fullLink, '_blank', 'width=800,height=600,scrollbars=yes');
+                        window.open(fullLink, '_blank', 'width=700,height=700,scrollbars=yes');
                     }
                 } else {
                     alert('읽음 처리 실패');

@@ -445,11 +445,11 @@ public class UsrPostController {
         ResultData<?> toggleResult = jobFavoriteService.toggleFavorite(memberId, jobPostingId);
 
         // 찜 추가 성공 시 알림 생성
-        if ("S-1".equals(toggleResult.getResultCode())) {
-            String title = "채용공고 찜이 추가되었습니다.";
-            String link = "/usr/job/detail?id=" + jobPostingId;
-            notificationService.addNotification(memberId, title, link);
-        }
+//        if ("S-1".equals(toggleResult.getResultCode())) {
+//            String title = "채용공고 찜이 추가되었습니다.";
+//            String link = "/usr/job/detail?id=" + jobPostingId;
+//            notificationService.addNotification(memberId, title, link);
+//        }
 
         return toggleResult;
     }
@@ -511,7 +511,6 @@ public class UsrPostController {
         List<Long> favoriteJobIds = new ArrayList<>();
         if (memberId != 0) {
             favoriteJobIds = jobFavoriteService.getFavoriteIdsByMemberId(memberId);
-            System.out.println("🔎 [찜 ID 목록] memberId = " + memberId + ", 찜된 jobPostingId = " + favoriteJobIds);
         }
 
 

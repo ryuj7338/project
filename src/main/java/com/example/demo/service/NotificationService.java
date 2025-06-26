@@ -98,4 +98,12 @@ public class NotificationService {
         return notificationRepository.countUnreadByMemberId(memberId) > 0;
     }
 
+    public boolean deleteById(int id, int memberId) {
+        Notification noti = notificationRepository.findById(id).orElse(null);
+        if (noti == null || noti.getMemberId() != memberId) return false;
+
+        notificationRepository.deleteById(id, memberId);
+        return true;
+    }
+
 }

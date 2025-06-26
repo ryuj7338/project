@@ -62,5 +62,10 @@
         VALUES (#{memberId}, #{title}, #{link}, #{read}, #{regDate})
     </insert>
 
+    <delete id="deleteById">
+        DELETE
+        FROM notification
+        WHERE id = #{id} AND memberId = #{memberId}
+    </delete>
 
 </mapper>

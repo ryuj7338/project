@@ -23,4 +23,6 @@ public interface NotificationRepository {
     void updateAllAsReadByMemberId(@Param("memberId") int memberId);
 
     void insert(Notification notification);
+
+    void deleteById(@Param("id") int id,  @Param("memberId") int memberId);
 }

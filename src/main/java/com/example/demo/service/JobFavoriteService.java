@@ -81,7 +81,7 @@ public class JobFavoriteService {
                 Date regDate = Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
                 notification.setRegDate(regDate);
 
-                notificationService.addNotification(notification); // ✅ 알림 저장
+
 
             }
 

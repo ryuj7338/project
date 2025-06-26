@@ -138,4 +138,16 @@ public class UsrNotificationController {
         return "usr/home/main";
     }
 
+    @PostMapping("/delete")
+    @ResponseBody
+    public ResultData delete(@RequestParam int id) {
+        if (!rq.isLogined()) {
+            return ResultData.from("F-1", "로그인이 필요합니다.");
+        }
+
+        int memberId = rq.getLoginedMemberId();
+        notificationService.deleteById(id, memberId);
+        return ResultData.from("S-1", "알림이 삭제되었습니다.");
+    }
+
 }
