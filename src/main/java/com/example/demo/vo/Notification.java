@@ -19,7 +19,7 @@ public class Notification {
     private String link;      // 알림 링크
     private Date regDate;// 등록일
 
-    private boolean read;        // 읽음 여부
+    private boolean isRead;        // 읽음 여부
     private String timeAgo;       // 클라이언트 표시용 (필요시)
 
 

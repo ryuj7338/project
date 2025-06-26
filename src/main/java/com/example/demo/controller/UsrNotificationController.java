@@ -45,8 +45,6 @@ public class UsrNotificationController {
     }
 
 
-
-
     // 알림 목록 페이지
     @GetMapping("/list")
     public String showNotificationList(HttpServletRequest request, HttpServletResponse response, Model model) {
@@ -96,14 +94,14 @@ public class UsrNotificationController {
     @ResponseBody
     public ResultData getUnreadCount() {
         if (!rq.isLogined()) {
-            return ResultData.from("S-1", "로그인 필요 없음", "count", 0);
+            return ResultData.from("F-1", "로그인이 필요합니다.");
         }
-
-        int count = notificationService.getUnreadCount(rq.getLoginedMemberId());
+        int memberId = rq.getLoginedMemberId();
+        int count = notificationService.getUnreadCount(memberId);
         return ResultData.from("S-1", "성공", "count", count);
     }
 
-//    모든 알림 읽음 처리
+    //    모든 알림 읽음 처리
     @PostMapping("/markAllAsRead")
     @ResponseBody
     public ResultData markAllAsRead() {
@@ -129,7 +127,7 @@ public class UsrNotificationController {
     @GetMapping("/home")
     public String showHome(Model model) {
 
-        if(rq.isLogined()) {
+        if (rq.isLogined()) {
             boolean hasUnread = notificationService.hasUnread(rq.getLoginedMemberId());
             model.addAttribute("hasUnreadNotification", hasUnread);
 
@@ -148,6 +146,19 @@ public class UsrNotificationController {
         int memberId = rq.getLoginedMemberId();
         notificationService.deleteById(id, memberId);
         return ResultData.from("S-1", "알림이 삭제되었습니다.");
+    }
+
+    @PostMapping("/deleteByLink")
+    @ResponseBody
+    public ResultData deleteByLink(@RequestParam String link, @RequestParam String title) {
+        if (!rq.isLogined()) {
+            return ResultData.from("F-1", "로그인이 필요합니다.");
+        }
+        int memberId = rq.getLoginedMemberId();
+        boolean success = notificationService.deleteByLinkAndTitle(memberId, link, title);
+        return success
+                ? ResultData.from("S-1", "이전 알림을 삭제했습니다.")
+                : ResultData.from("F-1", "삭제 실패 또는 권한 없음.");
     }
 
 }

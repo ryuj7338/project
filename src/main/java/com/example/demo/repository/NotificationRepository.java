@@ -25,4 +25,8 @@ public interface NotificationRepository {
     void insert(Notification notification);
 
     void deleteById(@Param("id") int id,  @Param("memberId") int memberId);
+
+    int updateRead(@Param("memberId") int memberId, @Param("notificationId") int notificationId);
+
+    int deleteByLinkAndTitle(@Param("memberId") int memberId, @Param("link") String link, @Param("title") String title);
 }

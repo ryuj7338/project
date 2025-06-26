@@ -4,6 +4,7 @@ import com.example.demo.repository.NotificationRepository;
 import com.example.demo.vo.Notification;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -11,6 +12,7 @@ import java.util.Date;
 import java.util.List;
 
 @Service
+@Transactional
 public class NotificationService {
 
     private final NotificationRepository notificationRepository;
@@ -44,15 +46,16 @@ public class NotificationService {
     }
 
     public boolean markAsRead(int memberId, int notificationId) {
-        Notification notification = notificationRepository.findById(notificationId).orElse(null);
-        if (notification == null || !notification.getMemberId().equals(memberId)) {
+        Notification noti = notificationRepository.findById(notificationId).orElse(null);
+        if (noti == null || !noti.getMemberId().equals(memberId)) {
             return false;
         }
 
-        notification.setRead(true);
-        notificationRepository.insert(notification); // 또는 update()가 있다면 그걸로
-        return true;
+        int rows = notificationRepository.updateRead(memberId, notificationId);
+        System.out.println(">>> updateRead returned rows = " + rows);
+        return rows > 0;
     }
+
 
     public List<Notification> getRecentNotifications(int memberId) {
         return notificationRepository.findByMemberIdOrderByRegDateDesc(memberId);
@@ -60,7 +63,7 @@ public class NotificationService {
 
     public void notifyMember(int memberId, String message, String link) {
 
-        if(notificationRepository.existsByMemberIdAndTitleAndLink(memberId, message, link)) {
+        if (notificationRepository.existsByMemberIdAndTitleAndLink(memberId, message, link)) {
             return;
         }
 
@@ -106,4 +109,8 @@ public class NotificationService {
         return true;
     }
 
+    public boolean deleteByLinkAndTitle(int memberId, String link, String title) {
+
+        return notificationRepository.deleteByLinkAndTitle(memberId, link, title) > 0;
+    }
 }

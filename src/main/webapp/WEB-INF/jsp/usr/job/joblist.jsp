@@ -7,11 +7,6 @@
 <!-- 제이쿼리 -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 
-<!-- 폰트어썸 -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-
-<!-- 테일윈드 -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.1.4/tailwind.min.css">
 
 <body>
 
@@ -33,42 +28,52 @@
     </c:if>
 </script>
 
+<!-- toggleFavorite 함수: 찜/해제 & 알림 삭제 -->
 <script>
-    function toggleFavorite(jobPostingId) {
-        const btn = $('#favorite-btn-' + jobPostingId);
-        const icon = $('#favorite-icon-' + jobPostingId);
-        let isFavorited = btn.data('favorited');
+function toggleFavorite(jobPostingId) {
+  const btn  = $('#favorite-btn-' + jobPostingId);
+  const icon = $('#favorite-icon-' + jobPostingId);
+  const isFav = btn.data('favorited');
+  const title = btn.data('title');
+  const link  = btn.data('link');
+  const cp    = '${pageContext.request.contextPath}';
 
-        $.ajax({
-            url: "/usr/job/favorite/toggle",
-            method: "POST",
-            data: {jobPostingId},
-            headers: {Accept: "application/json"},
-            success: function (response) {
-                // 로그인 필요 응답 처리
-                if (response.resultCode === 'F-A') {
-                    alert(response.msg);
-                    location.href = "/usr/member/login?redirectUrl=" + encodeURIComponent(location.href);
-                    return;
-                }
+  $.post(cp + '/usr/job/favorite/toggle',
+    { jobPostingId: jobPostingId },
+    function(response) {
+      // 로그인 필요
+      if (response.resultCode === 'F-A') {
+        alert(response.msg);
+        location.href = cp + '/usr/member/login?redirectUrl=' + encodeURIComponent(location.href);
+        return;
+      }
 
-                // 토글 후 상태 반영
-                isFavorited = !isFavorited;
-                btn.data('favorited', isFavorited);
+      // 토글 상태 반영
+      const nowFav = !isFav;
+      btn.data('favorited', nowFav);
 
-                if (isFavorited) {
-                    icon.removeClass('fa-regular').addClass('fa-solid text-yellow-400');
-                } else {
-                    icon.removeClass('fa-solid text-yellow-400').addClass('fa-regular');
-                }
+      if (nowFav) {
+        // 찜 추가
+        icon.removeClass('fa-regular').addClass('fa-solid text-yellow-400');
+      } else {
+        // 찜 해제 → 기존 알림 삭제
+        icon.removeClass('fa-solid text-yellow-400').addClass('fa-regular');
+        $.post(cp + '/usr/notifications/deleteByLink',
+          { link: link, title: title },
+          function(rd) {
+            console.log('deleteByLink:', rd);
+          },
+          'json'
+        );
+      }
 
-                alert(response.msg);
-            },
-            error: function () {
-                alert("찜 요청 실패");
-            }
-        });
-    }
+      alert(response.msg);
+    },
+    'json'
+  ).fail(function() {
+    alert('찜 요청에 실패했습니다.');
+  });
+}
 </script>
 
 

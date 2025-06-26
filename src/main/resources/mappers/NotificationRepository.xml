@@ -24,7 +24,7 @@
 
     <insert id="save" parameterType="com.example.demo.vo.Notification" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO notification (memberId, title, link, regDate, isRead)
-        VALUES (#{memberId}, #{title}, #{link}, #{regDate}, #{read})
+        VALUES (#{memberId}, #{title}, #{link}, #{regDate}, #{isRead})
     </insert>
 
     <select id="findById" resultType="com.example.demo.vo.Notification" parameterType="int">
@@ -43,9 +43,10 @@
 
     <!-- 안 읽은 알림 개수 -->
     <select id="countUnreadByMemberId" resultType="int">
-        SELECT COUNT(*) FROM notification
+        SELECT COUNT(*)
+        FROM notification
         WHERE memberId = #{memberId}
-        AND isRead = FALSE
+          AND isRead = FALSE
     </select>
 
     <!-- 전체 읽음 처리 -->
@@ -59,13 +60,28 @@
     <insert id="insert" parameterType="com.example.demo.vo.Notification">
         INSERT INTO notification
             (memberId, title, link, isRead, regDate)
-        VALUES (#{memberId}, #{title}, #{link}, #{read}, #{regDate})
+        VALUES (#{memberId}, #{title}, #{link}, #{isRead}, #{regDate})
     </insert>
 
     <delete id="deleteById">
         DELETE
         FROM notification
-        WHERE id = #{id} AND memberId = #{memberId}
+        WHERE id = #{id}
+          AND memberId = #{memberId}
     </delete>
 
+    <update id="updateRead">
+        UPDATE notification
+        SET isRead = true
+        WHERE id = #{notificationId}
+          AND memberId = #{memberId}
+    </update>
+
+    <delete id="deleteByLinkAndTitle">
+        DELETE
+        FROM notification
+        WHERE memberId = #{memberId}
+          AND link = #{link}
+          AND title = #{title}
+    </delete>
 </mapper>
