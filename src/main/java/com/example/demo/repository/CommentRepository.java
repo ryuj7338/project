@@ -3,6 +3,7 @@ package com.example.demo.repository;
 
 import com.example.demo.vo.Comment;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
@@ -18,4 +19,6 @@ public interface CommentRepository {
     Comment getComment(int id);
 
     void modifyComment(int id, String body);
+
+    Comment findById(@Param("id") int relId);
 }

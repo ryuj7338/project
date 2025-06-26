@@ -17,7 +17,7 @@
 			return;
 		}
 		if (form.loginId.value != validLoginId) {
-			alert('사용할 수 없는 아이디야');
+			alert('사용할 수 없는 아이디입니다.');
 			form.loginId.focus();
 			return;
 		}
@@ -130,7 +130,7 @@
 					</tr>
 					<tr>
 						<th></th>
-						<td style="text-align: center;"><input value="회원가입" type="submit" /></td>
+						<td style="text-align: center;"><button class="btn btn-ghost">가입</button></td>
 					</tr>
 
 				</tbody>

@@ -2,7 +2,6 @@ package com.example.demo.service;
 
 import com.example.demo.repository.NotificationRepository;
 import com.example.demo.vo.Notification;
-import org.checkerframework.checker.units.qual.A;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -14,26 +13,30 @@ import java.util.List;
 @Service
 public class NotificationService {
 
-    @Autowired
-    private NotificationRepository notificationRepository;
+    private final NotificationRepository notificationRepository;
 
+    @Autowired
     public NotificationService(NotificationRepository notificationRepository) {
         this.notificationRepository = notificationRepository;
     }
 
     public void addNotification(int memberId, String title, String link) {
         if (notificationRepository.existsByMemberIdAndTitleAndLink(memberId, title, link)) {
-            return; // 중복 시 저장 안 함
+            return; // 중복 저장 방지
         }
+
         Notification notification = new Notification();
         notification.setMemberId(memberId);
         notification.setTitle(title);
         notification.setLink(link);
-        // LocalDateTime.now() 대신 Date로 변환해서 저장
-        notification.setRegDate(Date.from(java.time.LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant()));
+        notification.setRegDate(Date.from(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant()));
         notification.setRead(false);
 
-        notificationRepository.save(notification);
+        notificationRepository.insert(notification); // ✅ insert로 통일
+    }
+
+    public void addNotification(Notification notification) {
+        notificationRepository.insert(notification); // ✅ insert로 통일
     }
 
     public List<Notification> getNotificationsByMemberId(int memberId) {
@@ -42,30 +45,64 @@ public class NotificationService {
 
     public boolean markAsRead(int memberId, int notificationId) {
         Notification notification = notificationRepository.findById(notificationId).orElse(null);
-
-        if (notification == null) {
-            System.out.println("알림이 없습니다. id=" + notificationId);
+        if (notification == null || !notification.getMemberId().equals(memberId)) {
             return false;
         }
-
-        if (!notification.getMemberId().equals(memberId)) {
-            System.out.println("회원 ID 불일치. 알림 memberId=" + notification.getMemberId() + ", 요청 memberId=" + memberId);
-            return false;
-        }
-
-        System.out.println("읽음 처리 전 isRead = " + notification.isRead());
 
         notification.setRead(true);
-        notificationRepository.save(notification);
-
-        System.out.println("읽음 처리 후 isRead = " + notification.isRead());
-
+        notificationRepository.insert(notification); // 또는 update()가 있다면 그걸로
         return true;
     }
 
     public List<Notification> getRecentNotifications(int memberId) {
-        // 예를 들어 최근 5건 조회 같은 로직 추가 가능
         return notificationRepository.findByMemberIdOrderByRegDateDesc(memberId);
     }
 
+    public void notifyMember(int memberId, String message, String link) {
+
+        if (notificationRepository.existsByMemberIdAndTitleAndLink(memberId, message, link)) {
+            return;
+        }
+
+        Notification notification = new Notification();
+        notification.setMemberId(memberId);
+        notification.setTitle(message);
+        notification.setLink(link);
+        notification.setRegDate(Date.from(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant()));
+        notification.setRead(false);
+
+        notificationRepository.insert(notification);
+    }
+
+    public int getUnreadCount(int loginedMemberId) {
+        return notificationRepository.countUnreadByMemberId(loginedMemberId);
+    }
+
+    public boolean markAllAsRead(int loginedMemberId) {
+        notificationRepository.updateAllAsReadByMemberId(loginedMemberId);
+        return true;
+    }
+
+    public Notification findById(int id) {
+
+        return notificationRepository.findById(id).orElse(null);
+    }
+
+    public boolean existByMemberIdAndLinkAndTitle(int memberId, String link, String title) {
+
+        return notificationRepository.existsByMemberIdAndTitleAndLink(memberId, link, title);
+    }
+
+    public boolean hasUnread(int memberId) {
+
+        int count = notificationRepository.countUnreadByMemberId(memberId);
+        System.out.println("[알림체크] memberId: " + memberId);
+        System.out.println("[알림체크] unreadCount: " + count);
+        return count > 0;
+
+
+//        return notificationRepository.countUnreadByMemberId(memberId) > 0;
+
+
+    }
 }

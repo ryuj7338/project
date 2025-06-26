@@ -22,4 +22,6 @@ public interface MemberRepository {
     void modifyWithoutPw(int loginedMemberId, String loginPw, String name, String nickname, String email);
 
     Member getMemberByNameAndEmail(String name, String email);
+
+    String getNicknameById(int memberId);
 }

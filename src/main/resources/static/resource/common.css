@@ -58,3 +58,21 @@ header > div > ul > li:hover {
 .toast-ui-content{
     text-align: center;
 }
+
+header {
+    min-height: 64px;
+    line-height: 64px;
+}
+
+/*알림창*/
+#alertDropdown {
+    max-height: 500px;
+    overflow-y: auto;
+    z-index: 9999;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+}
+
+.notification-item.read {
+    background-color: #f4f4f4;
+    color: gray;
+}

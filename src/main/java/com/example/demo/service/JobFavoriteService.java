@@ -10,6 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -27,33 +29,45 @@ public class JobFavoriteService {
 
     // 토글 찜 기능 + 알림 생성 포함
     public ResultData<?> toggleFavorite(int memberId, int jobPostingId) {
+
         if (memberId == 0) {
             return ResultData.from("F-L", "로그인이 필요합니다.");
         }
 
-        try {
-            if (isFavorited(memberId, jobPostingId)) {
-                jobFavoriteRepository.delete(memberId, jobPostingId);
-                return ResultData.from("S-2", "찜 해제", "favorited", false);
-            } else {
-                jobFavoriteRepository.insert(memberId, jobPostingId);
+        // 찜했는지 체크
+        boolean isFavorited = isFavorited(memberId, jobPostingId);
 
-                JobPosting jobPosting = jobPostingRepository.findById((long) jobPostingId).orElse(null);
+        if (isFavorited) {
+            jobFavoriteRepository.delete(memberId, jobPostingId);
+            return ResultData.from("S-2", "찜 해제", "favorited", false);
+        } else {
+            jobFavoriteRepository.insert(memberId, jobPostingId);
 
-                if (jobPosting != null) {
-                    // 편의 메서드 활용해서 알림 생성
-                    notificationService.addNotification(
-                            memberId,
-                            "찜하신 채용공고가 등록되었습니다: " + jobPosting.getTitle(),
-                            "/usr/job/detail?id=" + jobPostingId
-                    );
+            // ✅ 알림 생성
+            JobPosting jobPosting = jobPostingRepository.findById((long) jobPostingId).orElse(null);
+            if (jobPosting != null) {
+
+                String title = "📌 찜한 채용공고가 등록되었습니다. [" + jobPosting.getTitle() + "]";
+                String link = "usr/job/detail?id=" + jobPosting.getId();    // 페이지 못 들어가게 할지 고민중
+
+                boolean exists = notificationService.existByMemberIdAndLinkAndTitle(memberId, link, title);
+                if(!exists) {
+                    Notification notification = new Notification();
+                    notification.setMemberId(memberId);
+                    notification.setTitle(title);
+                    notification.setLink(link);
+                    notification.setRead(false);
+
+                    LocalDateTime localDateTime = LocalDateTime.now();
+                    Date regDate = Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
+                    notification.setRegDate(regDate);
+
+                    notificationService.addNotification(notification); // ✅ 알림 저장
                 }
 
-                return ResultData.from("S-1", "찜 추가", "favorited", true);
             }
-        } catch (Exception e) {
-            e.printStackTrace(); // 오류 로그 확인용
-            return ResultData.from("F-E", "찜 처리 중 오류가 발생했습니다.");
+
+            return ResultData.from("S-1", "찜 성공", "favorited", true);
         }
     }
 

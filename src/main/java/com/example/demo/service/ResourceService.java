@@ -113,4 +113,8 @@ public class ResourceService {
     public List<Resource> getFilesByPostId(int postId) {
         return resourceRepository.getListByPostId(postId);
     }
+
+    public boolean existsBySavedNameAndAuto(String savedName, boolean auto) {
+        return resourceRepository.existsBySavedNameAndAuto(savedName, auto);
+    }
 }

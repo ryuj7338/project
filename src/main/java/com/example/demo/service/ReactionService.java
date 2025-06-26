@@ -1,7 +1,10 @@
 package com.example.demo.service;
 
 
+import com.example.demo.repository.MemberRepository;
+import com.example.demo.repository.PostRepository;
 import com.example.demo.repository.ReactionRepository;
+import com.example.demo.vo.Post;
 import com.example.demo.vo.ResultData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -13,6 +16,15 @@ public class ReactionService {
     private ReactionRepository reactionRepository;
     @Autowired
     private PostService postService;
+
+    @Autowired
+    private PostRepository postRepository;
+
+    @Autowired
+    private MemberRepository memberRepository;
+
+    @Autowired
+    private NotificationService notificationService;
 
     // 댓글/게시글 좋아요 수 조회
     public int getReactionPoint(int memberId, String relTypeCode, int relId) {
@@ -64,4 +76,31 @@ public class ReactionService {
 
         return ResultData.from("S-1", "좋아요 취소");
     }
+
+
+    public ResultData<?> toggleReaction(int memberId, String relTypeCode, int relId) {
+        boolean isReacted = reactionRepository.existsByMemberIdAndRelTypeCodeAndRelId(memberId, relTypeCode, relId);
+
+        if (isReacted) {
+            reactionRepository.delete(memberId, relTypeCode, relId);
+            return ResultData.from("S-2", "좋아요 취소");
+        }
+
+        reactionRepository.insert(memberId, relTypeCode, relId);
+
+        // ✅ 알림 처리
+        if (relTypeCode.equals("post")) {
+            Post post = postRepository.getPostById(relId);
+            if (post != null && post.getMemberId() != memberId) {
+                String nickname = memberRepository.getNicknameById(memberId);
+                String message = "❤️ " + nickname + "님이 회원님의 글에 좋아요를 눌렀습니다.";
+                String link = "/usr/post/detail?id=" + relId;
+
+                notificationService.notifyMember(post.getMemberId(), message, link);
+            }
+        }
+
+        return ResultData.from("S-1", "좋아요 성공");
+    }
+
 }

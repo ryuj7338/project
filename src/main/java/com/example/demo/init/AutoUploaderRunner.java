@@ -1,6 +1,7 @@
 package com.example.demo.init;
 
 import com.example.demo.controller.AdmResourceController;
+import com.example.demo.service.AutoUploadService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
@@ -9,12 +10,11 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class AutoUploaderRunner implements CommandLineRunner {
 
-    private final AdmResourceController admResourceController;
+    private final AutoUploadService autoUploadService;
 
     @Override
     public void run(String... args) {
-        // 서버 시작 시 자동 실행
-        String result = admResourceController.autoUpload();
-        System.out.println("[AutoUpload 실행 결과] " + result);
+        int count = autoUploadService.autoUpload(); // 오버로딩 된 메서드
+        System.out.println("[AutoUpload 실행 결과] " + count + "개의 파일 자동 업로드 완료");
     }
 }

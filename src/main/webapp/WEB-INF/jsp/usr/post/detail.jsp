@@ -174,9 +174,18 @@
                     <c:forEach var="file" items="${resourceList}">
                         <div>
                             📁 ${file.originalName}
-                            <a href="#" class="download-link"
-                               data-path="${file.savedName}"
-                               data-original="${file.originalName}">[다운로드]</a>
+                            <c:choose>
+                                <c:when test="${file.auto}">
+                                    <a href="#" class="download-link"
+                                       data-path="auto/${file.savedName}"
+                                       data-original="${file.originalName}">[다운로드]</a>
+                                </c:when>
+                                <c:otherwise>
+                                    <a href="#" class="download-link"
+                                       data-path="${file.savedName}"
+                                       data-original="${file.originalName}">[다운로드]</a>
+                                </c:otherwise>
+                            </c:choose>
                         </div>
                     </c:forEach>
                 </td>

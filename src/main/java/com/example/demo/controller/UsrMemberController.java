@@ -71,7 +71,7 @@ public class UsrMemberController {
         return Ut.jsReplace("S-1", "로그아웃 되었습니다.", "/");
     }
 
-    @RequestMapping("/usr/memebr/join")
+    @RequestMapping("/usr/member/join")
     public String showJoin(){
         return "/usr/member/join";
     }
@@ -187,5 +187,22 @@ public class UsrMemberController {
         }
 
         return Ut.jsReplace("S-1", Ut.f("회원님의 아이디는 [ %s ]입니다.", member.getLoginId()), afterFindLoginIdUri);
+    }
+
+    @RequestMapping("/usr/member/getLoginIdDup")
+    @ResponseBody
+    public ResultData getLoginIdDup(String loginId){
+
+        if(Ut.isEmpty(loginId)) {
+            return ResultData.from("F-1", "아이디를 입력해주세요");
+        }
+
+        Member existsMember = memberService.getMemberByLoginId(loginId);
+
+        if(existsMember != null){
+            return ResultData.from("F-2", "이미 사용중인 아이디입니다.", "loginId", loginId);
+        }
+
+        return ResultData.from("S-1", "사용 가능한 아이디입니다.", "loginId", loginId);
     }
 }

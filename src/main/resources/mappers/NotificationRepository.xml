@@ -13,12 +13,11 @@
     </select>
 
     <select id="existsByMemberIdAndTitleAndLink" resultType="boolean">
-        SELECT EXISTS (
-            SELECT 1 FROM notification
-            WHERE memberId = #{memberId}
-              AND title = #{title}
-              AND link = #{link}
-        )
+        SELECT COUNT(*) > 0
+        FROM notification
+        WHERE memberId = #{memberId}
+          AND link = #{link}
+          AND title = #{title}
     </select>
 
     <insert id="save" parameterType="com.example.demo.vo.Notification" useGeneratedKeys="true" keyProperty="id">
@@ -39,5 +38,27 @@
         ORDER BY regDate DESC
             LIMIT #{limit}
     </select>
+
+    <!-- 안 읽은 알림 개수 -->
+    <select id="countUnreadByMemberId" resultType="int">
+        SELECT COUNT(*) FROM notification
+        WHERE memberId = #{memberId}
+        AND isRead = FALSE
+    </select>
+
+    <!-- 전체 읽음 처리 -->
+    <update id="updateAllAsReadByMemberId">
+        UPDATE notification
+        SET isRead = true
+        WHERE memberId = #{memberId}
+    </update>
+
+
+    <insert id="insert" parameterType="com.example.demo.vo.Notification">
+        INSERT INTO notification
+            (memberId, title, link, isRead, regDate)
+        VALUES (#{memberId}, #{title}, #{link}, #{read}, #{regDate})
+    </insert>
+
 
 </mapper>

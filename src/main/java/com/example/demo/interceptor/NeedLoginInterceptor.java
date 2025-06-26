@@ -25,7 +25,7 @@ public class NeedLoginInterceptor implements HandlerInterceptor {
 
             if (isAjax) {
                 resp.setContentType("application/json; charset=UTF-8");
-                resp.getWriter().write("{\"resultCode\":\"F-L\", \"msg\":\"로그인이 필요합니다.\"}");
+                resp.getWriter().write("{\"resultCode\":\"F-A\", \"msg\":\"로그인이 필요합니다.\"}");
                 return false;
             } else {
 

@@ -79,4 +79,10 @@
         WHERE id = #{loginedMemberId}
     </update>
 
+    <select id="getNicknameById" parameterType="int" resultType="string">
+        SELECT nickname
+        FROM member
+        WHERE id = #{memberId}
+    </select>
+
 </mapper>
