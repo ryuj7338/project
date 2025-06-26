@@ -45,8 +45,13 @@
 
     <select id="findById" resultType="com.example.demo.vo.Comment">
         SELECT *
-        FROM comment
+        FROM `comment`
         WHERE id = #{id}
     </select>
+
+    <delete id="deleteComment" parameterType="int">
+        DELETE FROM `comment`
+               WHERE id = #{id}
+    </delete>
 
 </mapper>

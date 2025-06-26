@@ -4,6 +4,7 @@ import com.example.demo.vo.LikeResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
@@ -15,6 +16,9 @@ import com.example.demo.vo.ResultData;
 import com.example.demo.vo.Rq;
 
 import jakarta.servlet.http.HttpServletRequest;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @Controller
 public class UsrCommentController {
@@ -54,22 +58,49 @@ public class UsrCommentController {
     }
 
 
-    @RequestMapping("usr/comment/doWrite")
+    @RequestMapping(value = "usr/comment/doWrite", method = RequestMethod.POST)
     @ResponseBody
-    public String doWrite(HttpServletRequest req, String relTypeCode, int relId, String body) {
-
-        Rq re = (Rq) req.getAttribute("rq");
+    public ResultData<?> doWrite(HttpServletRequest req, String relTypeCode, int relId, String body, Integer parentId) {
+        Rq rq = (Rq) req.getAttribute("rq");
 
         if (Ut.isEmptyOrNull(body)) {
-            return Ut.jsHistoryBack("F-2", "내용을 입력해주세요");
+            return ResultData.from("F-2", "내용을 입력해주세요");
         }
 
-        ResultData writeCommentRd = commentService.writeComment(rq.getLoginedMemberId(), body, relTypeCode, relId);
+        ResultData writeCommentRd = commentService.writeComment(
+                rq.getLoginedMemberId(),
+                body,
+                relTypeCode,
+                relId,
+                parentId
+        );
 
         int id = (int) writeCommentRd.getData1();
+        Comment comment = commentService.getComment(id); // 새로 추가된 댓글 가져오기
 
-        return Ut.jsReplace(writeCommentRd.getResultCode(), writeCommentRd.getMsg(), "../post/detail?id=" + relId);
+        Map<String, Object> data = new HashMap<>();
+        data.put("comment", comment);
+
+        return ResultData.from(writeCommentRd.getResultCode(), writeCommentRd.getMsg(), data);
     }
 
+    @RequestMapping(value = "/usr/comment/doDelete", method = RequestMethod.GET)
+    public String doDelete(@RequestParam int id, @RequestParam int postId, HttpServletRequest req) {
+        Rq rq = (Rq) req.getAttribute("rq");
+        Comment comment = commentService.getComment(id);
+
+        if (comment == null) {
+            // 댓글 없으면 글 상세페이지로
+            return "redirect:/usr/post/detail?id=" + postId;
+        }
+
+        if (comment.getMemberId() != rq.getLoginedMemberId()) {
+            return "redirect:/usr/post/detail?id=" + comment.getRelId();
+        }
+
+        commentService.deleteComment(id);
+
+        return "redirect:/usr/post/detail?id=" + comment.getRelId();
+    }
 
 }

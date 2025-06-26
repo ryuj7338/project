@@ -9,9 +9,12 @@
 <link rel="stylesheet" href="https://uicdn.toast.com/editor/latest/toastui-editor.min.css"/>
 <script src="https://uicdn.toast.com/editor/latest/toastui-editor-all.min.js"></script>
 
-<c:set var="pageTitle" value="게시글 상세보기"/>
+<!-- FontAwesome CDN -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
 
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+<c:set var="pageTitle" value="게시글 상세보기"/>
 
 <script>
     $(function () {
@@ -25,7 +28,7 @@
 
     function checkRP() {
         if (isAlreadyAddLikeRp == true) {
-            $('#likeButton').toggleClass('btn-outline');
+            $('#likeButton').removeClass('btn-outline');
         }
     }
 
@@ -55,9 +58,9 @@
                     const isLiked = data.data2;
 
                     if (isLiked) {
-                        $likeButton.html('❤️ <span id="likeCount" class="likeCount">' + likeCount + '</span>');
+                        $likeButton.html('<i class="fas fa-heart text-red-500"></i> <span id="likeCount" class="likeCount">' + likeCount + '</span>');
                     } else {
-                        $likeButton.html('🤍 <span id="likeCount" class="likeCount">' + likeCount + '</span>');
+                        $likeButton.html('<i class="far fa-heart"></i> <span id="likeCount" class="likeCount">' + likeCount + '</span>');
                     }
                 } else {
                     alert(data.msg);
@@ -143,8 +146,12 @@
                 <td>
                     <button id="likeButton" class="btn btn-outline btn-success" onclick="doLikeReaction(${post.id})">
                         <c:choose>
-                            <c:when test="${isAlreadyAddLikeRp}">❤️</c:when>
-                            <c:otherwise>🤍</c:otherwise>
+                            <c:when test="${isAlreadyAddLikeRp}">
+                                <i class="fas fa-heart text-red-500"></i>
+                            </c:when>
+                            <c:otherwise>
+                                <i class="far fa-heart"></i>
+                            </c:otherwise>
                         </c:choose>
                         <span id="likeCount" class="likeCount">${post.like}</span>
                     </button>
@@ -158,7 +165,6 @@
                 <th>제목</th>
                 <td>${post.title}</td>
             </tr>
-
             <tr>
                 <th>내용</th>
                 <td>
@@ -258,25 +264,51 @@
                 <th style="text-align: center;">내용</th>
                 <th style="text-align: center;">좋아요</th>
                 <th style="text-align: center;">수정</th>
-                <th style="text-align: center;">삭제</th>
+                <th style="text-align: center;">삭제/답글</th>
             </tr>
             </thead>
-            <tbody>
+            <tbody id="comments-container">
             <c:forEach var="comment" items="${comments}">
-                <tr class="hover">
+                <!-- 댓글 or 대댓글 구분: 대댓글은 parentId가 있을 것 -->
+                <tr class="hover ${comment.parentId != null ? 'reply-row' : ''}" data-comment-id="${comment.id}"
+                    data-parent-id="${comment.parentId}">
                     <td style="text-align: center;">${comment.regDate.substring(0,10)}</td>
                     <td style="text-align: center;">${comment.extra__writer}</td>
-                    <td style="text-align: center;">
+                    <td style="text-align: left;">
+                        <!-- 대댓글이면 앞에 화살표 표시 -->
+                        <c:if test="${comment.parentId != 0}">
+                            <span style="color:gray; margin-right: 6px;">→</span>
+                        </c:if>
                         <span id="comment-${comment.id}">${comment.body}</span>
-                        <form method="POST" id="modify-form-${comment.id}" style="display: none;"
-                              action="/usr/comment/doModify">
-                            <input type="text" value="${comment.body}" name="reply-text-${comment.id}"/>
-                        </form>
+
+                        <!-- 답글 작성 폼 숨김 -->
+                        <div class="reply-form-container" id="reply-form-container-${comment.id}"
+                             style="display:none; margin-top: 8px;">
+                            <form class="reply-form" data-parent-id="${parentId}" style="display: block;">
+                                <div style="display: flex; gap: 8px;">
+                                    <input type="hidden" name="relTypeCode" value="comment"/>
+                                    <input type="hidden" name="relId" value="${parentId}"/>
+                                    <input type="hidden" name="parentId" value="${parentId}"/>
+                                    <textarea name="body" class="input input-bordered input-sm w-full" rows="1"
+                                              placeholder="답글을 입력하세요"></textarea>
+                                    <button type="submit" class="btn btn-xs btn-success">등록</button>
+                                </div>
+                            </form>
+                        </div>
                     </td>
                     <td style="text-align: center;">
                         <button class="comment-like-btn" data-rel-id="${comment.id}"
                                 data-liked="${comment.alreadyLiked}">
-                            <span class="heart">${comment.alreadyLiked ? '❤️' : '🤍'}</span>
+                                <span class="heart">
+                                    <c:choose>
+                                        <c:when test="${comment.alreadyLiked}">
+                                            <i class="fas fa-heart text-red-500"></i>
+                                        </c:when>
+                                        <c:otherwise>
+                                            <i class="far fa-heart"></i>
+                                        </c:otherwise>
+                                    </c:choose>
+                                </span>
                             <span class="like-count">${comment.like}</span>
                         </button>
                     </td>
@@ -292,24 +324,33 @@
                     </td>
                     <td style="text-align: center;">
                         <c:if test="${comment.userCanDelete}">
-                            <a class="btn btn-outline btn-xs btn-error" onclick="if(!confirm('정말 삭제?')) return false;"
-                               href="/usr/comment/doDelete?id=${comment.id}">삭제</a>
+                            <a class="btn btn-outline btn-xs btn-error"
+                               onclick="if(!confirm('정말 삭제하시겠습니까?')) return false;"
+                               href="/usr/comment/doDelete?id=${comment.id}&postId=${post.id}">삭제</a>
                         </c:if>
+                        <button type="button" class="btn btn-outline btn-xs btn-primary reply-btn"
+                                data-parent-id="${comment.id}">답글
+                        </button>
                     </td>
                 </tr>
             </c:forEach>
-            <c:if test="${empty comments}">
-                <tr>
-                    <td colspan="6" style="text-align: center;">댓글이 없습니다</td>
-                </tr>
-            </c:if>
             </tbody>
         </table>
     </div>
 </section>
 
+<style>
+    /* 대댓글 들여쓰기 스타일 */
+    .reply-row td:first-child,
+    .reply-row td:nth-child(2),
+    .reply-row td:nth-child(3) {
+        padding-left: 20px;
+    }
+</style>
+
 <script>
     $(document).ready(function () {
+        // 댓글 좋아요 토글 (기존 코드)
         $(".comment-like-btn").click(function () {
             const $btn = $(this);
             const relId = $btn.data("rel-id");
@@ -321,7 +362,7 @@
                     const result = data.data1;
                     $likeCount.text(result.likeCount);
                     $btn.data("liked", result.liked);
-                    $heart.text(result.liked ? "❤️" : "🤍");
+                    $heart.html(result.liked ? '<i class="fas fa-heart text-red-500"></i>' : '<i class="far fa-heart"></i>');
                 } else {
                     if (data.resultCode === 'F-1') {
                         alert(data.msg);
@@ -333,33 +374,80 @@
                 }
             });
         });
-    });
-</script>
 
-<script>
-    document.querySelectorAll('.download-link').forEach(link => {
-        link.addEventListener('click', function (e) {
-            e.preventDefault();
+        // 답글 버튼 클릭 → 폼 토글
+        $(document).on("click", ".reply-btn", function () {
+            const parentId = $(this).data("parent-id");
+            $("#reply-form-" + parentId).remove();
 
-            const path = this.dataset.path;
-            const original = this.dataset.original;
+            const formHtml = `
+            <tr id="reply-form-${parentId}">
+                <td colspan="6">
+                    <form class="reply-form" data-parent-id="${parentId}" style="display: flex; gap: 8px;">
+                        <input type="hidden" name="relTypeCode" value="comment" />
+                        <input type="hidden" name="relId" value="${parentId}" />
+                        <input type="hidden" name="parentId" value="${parentId}" />
+                        <textarea name="body" class="input input-bordered input-sm w-full" rows="1" placeholder="답글을 입력하세요"></textarea>
+                        <button type="submit" class="btn btn-xs btn-success">등록</button>
+                    </form>
+                </td>
+            </tr>
+        `;
 
-            const url = "/file/download?path=" + encodeURIComponent(path)
-                + "&original=" + encodeURIComponent(original);
-
-            window.location.href = url;
+            // 부모 댓글 바로 뒤에 폼 삽입
+            $(`tr[data-comment-id="${parentId}"]`).after(formHtml);
         });
-    });
-</script>
 
+        // 대댓글 폼 제출
+        $(document).on("submit", ".reply-form", function (e) {
+            e.preventDefault();
+            alert("답글 등록 이벤트가 정상 작동합니다.");
+            const $form = $(this);
+            const relId = $form.find('[name="relId"]').val();
+            const body = $form.find('[name="body"]').val().trim();
 
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const content = document.querySelector('#viewerContent').value.trim();
-        toastui.Editor.factory({
-            el: document.querySelector('#viewer'),
-            viewer: true,
-            initialValue: content,
+            if (body.length < 3) {
+                alert('3글자 이상 입력하세요');
+                $form.find('[name="body"]').focus();
+                return false;
+            }
+
+            $.post("/usr/comment/doWrite", {
+                relTypeCode: "comment",
+                relId: relId,
+                body: body
+            }, function (res) {
+                if (res.resultCode.startsWith("S-")) {
+                    const newComment = res.data.comment;
+
+                    const $newRow = $(`
+                    <tr class="hover reply-row" data-comment-id="${newComment.id}" data-parent-id="${newComment.parentId}">
+                        <td style="text-align: center;">${newComment.regDate.substring(0,10)}</td>
+                        <td style="text-align: center;">${newComment.extra__writer || newComment.writer}</td>
+                        <td style="text-align: left;">
+                            <span style="color:gray; margin-right: 6px;">→</span>
+                            <span id="comment-${newComment.id}">${newComment.body}</span>
+                        </td>
+                        <td style="text-align: center;">
+                            <button class="comment-like-btn" data-rel-id="${newComment.id}" data-liked="false">
+                                <span class="heart"><i class="far fa-heart"></i></span>
+                                <span class="like-count">0</span>
+                            </button>
+                        </td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                `);
+
+                    $(`#comments-container tr[data-comment-id="${newComment.parentId}"]`).after($newRow);
+
+                    // 답글 폼 숨김 및 초기화
+                    $form.find('[name="body"]').val('');
+                    $form.closest('tr').remove(); // 답글 입력 폼 행 삭제
+                } else {
+                    alert(res.msg);
+                }
+            });
         });
     });
 </script>

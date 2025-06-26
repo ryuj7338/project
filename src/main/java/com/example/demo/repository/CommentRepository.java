@@ -12,7 +12,7 @@ public interface CommentRepository {
 
     List<Comment> getForPrintComments(int loginedMemberId, String relTypeCode, int relId);
 
-    void writeComment(int loginedMemberId, String body, String relTypeCode, int relId);
+    void writeComment(int loginedMemberId, String body, String relTypeCode, int relId, Integer parentId);
 
     int getLastInsertId();
 
@@ -21,4 +21,6 @@ public interface CommentRepository {
     void modifyComment(int id, String body);
 
     Comment findById(@Param("id") int relId);
+
+    void deleteComment(int id);
 }
