@@ -1,21 +1,17 @@
 package com.example.demo.service;
 
-
 import com.example.demo.repository.CommentRepository;
 import com.example.demo.repository.MemberRepository;
-import com.example.demo.repository.PostRepository;
-import com.example.demo.util.Ut;
 import com.example.demo.vo.Comment;
-import com.example.demo.vo.Post;
 import com.example.demo.vo.ResultData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
 public class CommentService {
+
 
     @Autowired
     private CommentRepository commentRepository;
@@ -23,17 +19,22 @@ public class CommentService {
     @Autowired
     private MemberRepository memberRepository;
 
-    // 댓글 작성 (대댓글 포함)
-    public ResultData writeComment(int memberId, String body, String relTypeCode, int relId, Integer parentId) {
+
+    public Comment writeComment(int memberId, String relTypeCode, int relId, Integer parentId, String body) {
         if (parentId == null) {
-            parentId = 0; // 일반 댓글일 경우 0으로 처리
+            parentId = 0;
         }
 
+        // 1) DB에 INSERT (parentId 까지 전달)
         commentRepository.writeComment(memberId, body, relTypeCode, relId, parentId);
 
-        int id = commentRepository.getLastInsertId();
+        // 2) 방금 생성된 댓글 ID 가져오기
+        int newId = commentRepository.getLastInsertId();
 
-        return ResultData.from("S-1", id + "번 댓글이 등록되었습니다.", "id", id);
+        // 3) DB에서 조회해서 Comment 객체로 리턴
+        Comment comment = commentRepository.getComment(newId);
+
+        return comment;
     }
 
     public Comment getComment(int id) {
@@ -44,11 +45,9 @@ public class CommentService {
         if (comment == null) {
             return ResultData.from("F-1", "댓글이 존재하지 않습니다.");
         }
-
         if (comment.getMemberId() != loginedMemberId) {
             return ResultData.from("F-2", "권한이 없습니다.");
         }
-
         return ResultData.from("S-1", "수정 가능합니다.");
     }
 
@@ -60,26 +59,23 @@ public class CommentService {
         commentRepository.deleteComment(id);
     }
 
-    // 댓글 리스트 가져오기 (출력용)
+    // 댓글 출력용 조회
     public List<Comment> getForPrintComments(int loginedMemberId, String relTypeCode, int relId) {
         List<Comment> comments = commentRepository.getForPrintComments(loginedMemberId, relTypeCode, relId);
 
         for (Comment comment : comments) {
-            // parentId 세팅: 대댓글인 경우 relTypeCode가 "comment"이면 relId가 부모 댓글 ID
+            // parentId 설정 (DB에 parentId 컬럼이 있다면 이 블록은 생략 가능)
             if ("comment".equals(comment.getRelTypeCode())) {
+                // 여기서 c.getRelId() 는 부모 댓글 ID
                 comment.setParentId(comment.getRelId());
             } else {
-                comment.setParentId(0);  // 일반 댓글은 0 (null 대신 0으로)
+                comment.setParentId(0);
             }
-
-            // 작성자 닉네임 셋팅 (DB join에서 extra__writer도 가능)
+            // 닉네임 채우기
             comment.setExtra__writer(memberRepository.getNicknameById(comment.getMemberId()));
-
-            // 기타 필요한 필드들 셋팅 가능
+            // 로그인 정보에 따른 수정/삭제 권한은 컨트롤러에서 직접 설정하므로 여기선 생략
         }
 
         return comments;
     }
-
 }
-
