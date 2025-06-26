@@ -72,7 +72,9 @@ public class UsrNotificationController {
         return "usr/notification/list";
     }
 
-//    알림
+
+//    개별 알림 읽음 처리
+
     @PostMapping("/markAsRead")
     @ResponseBody
     public ResultData markAsRead(@RequestParam int notificationId) {

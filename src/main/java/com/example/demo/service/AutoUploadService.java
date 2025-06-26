@@ -65,7 +65,9 @@ public class AutoUploadService {
             resource.setMemberId(1);
             resource.setBoardId(5);
             resource.setTitle(originalName);
-            resource.setBody("필요하신 경우 다운로드해 주세요.");
+
+            resource.setBody("필요하신 경우 다운로드하시면 됩니다.");
+
             resource.setOriginalName(originalName);
             resource.setSavedName(savedName);
             resource.setAuto(true); // 자동 업로드 표시

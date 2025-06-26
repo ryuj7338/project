@@ -13,11 +13,13 @@
     </select>
 
     <select id="existsByMemberIdAndTitleAndLink" resultType="boolean">
+
         SELECT COUNT(*) > 0
         FROM notification
         WHERE memberId = #{memberId}
           AND link = #{link}
           AND title = #{title}
+
     </select>
 
     <insert id="save" parameterType="com.example.demo.vo.Notification" useGeneratedKeys="true" keyProperty="id">

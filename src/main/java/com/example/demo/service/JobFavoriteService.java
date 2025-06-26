@@ -47,7 +47,8 @@ public class JobFavoriteService {
             JobPosting jobPosting = jobPostingRepository.findById((long) jobPostingId).orElse(null);
             if (jobPosting != null) {
 
-                String title = "📌 찜한 채용공고가 등록되었습니다. [" + jobPosting.getTitle() + "]";
+
+                String title = "📌 찜한 채용공고가 등록되었습니다. (" + jobPosting.getTitle() + ")";
                 String link = "usr/job/detail?id=" + jobPosting.getId();    // 페이지 못 들어가게 할지 고민중
 
                 boolean exists = notificationService.existByMemberIdAndLinkAndTitle(memberId, link, title);
@@ -64,6 +65,19 @@ public class JobFavoriteService {
 
                     notificationService.addNotification(notification); // ✅ 알림 저장
                 }
+
+
+                Notification notification = new Notification();
+                notification.setMemberId(memberId);
+                notification.setTitle("📌 찜한 채용공고가 등록되었습니다: " + jobPosting.getTitle());
+                notification.setLink("/usr/job/detail?id=" + jobPostingId);
+                notification.setRead(false);
+
+                LocalDateTime localDateTime = LocalDateTime.now();
+                Date regDate = Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
+                notification.setRegDate(regDate);
+
+                notificationService.addNotification(notification); // ✅ 알림 저장
 
             }
 

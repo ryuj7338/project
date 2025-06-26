@@ -88,6 +88,7 @@ public class NotificationService {
         return notificationRepository.findById(id).orElse(null);
     }
 
+
     public boolean existByMemberIdAndLinkAndTitle(int memberId, String link, String title) {
 
         return notificationRepository.existsByMemberIdAndTitleAndLink(memberId, link, title);
@@ -96,4 +97,5 @@ public class NotificationService {
     public boolean hasUnread(int memberId) {
         return notificationRepository.countUnreadByMemberId(memberId) > 0;
     }
+
 }

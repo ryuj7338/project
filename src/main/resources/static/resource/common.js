@@ -7,6 +7,7 @@ $('select[data-value]').each(function (index, el) {
     }
 });
 
+
 // $(document).on('click', '.notification-item', function () {
 //     const $li = $(this);
 //     const notificationId = $li.data('id');
@@ -38,3 +39,5 @@ $('select[data-value]').each(function (index, el) {
 //             }
 //         });
 // });
+
+
