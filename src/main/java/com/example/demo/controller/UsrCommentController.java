@@ -27,37 +27,9 @@ public class UsrCommentController {
     private Rq rq;
 
     @Autowired
-    private ReactionService reactionService;
-
-    @Autowired
     private CommentService commentService;
 
-    @RequestMapping("usr/comment/doModify")
-    @ResponseBody
-    public String doModify(HttpServletRequest req, int id, String body) {
-
-        System.err.println(id);
-        System.err.println(body);
-        Rq rq = (Rq) req.getAttribute("rq");
-
-        Comment comment = commentService.getComment(id);
-
-        if (comment == null) {
-            return Ut.jsHistoryBack("F-1", Ut.f("%d번 댓글은 존재하지 않습니다.", id));
-        }
-
-        ResultData loginedMemberCanModifyRd = commentService.userCanModify(rq.getLoginedMemberId(), comment);
-
-        if (loginedMemberCanModifyRd.isSuccess()) {
-            commentService.modifyComment(id, body);
-        }
-
-        comment = commentService.getComment(id);
-
-        return comment.getBody();
-    }
-
-
+    // 댓글 작성 (일반 댓글, 대댓글 모두 처리)
     @RequestMapping(value = "usr/comment/doWrite", method = RequestMethod.POST)
     @ResponseBody
     public ResultData<?> doWrite(HttpServletRequest req, String relTypeCode, int relId, String body, Integer parentId) {
@@ -67,16 +39,12 @@ public class UsrCommentController {
             return ResultData.from("F-2", "내용을 입력해주세요");
         }
 
-        ResultData writeCommentRd = commentService.writeComment(
-                rq.getLoginedMemberId(),
-                body,
-                relTypeCode,
-                relId,
-                parentId
-        );
+        int loginedMemberId = rq.getLoginedMemberId();
+
+        ResultData writeCommentRd = commentService.writeComment(loginedMemberId, body, relTypeCode, relId, parentId);
 
         int id = (int) writeCommentRd.getData1();
-        Comment comment = commentService.getComment(id); // 새로 추가된 댓글 가져오기
+        Comment comment = commentService.getComment(id);
 
         Map<String, Object> data = new HashMap<>();
         data.put("comment", comment);
@@ -84,13 +52,13 @@ public class UsrCommentController {
         return ResultData.from(writeCommentRd.getResultCode(), writeCommentRd.getMsg(), data);
     }
 
+    // 댓글 삭제 (삭제 후 게시글 상세로 리다이렉트)
     @RequestMapping(value = "/usr/comment/doDelete", method = RequestMethod.GET)
     public String doDelete(@RequestParam int id, @RequestParam int postId, HttpServletRequest req) {
         Rq rq = (Rq) req.getAttribute("rq");
         Comment comment = commentService.getComment(id);
 
         if (comment == null) {
-            // 댓글 없으면 글 상세페이지로
             return "redirect:/usr/post/detail?id=" + postId;
         }
 
@@ -101,6 +69,28 @@ public class UsrCommentController {
         commentService.deleteComment(id);
 
         return "redirect:/usr/post/detail?id=" + comment.getRelId();
+    }
+
+    // 댓글 수정 (Ajax 처리)
+    @RequestMapping("usr/comment/doModify")
+    @ResponseBody
+    public String doModify(HttpServletRequest req, Integer id, String body) {
+        Rq rq = (Rq) req.getAttribute("rq");
+        Comment comment = commentService.getComment(id);
+
+        if (comment == null) {
+            return Ut.jsHistoryBack("F-1", Ut.f("%d번 댓글은 존재하지 않습니다.", id));
+        }
+
+        ResultData canModifyRd = commentService.userCanModify(rq.getLoginedMemberId(), comment);
+
+        if (canModifyRd.isSuccess()) {
+            commentService.modifyComment(id, body);
+        }
+
+        comment = commentService.getComment(id);
+
+        return comment.getBody();
     }
 
 }

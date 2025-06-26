@@ -17,28 +17,25 @@
         ORDER BY C.id ASC;
     </select>
 
-    <insert id="writeComment">
-        INSERT INTO `comment`
-        SET regDate = NOW(),
-        updateDate = NOW(),
-        memberId = #{loginedMemberId},
-        relTypeCode = #{relTypeCode},
-        relId = #{relId},
-        `body` = #{body}
+    <insert id="writeComment" parameterType="map">
+        INSERT INTO comment
+            (memberId, body, relTypeCode, relId, parentId, regDate, updateDate)
+        VALUES (#{loginedMemberId}, #{body}, #{relTypeCode}, #{relId}, #{parentId}, NOW(), NOW())
     </insert>
 
-    <select id="getLastInsertId" parameterType="int">
+    <select id="getLastInsertId" resultType="int">
         SELECT LAST_INSERT_ID()
     </select>
 
-    <select id="getComment" parameterType="int">
-        SELECT C.* FROM `comment` C
-        WHERE C.id = #{id}
+
+    <select id="getComment" parameterType="int" resultType="com.example.demo.vo.Comment">
+        SELECT * FROM comment WHERE id = #{id}
     </select>
+
 
     <update id="modifyComment">
         UPDATE `comment`
-        SET `body` = #{body},
+        SET `body`     = #{body},
             updateDate = NOW()
         WHERE id = #{id}
     </update>
@@ -50,8 +47,9 @@
     </select>
 
     <delete id="deleteComment" parameterType="int">
-        DELETE FROM `comment`
-               WHERE id = #{id}
+        DELETE
+        FROM `comment`
+        WHERE id = #{id}
     </delete>
 
 </mapper>
