@@ -78,6 +78,7 @@ public class UsrNotificationController {
     @PostMapping("/markAsRead")
     @ResponseBody
     public ResultData markAsRead(@RequestParam int notificationId) {
+
         if (!rq.isLogined()) {
             return ResultData.from("F-1", "로그인이 필요합니다.");
         }
