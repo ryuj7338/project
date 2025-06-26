@@ -60,7 +60,7 @@ public class NotificationService {
 
     public void notifyMember(int memberId, String message, String link) {
 
-        if (notificationRepository.existsByMemberIdAndTitleAndLink(memberId, message, link)) {
+        if(notificationRepository.existsByMemberIdAndTitleAndLink(memberId, message, link)) {
             return;
         }
 
@@ -94,15 +94,6 @@ public class NotificationService {
     }
 
     public boolean hasUnread(int memberId) {
-
-        int count = notificationRepository.countUnreadByMemberId(memberId);
-        System.out.println("[알림체크] memberId: " + memberId);
-        System.out.println("[알림체크] unreadCount: " + count);
-        return count > 0;
-
-
-//        return notificationRepository.countUnreadByMemberId(memberId) > 0;
-
-
+        return notificationRepository.countUnreadByMemberId(memberId) > 0;
     }
 }
