@@ -16,15 +16,16 @@
 <c:set var="pageTitle" value="게시글 상세보기"/>
 
 
-
-
 <c:url var="incUrl" value="/usr/post/doIncreaseHitCountRd"/>
 
 <!-- 게시글, 좋아요, 조회수 증가 스크립트 -->
 <script>
+    const currentPostId = ${post.id}; // 반드시 맨 위에서 전역 선언
+
     $(function () {
         // 좋아요 버튼 초기화
         if (${isAlreadyAddLikeRp}) $('#likeButton').removeClass('btn-outline');
+
         $('#likeButton').click(function () {
             $.post('/usr/reaction/doLike',
                 {relTypeCode: 'post', relId: currentPostId},
@@ -34,23 +35,34 @@
                         location.href = d.data1 || '/usr/member/login';
                         return;
                     }
+
                     if (d.resultCode.startsWith('S-')) {
-                        $('#likeButton').html(
-                            (d.data2 ? '<i class="fas fa-heart text-red-500"></i>' : '<i class="far fa-heart"></i>')
-                            + ' <span id="likeCount">' + d.data1 + '</span>'
+                        const $btn = $('#likeButton');
+                        const $icon = $btn.find('i');
+                        const likeCount = d.like || d.data1 || 0;
+
+                        const isCurrentlyLiked = $icon.hasClass('fas');
+
+                        // 아이콘/색상 토글
+                        $btn.html(
+                            (!isCurrentlyLiked
+                                ? '<i class="fas fa-heart text-red-500"></i>'
+                                : '<i class="far fa-heart"></i>') +
+                            ' <span id="likeCount">' + likeCount + '</span>'
                         );
-                    } else alert(d.msg);
-                }, 'json'
-            );
+                    } else {
+                        alert(d.msg);
+                    }
+                }, 'json');
         });
 
-        // 조회수는 key가 같으면 증가 안 함
-        const key = 'post__${post.id}__viewed';
+        // 조회수 증가
+        const key = 'post__' + currentPostId + '__viewed';
         if (!localStorage.getItem(key)) {
             localStorage.setItem(key, '1');
 
-            $.getJSON('${incUrl}', {
-                id: ${post.id},
+            $.getJSON('<c:url value="/usr/post/doIncreaseHitCountRd"/>', {
+                id: currentPostId,
                 ajaxMode: 'Y'
             }, function (data) {
                 $('.post-detail__hit-count').text(data.data1);
@@ -58,6 +70,7 @@
         }
     });
 </script>
+
 
 <!-- 댓글 수정 스크립트 -->
 <script>
@@ -142,7 +155,7 @@
 <!-- 댓글 작성 폼 -->
 <section class="mt-8 px-4">
     <c:if test="${rq.isLogined()}">
-        <form action="/usr/comment/doWrite" method="POST" onsubmit="return (function(f){
+        <form id="commentForm" action="/usr/comment/doWrite" method="POST" onsubmit="return (function(f){
       f.body.value=f.body.value.trim();
       if(f.body.value.length<3){alert('3글자 이상 입력하세요');f.body.focus();return false;}
       return true;
@@ -179,37 +192,47 @@
         </tr>
         </thead>
         <tbody id="comments-container">
-        <c:forEach var="cmt" items="${comments}">
-            <tr data-comment-id="${cmt.id}" data-parent-id="${cmt.parentId}" class="hover reply-row">
-                <td>${cmt.regDate.substring(0,10)}</td>
-                <td>${cmt.extra__writer}</td>
+        <c:forEach var="c" items="${comments}">
+            <tr class="reply-row ${c.parentId != 0 ? 'reply-child' : ''}" data-comment-id="${c.id}"
+                data-parent-id="${c.parentId}">
+                <td>${c.regDate}</td>
+                <td>${c.extra__writer}</td>
                 <td class="comment-body-cell">
-                    <c:if test="${cmt.parentId != 0}"><span style="color:gray;margin-right:6px;">↳</span></c:if>
-                        ${cmt.body}
-                    <!-- JS가 여기에 대댓글 폼 삽입 -->
+                    <c:if test="${fn:trim(c.parentId) ne '0'}">
+                        <span class="reply-arrow">↳</span>
+                    </c:if>
+                    <span id="comment-${c.id}">${c.body}</span>
+                    <form id="modify-form-${c.id}" style="display:none;">
+                        <input type="text" name="reply-text-${c.id}" value="${c.body}"/>
+                        <button type="button" onclick="doModifyReply(${c.id})">저장</button>
+                    </form>
                 </td>
                 <td>
-                    <button class="comment-like-btn" data-rel-id="${cmt.id}">
-              <span class="heart">
-                <c:choose>
-                    <c:when test="${cmt.alreadyLiked}"><i class="fas fa-heart text-red-500"></i></c:when>
-                    <c:otherwise><i class="far fa-heart"></i></c:otherwise>
-                </c:choose>
-              </span>
-                        <span class="like-count">${cmt.like}</span>
+                    <button class="comment-like-btn" data-rel-id="${c.id}">
+                <span class="heart">
+                    <c:choose>
+                        <c:when test="${c.alreadyLiked}">
+                            <i class="fas fa-heart text-red-500"></i>
+                        </c:when>
+                        <c:otherwise>
+                            <i class="far fa-heart"></i>
+                        </c:otherwise>
+                    </c:choose>
+                </span>
+                        <span class="like-count">${c.like}</span>
                     </button>
                 </td>
                 <td>
-                    <c:if test="${cmt.userCanModify}">
-                        <button onclick="toggleModifybtn('${cmt.id}')">수정</button>
+                    <c:if test="${c.userCanModify}">
+                        <button onclick="toggleModifybtn(${c.id})">수정</button>
                     </c:if>
                 </td>
                 <td>
-                    <c:if test="${cmt.userCanDelete}">
-                        <a href="/usr/comment/doDelete?id=${cmt.id}&postId=${post.id}"
-                           onclick="return confirm('정말 삭제하시겠습니까?');">삭제</a>
+                    <c:if test="${c.userCanDelete}">
+                        <a href="/usr/comment/doDelete?id=${c.id}&postId=${post.id}"
+                           onclick="return confirm('삭제하시겠습니까?')">삭제</a>
                     </c:if>
-                    <button type="button" class="reply-btn btn-xs btn-primary" data-parent-id="${cmt.id}">답글</button>
+                    <button type="button" class="reply-btn" data-parent-id="${c.id}">답글</button>
                 </td>
             </tr>
         </c:forEach>
@@ -219,112 +242,174 @@
 
 <!-- 대댓글 삽입 & 좋아요 스크립트 -->
 <script>
-    $(function () {
-        // 댓글 좋아요
-        $('.comment-like-btn').off('click').on('click', function () {
-            const $b = $(this), id = $b.data('rel-id');
-            const $cnt = $b.find('.like-count'), $hrt = $b.find('.heart');
-            $.post('/usr/comment/toggleLike', {relId: id}, d => {
-                if (d.resultCode.startsWith('S-')) {
-                    $cnt.text(d.data1.likeCount);
-                    $hrt.html(d.data1.liked ? '<i class="fas fa-heart text-red-500"></i>' : '<i class="far fa-heart"></i>');
-                } else if (d.resultCode === 'F-1') {
-                    alert(d.msg);
-                    location.href = '/usr/member/login?redirectUrl=' + encodeURIComponent(location.href);
-                } else alert(d.msg);
-            }, 'json');
-        });
+    const postId = ${post.id};
+    const loginedMemberId = ${rq.getLoginedMemberId()};
 
-        // 답글 폼 토글
-        $(document).off('click.reply', '.reply-btn').on('click.reply', '.reply-btn', function (e) {
-            e.preventDefault();
-            const cid = $(this).data('parent-id');
-            const $cell = $(this).closest('tr').find('td.comment-body-cell');
-            const $ex = $cell.find('.reply-form-container');
-            if ($ex.length) {
-                $ex.slideUp(200, () => $ex.remove());
+    // 댓글 좋아요 토글
+    $(document).on("click", ".comment-like-btn", function () {
+        const $btn = $(this);
+        const commentId = $btn.data("rel-id");
+
+        $.post("/usr/comment/toggleLike", {relId: commentId}, function (res) {
+            if (res.resultCode.startsWith("S-")) {
+                const count = res.data1;
+                const liked = res.data2;
+                const iconHtml = liked
+                    ? '<i class="fas fa-heart text-red-500"></i>'
+                    : '<i class="far fa-heart"></i>';
+                $btn.html('<span class="heart">' + iconHtml + '</span> <span class="like-count">' + count + '</span>');
+            } else if (res.resultCode === "F-1") {
+                alert(res.msg);
+                location.href = "/usr/member/login?redirectUrl=" + encodeURIComponent(location.href);
+            } else {
+                alert(res.msg);
+            }
+        }, "json");
+    });
+
+    // 댓글 수정 폼 열기/닫기
+    function toggleModifybtn(id) {
+        $('#modify-form-' + id).toggle();
+    }
+
+    // 댓글 수정 저장
+    function doModifyReply(id) {
+        const newBody = $('#modify-form-' + id + ' input[name="reply-text-' + id + '"]').val();
+        $.post("/usr/comment/doModify", {id: id, body: newBody}, function (res) {
+            $('#comment-' + id).text(res);
+            $('#modify-form-' + id).hide();
+        });
+    }
+
+    // 답글 폼 열기
+    $(document).on("click", ".reply-btn", function () {
+        $(".reply-form-container").remove(); // 기존 폼 제거
+        const parentId = $(this).data("parent-id");
+
+        const html = '' +
+            '<div class="reply-form-container" style="margin-top: 6px;">' +
+            '<form class="reply-form" data-parent-id="' + parentId + '">' +
+            '<textarea name="body" rows="2" placeholder="답글을 입력하세요" required></textarea>' +
+            '<button type="submit">등록</button>' +
+            '<button type="button" class="reply-cancel">취소</button>' +
+            '</form>' +
+            '</div>';
+
+        // 댓글 내용(td.comment-body-cell) 안으로 삽입
+        $(this).closest("tr").find("td.comment-body-cell").append(html);
+    });
+
+    // 답글 취소
+    $(document).on("click", ".reply-cancel", function () {
+        $(this).closest(".reply-form-container").remove();
+    });
+
+    // 대댓글 등록
+    $(document).on("submit", ".reply-form", function (e) {
+        e.preventDefault();
+
+        const $f = $(this);
+        const parentId = $f.data("parent-id");
+        const body = $f.find("textarea[name='body']").val().trim();
+
+        if (body.length < 3) {
+            alert("3자 이상 입력해주세요");
+            return;
+        }
+
+        $.post("/usr/comment/doWrite", {
+            relTypeCode: "post",
+            relId: postId,
+            parentId: parentId,
+            body: body
+        }, function (res) {
+            if (res.resultCode !== "S-1") {
+                alert(res.msg || "등록 실패");
                 return;
             }
-            $('.reply-form-container').slideUp(200, () => $('.reply-form-container').remove());
 
-            const html =
-                '<div class="reply-form-container" style="display:none;margin-top:8px;">' +
-                '  <form class="reply-form" data-parent-id="' + cid + '" style="display:flex;gap:8px;">' +
-                '    <input type="hidden" name="relTypeCode" value="comment"/>' +
-                '    <input type="hidden" name="relId"        value="' + cid + '"/>' +
-                '    <input type="hidden" name="parentId"     value="' + cid + '"/>' +
-                '    <textarea name="body" rows="2" class="input input-bordered input-sm w-full" placeholder="답글을 입력하세요"></textarea>' +
-                '    <button type="submit" class="btn-xs btn-success">등록</button>' +
-                '    <button type="button" class="btn-xs btn-secondary reply-cancel">취소</button>' +
-                '  </form>' +
-                '</div>';
-            const $f = $(html);
-            $cell.append($f);
-            $f.slideDown(200);
-        });
+            const c = res.data1;
+            const writer = c.extra__writer || "익명";
+            const isMine = (c.memberId === loginedMemberId);
+            const likeCount = c.likeCount || 0;
 
-        const currentPostId = ${post.id}
-        // 대댓글 등록
-        $(document).on('submit', '.reply-form', function (e) {
-            e.preventDefault();
-            const $f = $(this), pid = $f.data('parent-id');
-            const body = $f.find('[name="body"]').val().trim();
-
-
-            if (body.length < 3) {
-                alert('3글자 이상 입력하세요');
-                return;
+            let modifyBtn = '';
+            if (isMine) {
+                modifyBtn = '<button onclick="toggleModifybtn(' + c.id + ')">수정</button>';
             }
 
+            const row = '' +
+                '<tr class="reply-row reply-child" data-comment-id="' + c.id + '" data-parent-id="' + c.parentId + '">' +
+                '<td>' + (c.regDate ? c.regDate.substring(0, 10) : '') + '</td>' +
+                '<td>' + writer + '</td>' +
+                '<td class="comment-body-cell">' +
+                '<span class="reply-arrow">↳</span>' +  // 화살표 추가
+                '<span id="comment-' + c.id + '">' + c.body + '</span>' +
+                '<form id="modify-form-' + c.id + '" style="display:none;">' +
+                '<input type="text" name="reply-text-' + c.id + '" value="' + c.body + '" />' +
+                '<button type="button" onclick="doModifyReply(' + c.id + ')">저장</button>' +
+                '</form>' +
+                '</td>' +
+                '<td>' +
+                '<button class="comment-like-btn" data-rel-id="' + c.id + '">' +
+                '<span class="heart"><i class="far fa-heart"></i></span>' +
+                '<span class="like-count">' + likeCount + '</span>' +
+                '</button>' +
+                '</td>' +
+                '<td>' + modifyBtn + '</td>' +
+                '<td>' +
+                '<button class="reply-btn" data-parent-id="' + c.id + '">답글</button>' +
+                '</td>' +
+                '</tr>';
 
-            $.post('/usr/comment/doWrite', {
-                relTypeCode: 'post',
-                 relId: currentPostId,
-                 parentId: parentId,
-                 body: body
-            }, res => {
-                const nc = res.data1?.comment || res.data?.comment || res.comment || res;
-                if (!nc || !nc.id) {
-                    alert('등록된 댓글 정보를 불러올 수 없습니다.');
-                    return;
-                }
-                const writer = nc.extra__writer || nc.writer || '익명';
-                const isMine = nc.memberId ===${rq.getLoginedMemberId()};
-                let row =
-                    '<tr class="hover reply-row" data-comment-id="' + nc.id + '" data-parent-id="' + nc.parentId + '">' +
-                    '<td>' + nc.regDate.substring(0, 10) + '</td>' +
-                    '<td>' + writer + '</td>' +
-                    '<td class="comment-body-cell" style="padding-left:20px;">' +
-                    '<span style="color:gray;margin-right:6px;">↳</span>' + nc.body +
-                    '</td>' +
-                    '<td><button class="comment-like-btn" data-rel-id="' + nc.id + '">' +
-                    '<i class="' + (nc.alreadyLiked ? 'fas fa-heart text-red-500' : 'far fa-heart') + '"></i> ' +
-                    '<span class="like-count">' + nc.likeCount + '</span></button></td>' +
-                    '<td>' + (isMine ? '<button onclick="toggleModifybtn(\'' + nc.id + '\')">수정</button>' : '') + '</td>' +
-                    '<td>' + (isMine ?
-                        '<a href="/usr/comment/doDelete?id=' + nc.id + '&postId=' + currentPostId +
-                        '" onclick="return confirm(\'정말 삭제하시겠습니까?\');">삭제</a>' : '') +
-                    ' <button type="button" class="reply-btn btn-xs btn-primary" data-parent-id="' + nc.id + '">답글</button>' +
-                    '</td></tr>';
-                $('tr[data-comment-id="' + pid + '"]').after(row);
-                $f.closest('.reply-form-container').remove();
-                // 재바인딩
-                $('.comment-like-btn').off('click').on('click', function () {/*...*/
-                });
-            }, 'json').fail(() => alert('답글 등록 중 오류'));
+
+            $('tr[data-comment-id="' + parentId + '"]').after(row);
+            $f.closest(".reply-form-container").remove();
+        }, "json").fail(function () {
+            alert("등록 중 오류");
         });
+    });
 
-        // 취소
-        $(document).off('click', '.reply-cancel').on('click', '.reply-cancel', function () {
-            $(this).closest('.reply-form-container').slideUp(200, () => $(this).remove());
+    // 최상단 댓글 등록
+    $("#commentForm").on("submit", function (e) {
+        e.preventDefault();
+        const body = $(this).find("textarea").val().trim();
+        if (body.length < 3) {
+            alert("3자 이상 입력하세요");
+            return;
+        }
+
+        $.post("/usr/comment/doWrite", {
+            relTypeCode: "post",
+            relId: postId,
+            body: body
+        }, function () {
+            location.reload(); // 새로고침으로 상단 댓글 반영
         });
     });
 </script>
 
 <style>
-    .reply-row td {
+    .reply-child td.comment-body-cell {
         padding-left: 20px;
     }
+
+    .reply-arrow {
+        color: gray;
+        margin-right: 6px;
+    }
+
+    .reply-form-container textarea {
+        width: 100%;
+        box-sizing: border-box;
+        margin-top: 6px;
+    }
+
+    .reply-form-container button {
+        margin-top: 4px;
+        margin-right: 4px;
+    }
 </style>
+
 
 <%@ include file="../common/foot.jspf" %>

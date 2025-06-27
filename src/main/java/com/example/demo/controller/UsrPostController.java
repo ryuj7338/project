@@ -265,6 +265,12 @@ public class UsrPostController {
 
         List<Comment> comments = commentService.getForPrintComments(loginedMemberId, "post", id);
 
+
+        for(Comment comment : comments) {
+            comment.setUserCanDelete(comment.getMemberId() == loginedMemberId);
+            comment.setUserCanModify(comment.getMemberId() == loginedMemberId);
+        }
+
         // 🔁 이제는 하나의 리스트만 사용
         List<Resource> resourceList = resourceService.getFilesByPostId(id);
 

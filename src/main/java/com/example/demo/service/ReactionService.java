@@ -57,7 +57,7 @@ public class ReactionService {
 
         return ResultData.from("S-1", "좋아요 가능", "sumReactionByMemberId", sum);
     }
-    
+
 
     public ResultData deleteLikeReaction(int loginedMemberId, String relTypeCode, int relId) {
         reactionRepository.deleteLikeReaction(loginedMemberId, relTypeCode, relId);
@@ -154,5 +154,44 @@ public class ReactionService {
 
         return -1;
     }
+
+    public ResultData toggleLike(int loginedMemberId, String relTypeCode, int relId) {
+        boolean alreadyLiked = reactionRepository.existsByMemberIdAndRelTypeCodeAndRelId(loginedMemberId, relTypeCode, relId);
+
+        if (alreadyLiked) {
+            reactionRepository.delete(loginedMemberId, relTypeCode, relId);
+
+            if (relTypeCode.equals("comment")) {
+                commentRepository.decreaseCommentLike(relId);
+            } else if (relTypeCode.equals("post")) {
+                postRepository.decreaseLikeReaction(relId);
+            }
+
+        } else {
+            reactionRepository.insert(loginedMemberId, relTypeCode, relId);
+
+            if (relTypeCode.equals("comment")) {
+                commentRepository.increaseCommentLike(relId);
+            } else if (relTypeCode.equals("post")) {
+                postRepository.increaseLikeReaction(relId);
+            }
+        }
+
+        // ✅ 여기에서 직접 comment/post 테이블에서 likeCount 가져오기
+        int likeCount = 0;
+        if (relTypeCode.equals("comment")) {
+            likeCount = commentRepository.getLikeCount(relId);
+        } else if (relTypeCode.equals("post")) {
+            likeCount = postRepository.getLikeCount(relId);
+        }
+
+        return ResultData.from(
+                alreadyLiked ? "S-2" : "S-1",
+                alreadyLiked ? "좋아요 취소" : "좋아요 성공",
+                "likeCount", likeCount,
+                "liked", !alreadyLiked
+        );
+    }
+
 
 }

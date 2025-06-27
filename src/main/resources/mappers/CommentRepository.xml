@@ -52,4 +52,20 @@
         WHERE id = #{id}
     </delete>
 
+    <update id="increaseCommentLike" parameterType="int">
+        UPDATE comment
+        SET `like` = `like` + 1
+        WHERE id = #{relId}
+    </update>
+
+    <update id="decreaseCommentLike" parameterType="int">
+        UPDATE comment
+        SET `like` = `like` - 1
+        WHERE id = #{relId}
+    </update>
+
+    <select id="getLikeCount" parameterType="int" resultType="int">
+        SELECT `like` FROM comment WHERE id = #{commentId}
+    </select>
+
 </mapper>

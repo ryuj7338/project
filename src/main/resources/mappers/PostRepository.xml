@@ -158,7 +158,7 @@
         WHERE id = #{relId}
     </update>
 
-    <select id="getLike">
+    <select id="getLikeCount">
         SELECT `like` FROM post
         WHERE id = #{relId}
     </select>

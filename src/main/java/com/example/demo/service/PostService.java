@@ -172,8 +172,8 @@ public class PostService {
         return ResultData.from("S-1", "좋아요 감소", "affectedRow", affectedRow);
     }
 
-    public int getLike(int relId) {
-        return postRepository.getLike(relId);
+    public int getLikeCount(int relId) {
+        return postRepository.getLikeCount(relId);
     }
 
 

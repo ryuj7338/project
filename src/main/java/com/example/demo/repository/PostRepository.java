@@ -36,7 +36,7 @@ public interface PostRepository {
     int increaseLikeReaction(int relId);
     int decreaseLikeReaction(int relId);
 
-    int getLike(int relId);
+
 
     boolean existsByTitle(String title);
 
@@ -64,4 +64,6 @@ public interface PostRepository {
     void updatePostBody(@Param("postId") int postId, @Param("body") String body);
 
     Post getById(int id);
+
+    int getLikeCount(int relId);
 }

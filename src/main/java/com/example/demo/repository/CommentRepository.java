@@ -23,4 +23,10 @@ public interface CommentRepository {
     Comment findById(@Param("id") int relId);
 
     void deleteComment(int id);
+
+    void decreaseCommentLike(int relId);
+
+    void increaseCommentLike(int relId);
+
+    int getLikeCount(int relId);
 }

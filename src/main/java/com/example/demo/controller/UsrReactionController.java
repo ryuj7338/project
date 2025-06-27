@@ -28,29 +28,30 @@ public class UsrReactionController {
 
     @RequestMapping("/usr/reaction/doLike")
     @ResponseBody
-    public ResultData doLike(String relTypeCode, int relId, String replaceUri){
+    public ResultData doLike(String relTypeCode, int relId, String replaceUri) {
 
         ResultData usersReactionRd = reactionService.usersReaction(rq.getLoginedMemberId(), relTypeCode, relId);
 
         int usersReaction = (int) usersReactionRd.getData1();
 
-        if(usersReaction == 1){
+        if (usersReaction == 1) {
             ResultData rd = reactionService.deleteLikeReaction(rq.getLoginedMemberId(), relTypeCode, relId);
 
-            int like = postService.getLike(relId);
+            int like = postService.getLikeCount(relId);
 
             return ResultData.from("S-1", "좋아요 취소", "like", like);
         }
 
         ResultData reactionRd = reactionService.addLikeReaction(rq.getLoginedMemberId(), relTypeCode, relId);
 
-        if(reactionRd.isFail()){
+        if (reactionRd.isFail()) {
             return ResultData.from(reactionRd.getResultCode(), reactionRd.getMsg());
         }
 
-        int like = postService.getLike(relId);
+        int like = postService.getLikeCount(relId);
         return ResultData.from(reactionRd.getResultCode(), reactionRd.getMsg(), "like", like);
     }
+
 
     @PostMapping("/toggle")
     @ResponseBody
