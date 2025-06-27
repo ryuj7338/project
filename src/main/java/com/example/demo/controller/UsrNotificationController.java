@@ -42,6 +42,8 @@ public class UsrNotificationController {
 
         int memberId = rq.getLoginedMemberId();
         List<Notification> list = notificationService.getRecentNotifications(memberId);
+
+
         return ResponseEntity.ok(list);
     }
 

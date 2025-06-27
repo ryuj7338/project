@@ -2,8 +2,10 @@ package com.example.demo.service;
 
 import com.example.demo.repository.CommentRepository;
 import com.example.demo.repository.MemberRepository;
+import com.example.demo.repository.PostRepository;
 import com.example.demo.repository.ReactionRepository;
 import com.example.demo.vo.Comment;
+import com.example.demo.vo.Post;
 import com.example.demo.vo.ResultData;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +27,12 @@ public class CommentService {
     private MemberRepository memberRepository;
 
     @Autowired
+    private NotificationService notificationService;
+
+    @Autowired
+    private PostRepository postRepository;
+
+    @Autowired
     private ReactionRepository reactionRepository;
 
 
@@ -43,6 +51,41 @@ public class CommentService {
         // 3) DB에서 조회해서 Comment 객체로 리턴
         Comment comment = commentRepository.getComment(newId);
 
+        if (relTypeCode.equals("post")) {
+            // 일반 댓글 (게시글에 대한 댓글)
+            Post post = postRepository.getPostById(relId);
+            if (post != null && post.getMemberId() != memberId) {
+                String nickname = memberRepository.getNicknameById(memberId);
+                String message = nickname + "님이 회원님의 게시글에 댓글을 남겼습니다.";
+                String link = "/usr/post/detail?id=" + relId + "#comment-" + comment.getId();
+
+                notificationService.addNotification(
+                        post.getMemberId(),     // 알림 받을 사용자 (게시글 작성자)
+                        memberId,               // 알림 보낸 사용자 (댓글 작성자)
+                        "WRITE_COMMENT",        // 알림 타입
+                        message,
+                        link
+                );
+            }
+        } else if (relTypeCode.equals("comment")) {
+            // 대댓글 (댓글에 대한 댓글)
+            Comment parentComment = commentRepository.getComment(relId);
+            if (parentComment != null && parentComment.getMemberId() != memberId) {
+                String nickname = memberRepository.getNicknameById(memberId);
+                int postId = findPostIdByComment(parentComment); // 재귀적으로 게시글 ID 추적
+                String message = nickname + "님이 회원님의 댓글에 답글을 남겼습니다.";
+                String link = "/usr/post/detail?id=" + postId + "#comment-" + comment.getId();
+
+                notificationService.addNotification(
+                        parentComment.getMemberId(),  // 알림 받을 사람 (부모 댓글 작성자)
+                        memberId,                     // 알림 보낸 사람 (답글 작성자)
+                        "REPLY_COMMENT",
+                        message,
+                        link
+                );
+
+            }
+        }
         return comment;
     }
 
@@ -113,7 +156,8 @@ public class CommentService {
         return sorted;
     }
 
-    private void addWithChildren(List<Comment> result, Comment parent, Map<Integer, List<Comment>> childMap) {
+    private void addWithChildren(List<Comment> result, Comment
+            parent, Map<Integer, List<Comment>> childMap) {
         result.add(parent);
         List<Comment> children = childMap.get(parent.getId());
         if (children != null) {
@@ -122,4 +166,19 @@ public class CommentService {
             }
         }
     }
+
+    private int findPostIdByComment(Comment comment) {
+        if ("post".equals(comment.getRelTypeCode())) {
+            return comment.getRelId();
+        } else if ("comment".equals(comment.getRelTypeCode())) {
+            Comment parent = commentRepository.getComment(comment.getRelId());
+            if (parent == null) return -1;
+            return findPostIdByComment(parent);
+        }
+        return -1;
+    }
+
+
 }
+
+

@@ -111,6 +111,8 @@ public class ReactionService {
                 String nickname = memberRepository.getNicknameById(loginedMemberId);
                 String message = "❤️ " + nickname + "님이 회원님의 글을 좋아합니다.";
                 String link = "/usr/post/detail?id=" + relId;
+
+                System.out.println(">>> 게시글 좋아요 알림 등록: " + message + " | link: " + link);
                 notificationService.addNotification(
                         post.getMemberId(),         // 알림 받을 사람
                         loginedMemberId,            // 알림 발생자
@@ -172,12 +174,47 @@ public class ReactionService {
 
             if (relTypeCode.equals("comment")) {
                 commentRepository.increaseCommentLike(relId);
+
+                // 🔔 댓글/대댓글 좋아요 알림
+                Comment comment = commentRepository.getComment(relId);
+                if (comment != null && comment.getMemberId() != loginedMemberId) {
+                    String nickname = memberRepository.getNicknameById(loginedMemberId);
+                    int postId = comment.getRelTypeCode().equals("post")
+                            ? comment.getRelId()
+                            : findPostIdByComment(comment);
+                    String message = "❤️ " + nickname + "님이 회원님의 댓글을 좋아합니다.";
+                    String link = "/usr/post/detail?id=" + postId + "#comment-" + relId;
+
+                    notificationService.addNotification(
+                            comment.getMemberId(),
+                            loginedMemberId,
+                            "LIKE_COMMENT",
+                            message,
+                            link
+                    );
+                }
+
             } else if (relTypeCode.equals("post")) {
                 postRepository.increaseLikeReaction(relId);
+
+                // 🔔 게시글 좋아요 알림 추가
+                Post post = postRepository.getPostById(relId);
+                if (post != null && post.getMemberId() != loginedMemberId) {
+                    String nickname = memberRepository.getNicknameById(loginedMemberId);
+                    String message = "❤️ " + nickname + "님이 회원님의 글을 좋아합니다.";
+                    String link = "/usr/post/detail?id=" + relId;
+
+                    notificationService.addNotification(
+                            post.getMemberId(),
+                            loginedMemberId,
+                            "LIKE_POST",
+                            message,
+                            link
+                    );
+                }
             }
         }
 
-        // ✅ 여기에서 직접 comment/post 테이블에서 likeCount 가져오기
         int likeCount = 0;
         if (relTypeCode.equals("comment")) {
             likeCount = commentRepository.getLikeCount(relId);
@@ -192,6 +229,5 @@ public class ReactionService {
                 "liked", !alreadyLiked
         );
     }
-
 
 }
