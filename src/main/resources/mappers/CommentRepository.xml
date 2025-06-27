@@ -10,11 +10,11 @@
             resultType="com.example.demo.vo.Comment">
         SELECT C.*, M.nickname AS extra__writer
         FROM `comment` AS C
-                 INNER JOIN `member` AS M
-                            ON C.memberId = M.id
-        WHERE relTypeCode = #{relTypeCode}
-          AND relId = #{relId}
-        ORDER BY C.id ASC;
+        INNER JOIN `member` AS M
+        ON C.memberId = M.id
+        WHERE (C.relTypeCode = #{relTypeCode} AND C.relId = #{relId})
+        OR (C.relTypeCode = 'comment' AND C.relId IN (SELECT id FROM `comment` WHERE relTypeCode = #{relTypeCode} AND relId = #{relId}))
+        ORDER BY C.parentId ASC, C.id ASC
     </select>
 
     <insert id="writeComment" parameterType="map">

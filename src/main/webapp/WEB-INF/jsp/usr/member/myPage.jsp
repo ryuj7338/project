@@ -34,7 +34,7 @@
 				</tr>
 				<tr>
 					<th>전화번호</th>
-					<td style="text-align: center;">${rq.loginedMember.cellphoneNum }</td>
+					<td style="text-align: center;">${rq.loginedMember.cellphone }</td>
 				</tr>
 				<tr>
 					<th>회원정보 수정</th>
