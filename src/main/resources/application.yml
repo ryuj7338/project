@@ -31,7 +31,7 @@ custom:
   uploadDirPath: C:/Users/rjh73/IdeaProjects/project/src/main/resources/static/uploadFiles
 
 openai:
-  api-key: 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
+  api-key:
 
 
 
