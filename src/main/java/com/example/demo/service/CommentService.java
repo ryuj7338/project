@@ -52,7 +52,7 @@ public class CommentService {
         Comment comment = commentRepository.getComment(newId);
 
         if (relTypeCode.equals("post")) {
-            // 일반 댓글 (게시글에 대한 댓글)
+
             Post post = postRepository.getPostById(relId);
             if (post != null && post.getMemberId() != memberId) {
                 String nickname = memberRepository.getNicknameById(memberId);
@@ -68,7 +68,7 @@ public class CommentService {
                 );
             }
         } else if (relTypeCode.equals("comment")) {
-            // 대댓글 (댓글에 대한 댓글)
+
             Comment parentComment = commentRepository.getComment(relId);
             if (parentComment != null && parentComment.getMemberId() != memberId) {
                 String nickname = memberRepository.getNicknameById(memberId);
