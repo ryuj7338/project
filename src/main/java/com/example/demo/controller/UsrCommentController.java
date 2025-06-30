@@ -27,7 +27,7 @@ public class UsrCommentController {
     @Autowired
     private ReactionService reactionService;
 
-    // 댓글 작성 (일반 댓글, 대댓글 모두 처리)
+
     @RequestMapping("/usr/comment/doWrite")
     @ResponseBody
     public Object doWrite(
@@ -40,23 +40,22 @@ public class UsrCommentController {
         Rq rq = (Rq) req.getAttribute("rq");
 
         if (Ut.isEmptyOrNull(body)) {
-            // 대댓글 요청은 JSON 응답
+
             if (parentId != 0) {
                 return ResultData.from("F-1", "내용을 입력해주세요");
             }
-            // 일반 댓글은 JS 응답
+
             return Ut.jsHistoryBack("F-1", "내용을 입력해주세요");
         }
 
         int loginedMemberId = rq.getLoginedMemberId();
         Comment comment = commentService.writeComment(loginedMemberId, relTypeCode, relId, parentId, body);
 
-        // 대댓글은 JSON 응답
         if (parentId != 0) {
             return ResultData.from("S-1", "댓글 등록 성공", "data1", comment);
         }
 
-        // 일반 댓글은 alert + redirect
+
         return Ut.jsReplace("S-1", "댓글 등록 성공", "/usr/post/detail?id=" + relId);
 
     }
@@ -67,12 +66,12 @@ public class UsrCommentController {
     public String doDelete(@RequestParam int id, @RequestParam int postId) {
         Comment comment = commentService.getComment(id);
 
-        // 댓글이 없더라도 원래 게시글로 리다이렉트
+
         if (comment == null) {
             return "redirect:/usr/post/detail?id=" + postId;
         }
 
-        // 권한이 없는 경우에도 원래 게시글로 리다이렉트
+
         if (comment.getMemberId() != rq.getLoginedMemberId()) {
             return "redirect:/usr/post/detail?id=" + postId;
         }
@@ -83,7 +82,7 @@ public class UsrCommentController {
     }
 
 
-    // 댓글 수정
+
     @PostMapping("/usr/comment/doModify")
     @ResponseBody
     public String doModify(

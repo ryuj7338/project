@@ -57,20 +57,7 @@ public class ResourceService {
     public List<Resource> getByPostId(int postId) {
         return resourceRepository.getByPostId(postId);
     }
-//
-//    public List<Resource> getAutoFilesByPostId(int postId) {
-//        List<Resource> allFiles = resourceRepository.getListByPostId(postId);
-//
-//        return allFiles.stream()
-//                .filter(this::isAutoUploadFile)
-//                .collect(Collectors.toList());
-//    }
 
-    /**
-     * 자동 업로드 파일 판단 로직
-     * 예: 저장된 파일명(savedName) 에 UUID 형태가 포함되어 있으면 자동 업로드로 판단
-     * UUID 예시 정규식: 8-4-4-4-12 형식
-     */
     private boolean isAutoUploadFile(Resource resource) {
         String savedName = resource.getSavedName();
 
