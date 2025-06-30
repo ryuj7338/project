@@ -34,10 +34,10 @@ public class PostService {
 
     public void printPostServiceBeans() {
         String[] beanNames = context.getBeanNamesForType(PostService.class);
-        System.out.println("PostService 빈 개수: " + beanNames.length);
+
         for (String name : beanNames) {
             Object bean = context.getBean(name);
-            System.out.println("Bean name: " + name + ", Class: " + bean.getClass() + ", Hash: " + bean.hashCode());
+
         }
     }
 
@@ -68,10 +68,10 @@ public class PostService {
         post.setBody(body);
 
         postRepository.insert(post);
-        System.out.println("[DEBUG] insert 후 Post ID: " + post.getId());
+
         Post savedPost = postRepository.getById(post.getId());
 
-        System.out.println("[DEBUG] getById 후 Post: " + savedPost);
+
         return post;
     }
 
@@ -84,7 +84,6 @@ public class PostService {
     }
 
     public List<Post> getForPosts(int boardId, int itemsInAPage, int page, String searchKeyword, String searchType) {
-
         int limitFrom = (page - 1) * itemsInAPage;
         int limitTake = itemsInAPage;
 
@@ -115,7 +114,7 @@ public class PostService {
 
     public Post getForPrintPost(int loginedMemberId, int id) {
         Post post = postRepository.getForPrintPost(id);
-        System.out.println("getForPrintPost 조회된 body: " + (post != null ? post.getBody() : "post is null"));
+
         controlForPrintData(loginedMemberId, post);
         return post;
     }
@@ -207,8 +206,6 @@ public class PostService {
                 String path = line.substring(hrefStart, hrefEnd);
                 String name = path.substring(path.lastIndexOf("/") + 1);
 
-                System.out.println(">>>> href 추출: " + path);
-                System.out.println(">>>> 파일명 추출 전: " + path.substring(path.lastIndexOf("/") + 1));
                 // 허용 확장자
                 String ext = name.substring(name.lastIndexOf(".") + 1).toLowerCase();
                 List<String> allowed = List.of("pdf", "hwp", "pptx", "xlsx", "jpg", "jpeg", "png", "gif");
@@ -259,35 +256,23 @@ public class PostService {
     }
 
     public void updatePostBody(int postId, String body) {
-        System.out.println("updatePostBody 호출: postId=" + postId + ", Body=" + body);
+
         postRepository.updatePostBody(postId, body);
-        System.out.println("updatePostBody 종료");
+
     }
 
 
     public boolean existsByTitle(String originalName) {
         printPostServiceBeans();
-        System.out.println("[existsByTitle] 검사 대상: " + originalName);
+
         boolean exists = postRepository.existsByTitle(originalName);
-        System.out.println("[existsByTitle] 결과: " + exists);
+
         return exists;
 //        return postRepository.existsByTitle(originalName);
     }
 
 
-
-//    public boolean existsByBodyContains(String relativePath) {
-//        try {
-//            System.out.println("[PostService] existsByBodyContains 호출됨, parameter: " + relativePath);
-//            boolean exists = postRepository.existsByBodyContains(relativePath);
-//            System.out.println("[PostService] existsByBodyContains 결과: " + exists);
-//            return exists;
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//            return false;
-//        }
-//
-////        return postRepository.existsByBodyContains(relativePath);
-//    }
-
+    public List<Post> getRecentPostsByBoardCode(String boardCode, int limit) {
+        return postRepository.findRecentByBoardCode(boardCode, limit);
+    }
 }

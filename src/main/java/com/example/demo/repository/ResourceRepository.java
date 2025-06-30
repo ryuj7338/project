@@ -26,4 +26,6 @@ public interface ResourceRepository {
     List<Resource> findByPostIdAndAuto(@Param("postId") int postId, @Param("auto") boolean auto);
 
     boolean existsBySavedNameAndAuto(String savedName, boolean auto);
+
+    List<Resource> findRecent(int limit);
 }

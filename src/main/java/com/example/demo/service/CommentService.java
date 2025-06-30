@@ -42,14 +42,15 @@ public class CommentService {
             parentId = 0;
         }
 
-        // 1) DB에 INSERT (parentId 까지 전달)
+
         commentRepository.writeComment(memberId, body, relTypeCode, relId, parentId);
 
-        // 2) 방금 생성된 댓글 ID 가져오기
+
         int newId = commentRepository.getLastInsertId();
 
-        // 3) DB에서 조회해서 Comment 객체로 리턴
+
         Comment comment = commentRepository.getComment(newId);
+
 
         if (relTypeCode.equals("post")) {
             // 일반 댓글 (게시글에 대한 댓글)
@@ -60,9 +61,9 @@ public class CommentService {
                 String link = "/usr/post/detail?id=" + relId + "#comment-" + comment.getId();
 
                 notificationService.addNotification(
-                        post.getMemberId(),     // 알림 받을 사용자 (게시글 작성자)
-                        memberId,               // 알림 보낸 사용자 (댓글 작성자)
-                        "WRITE_COMMENT",        // 알림 타입
+                        post.getMemberId(),
+                        memberId,
+                        "WRITE_COMMENT",
                         message,
                         link
                 );
@@ -77,8 +78,8 @@ public class CommentService {
                 String link = "/usr/post/detail?id=" + postId + "#comment-" + comment.getId();
 
                 notificationService.addNotification(
-                        parentComment.getMemberId(),  // 알림 받을 사람 (부모 댓글 작성자)
-                        memberId,                     // 알림 보낸 사람 (답글 작성자)
+                        parentComment.getMemberId(),
+                        memberId,
                         "REPLY_COMMENT",
                         message,
                         link

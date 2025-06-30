@@ -1,76 +1,52 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
+<c:set var="pageTitle" value="MEMBER LOGIN"/>
+<%@ include file="../common/head.jspf" %>
+<c:set var="pageColor" value="dark"/>
+<%@ include file="../common/nav.jspf" %>
 
-<c:set var="pageTitle" value="MEMBER LOGIN"></c:set>
-<%@ include file="../common/head.jspf"%>
+<body class="bg-gray-100 flex flex-col min-h-screen">
+<main class="flex-1 flex items-center justify-center px-4">
+    <section class="w-full max-w-md bg-white p-10 mt-12 rounded-2xl shadow-xl border border-gray-200">
+        <h2 class="text-2xl font-bold text-center mb-8 text-gray-900">로그인</h2>
+        <form action="../member/doLogin" method="POST">
+            <input type="hidden" name="redirectUrl" value="${param.redirectUrl}"/>
 
+            <div class="mb-5">
+                <label class="block mb-1 text-gray-700 font-semibold">아이디</label>
+                <input name="loginId" autocomplete="on" type="text"
+                       class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                       placeholder="아이디 입력"/>
+            </div>
 
-<section class="mt-8 text-xl px-4">
-	<div class="mx-auto">
-		<form action="../member/doLogin" method="POST">
-			<input type="hidden" name="redirectUrl" value="${param.redirectUrl}" />
-			<table class="table" border="1" cellspacing="0" cellpadding="5" style="width: 100%; border-collapse: collapse;">
-				<tbody>
-					<tr>
-						<th>아이디</th>
-						<td style="text-align: center;"><input class="input input-primary" name="loginId" autocomplete="on"
-							type="text" placeholder="아이디 입력" /></td>
-					</tr>
-					<tr>
-						<th>비밀번호</th>
-						<td style="text-align: center;"><input class="input input-primary"  name="loginPw" autocomplete="off"
-							type="text" placeholder="비밀번호 입력" /></td>
-					</tr>
+            <div class="mb-6">
+                <label class="block mb-1 text-gray-700 font-semibold">비밀번호</label>
+                <input name="loginPw" autocomplete="off" type="password"
+                       class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                       placeholder="비밀번호 입력"/>
+            </div>
 
-					<tr>
-						<th></th>
-						<td style="text-align: center;">
-							<button class="btn btn-ghost">로그인</button>
-						</td>
-					</tr>
-					<tr>
-						<th></th>
-						<td style="text-align: center;"><a class="btn btn-outline btn-primary" href="${rq.findLoginIdUri }">아이디
-								찾기</a> <a class="btn btn-outline btn-success" href="${rq.findLoginPwUri }">비밀번호찾기</a></td>
-					</tr>
-					<tr>
-					<td>
-					<a href="javascript:kakaoLogin()"><img src="<c:url value="/image/kakao_login_medium_narrow.png"/>" style="width: 200px"></a>
-</td>
-</tr>
-				</tbody>
-			</table>
-		</form>
-		<div class="btns">
-			<button class="btn btn-ghost" type="button" onclick="history.back();">뒤로가기</button>
+            <div class="flex justify-between items-center mb-6 text-sm">
+                <a href="${rq.findLoginIdUri}" class="text-blue-600 hover:underline">아이디 찾기</a>
+                <a href="${rq.findLoginPwUri}" class="text-green-600 hover:underline">비밀번호 찾기</a>
+            </div>
 
-		</div>
-	</div>
-</section>
+            <button type="submit"
+                    class="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 rounded-xl transition">
+                로그인
+            </button>
+        </form>
 
-<script type="text/javascript" src="https://developers.kakao.com/sdk/js/kakao.js"></script>
-<script type="text/javascript">
-    Kakao.init('9c30d628ff4b5f6e101179faa1f4867b');
-    function kakaoLogin() {
-        Kakao.Auth.login({
-            success: function (response) {
-                Kakao.API.request({
-                    url: '/v2/user/me',
-                    success: function (response) {
-                        alert(JSON.stringify(response))
-                    },
-                    fail: function (error) {
-                        alert(JSON.stringify(error))
-                    },
-                })
-            },
-            fail: function (error) {
-                alert(JSON.stringify(error))
-            },
-        })
-    }
-</script>
+        <div class="mt-6 text-center">
+            <button type="button" onclick="history.back();"
+                    class="text-sm text-gray-600 hover:underline">
+                뒤로가기
+            </button>
+        </div>
+    </section>
+</main>
 
-<%@ include file="../common/foot.jspf"%>
-
+<%@ include file="../common/foot.jspf" %>
+</body>
+</html>

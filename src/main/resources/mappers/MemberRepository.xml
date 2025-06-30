@@ -5,14 +5,18 @@
 
 <mapper namespace="com.example.demo.repository.MemberRepository">
 
-    <insert id="doJoin" parameterType="map">
+    <insert id="doJoin">
         INSERT INTO `member`
         SET regDate = NOW(),
-		loginId = #{loginId},
+        updateDate = NOW(),
+        loginId = #{loginId},
             loginPw = #{loginPw},
-            `name` =
-            #{name}
+            `name` = #{name},
+            nickname = #{nickname},
+            cellphone = #{cellphone},
+            email = #{email}
     </insert>
+
 
     <select id="getLastInsertId" parameterType="int">
         SELECT LAST_INSERT_ID()

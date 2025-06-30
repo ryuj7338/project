@@ -27,14 +27,11 @@ mybatis:
   type-aliases-package: com.example.demo.vo
   mapper-locations: classpath:/mappers/**/*.xml
 
-kakao:
-  client_id: 79f2a3a73883a82595a2202187f96cc5
-  redirect_uri: http://localhost:8080/login/oauth2/code/kakao
-
 custom:
   uploadDirPath: C:/Users/rjh73/IdeaProjects/project/src/main/resources/static/uploadFiles
 
-
+openai:
+  api-key: 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
 
 
 

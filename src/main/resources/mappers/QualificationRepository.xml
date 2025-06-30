@@ -6,30 +6,35 @@
 <mapper namespace="com.example.demo.repository.QualificationRepository">
 
     <select id="findAll" resultType="com.example.demo.vo.Qualification">
-        SELECT
-            id,
-            name,
-            issuing_agency AS issuingAgency,
-            organizing_agency AS organizingAgency,
-            grade,
-            category_code AS categoryCode,
-            `type`,
-            applyUrl
+        SELECT id,
+               name,
+               issuing_agency    AS issuingAgency,
+               organizing_agency AS organizingAgency,
+               grade,
+               category_code     AS categoryCode,
+               `type`,
+               applyUrl
         FROM qualifications
     </select>
 
     <select id="findById" parameterType="int" resultType="com.example.demo.vo.Qualification">
-        SELECT
-            id,
-            name,
-            issuing_agency AS issuingAgency,
-            organizing_agency AS organizingAgency,
-            grade,
-            category_code AS categoryCode,
-            `type`,
-            applyUrl
+        SELECT id,
+               name,
+               issuing_agency    AS issuingAgency,
+               organizing_agency AS organizingAgency,
+               grade,
+               category_code     AS categoryCode,
+               `type`,
+               applyUrl
         FROM qualifications
         WHERE id = #{id}
+    </select>
+
+    <select id="findRecent" resultType="com.example.demo.vo.Qualification">
+        SELECT *
+        FROM qualifications
+        ORDER BY id DESC
+            LIMIT #{limit}
     </select>
 
 </mapper>

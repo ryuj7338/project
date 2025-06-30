@@ -8,9 +8,30 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
+import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
 
 @Configuration
 public class WebMvcConfigurer implements org.springframework.web.servlet.config.annotation.WebMvcConfigurer {
+
+    @Override
+    public void addViewControllers(ViewControllerRegistry registry) {
+
+
+        registry.addViewController("/usr/post/introduce.jsp")
+                .setViewName("usr/post/introduce");
+        registry.addViewController("/usr/post/introduce")
+                .setViewName("usr/post/introduce");
+
+        registry
+                .addViewController("/usr/post/requirements")
+                .setViewName("usr/post/requirements");
+
+        registry.addViewController("/usr/post/company")
+                .setViewName("usr/post/company");
+        // (굳이 .jsp 확장자 붙여 들어오는 경우도 동일하게)
+        registry.addViewController("/usr/post/company.jsp")
+                .setViewName("usr/post/company");
+    }
 
     //  BeforeActionInterceptor 불러오기(연결)
     @Autowired
@@ -39,17 +60,17 @@ public class WebMvcConfigurer implements org.springframework.web.servlet.config.
         ir.addPathPatterns("/uploadFiles/**");
         ir.addPathPatterns("file:///\" + System.getProperty(\"user.dir\") + \"/uploadFiles/");
 
-    //  로그인 필요
+        //  로그인 필요
         ir = registry.addInterceptor(needLoginInterceptor);
 
-    //  글 관련
+        //  글 관련
         ir.addPathPatterns("/usr/post/write");
         ir.addPathPatterns("/usr/post/doWrite");
         ir.addPathPatterns("/usr/post/modify");
         ir.addPathPatterns("/usr/post/doModify");
         ir.addPathPatterns("/usr/post/doDelete");
 
-    //  회원 관련
+        //  회원 관련
         ir.addPathPatterns("/usr/member/myPage");
         ir.addPathPatterns("/usr/member/checkPw");
         ir.addPathPatterns("/usr/member/doCheckPw");
@@ -57,13 +78,13 @@ public class WebMvcConfigurer implements org.springframework.web.servlet.config.
         ir.addPathPatterns("/usr/member/modify");
         ir.addPathPatterns("/usr/member/doModify");
 
-    //  댓글 관련
+        //  댓글 관련
         ir.addPathPatterns("/usr/comment/doWrite");
 
-    //  좋아요 관련
+        //  좋아요 관련
         ir.addPathPatterns("/usr/reaction/doLike");
 
-    // 채용공고 관련
+        // 채용공고 관련
         ir.addPathPatterns("/usr/job/favorite/toggle");
         ir.addPathPatterns("/usr/job/favorite/list");
         ir.addPathPatterns("/usr/job/favorite/delete");
@@ -75,7 +96,7 @@ public class WebMvcConfigurer implements org.springframework.web.servlet.config.
         ir.addPathPatterns("/usr/gpt/doAsk");
         ir.addPathPatterns("/usr/gpt/history");
 
-    //  로그아웃 필요
+        //  로그아웃 필요
         ir = registry.addInterceptor(needLogoutInterceptor);
         ir.addPathPatterns("/usr/member/login");
         ir.addPathPatterns("/usr/member/doLogin");
@@ -87,4 +108,9 @@ public class WebMvcConfigurer implements org.springframework.web.servlet.config.
         ir.addPathPatterns("/usr/member/doFindLoginPw");
     }
 
+    @Override
+    public void addResourceHandlers(ResourceHandlerRegistry registry) {
+        registry.addResourceHandler("/uploadFiles/**")
+                .addResourceLocations("classpath:/static/uploadFiles/");
+    }
 }

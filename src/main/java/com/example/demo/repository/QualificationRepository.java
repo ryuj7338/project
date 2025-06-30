@@ -9,4 +9,6 @@ import java.util.List;
 public interface QualificationRepository {
     List<Qualification> findAll();
     Qualification findById(int id);
+
+    List<Qualification> findRecent(int limit);
 }

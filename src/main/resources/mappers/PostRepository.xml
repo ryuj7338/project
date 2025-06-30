@@ -9,14 +9,12 @@
         INSERT INTO post
         SET regDate = NOW(),
         updateDate = NOW(),
-        memberId = #{memberId},
-            boardId = #{boardId},
-            title = #{title},
-            body = #{body}
+        memberId = #{memberId}, boardId = #{boardId}, title = #{title}, body = #{body}
     </insert>
 
     <delete id="deletePost" parameterType="int">
-        DELETE FROM post
+        DELETE
+        FROM post
         WHERE id = #{id}
     </delete>
 
@@ -53,7 +51,7 @@
         </if>
     </select>
 
-    <select id="getForPosts"  resultType="com.example.demo.vo.Post">
+    <select id="getForPosts" resultType="com.example.demo.vo.Post">
         SELECT P.*, M.nickname AS extra__writer,
         IFNULL(COUNT(C.id), 0) AS extra__commentsCount
         FROM post AS P
@@ -87,6 +85,7 @@
 
             </choose>
         </if>
+        GROUP BY P.id
         ORDER BY P.id DESC
         <if test="limitFrom >= 0">
             LIMIT #{limitFrom}, #{limitTake}
@@ -106,7 +105,8 @@
     </select>
 
     <select id="getPostById" parameterType="int" resultType="com.example.demo.vo.Post">
-        SELECT * FROM post
+        SELECT *
+        FROM post
         WHERE id = #{id}
     </select>
 
@@ -143,13 +143,13 @@
     <update id="increaseHitCount" parameterType="int">
         UPDATE post
         SET hit = hit + 1
-        WHERE id =#{id}
+        WHERE id = #{id}
     </update>
 
     <update id="increaseLikeReaction" parameterType="int">
         UPDATE post
         SET `like` = `like` + 1
-        WHERE id =#{relId}
+        WHERE id = #{relId}
     </update>
 
     <update id="decreaseLikeReaction" parameterType="int">
@@ -159,31 +159,27 @@
     </update>
 
     <select id="getLikeCount">
-        SELECT `like` FROM post
+        SELECT `like`
+        FROM post
         WHERE id = #{relId}
     </select>
 
 
     <select id="getPostsByBoardId" parameterType="int" resultType="com.example.demo.vo.Post">
-        SELECT * FROM post
+        SELECT *
+        FROM post
         WHERE boardId = #{boardId}
         ORDER BY id DESC
     </select>
 
     <insert id="write" parameterType="com.example.demo.vo.Post" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO post
-        SET boardId = #{boardId},
-            memberId = #{memberId},
-            title = #{title},
-            body = #{body},
-            regDate = NOW(),
-            updateDate = NOW()
+        SET boardId = #{boardId}, memberId = #{memberId}, title = #{title}, body = #{body}, regDate = NOW(), updateDate = NOW()
     </insert>
     <update id="update" parameterType="Post">
         UPDATE post
-        SET
-            title = #{title},
-            body = #{body},
+        SET title      = #{title},
+            body       = #{body},
             updateDate = NOW()
         WHERE id = #{id}
     </update>
@@ -192,8 +188,7 @@
         SELECT title
         FROM post
         WHERE title LIKE CONCAT('%', #{keyword}, '%')
-        ORDER BY id DESC
-            LIMIT 10
+        ORDER BY id DESC LIMIT 10
     </select>
 
 
@@ -211,12 +206,15 @@
     </select>
 
     <select id="getPostByTitle" resultType="Post">
-        SELECT * FROM post WHERE title = #{title}
+        SELECT *
+        FROM post
+        WHERE title = #{title}
     </select>
 
     <update id="updatePostBody" parameterType="map">
         UPDATE post
-        SET body = #{body}, updateDate = NOW()
+        SET body       = #{body},
+            updateDate = NOW()
         WHERE id = #{postId}
     </update>
 
@@ -230,6 +228,21 @@
         SELECT *
         FROM post
         WHERE id = #{id}
+    </select>
+
+    <select id="findRecentByBoardCode" resultType="Post" parameterType="map">
+        SELECT p.id,
+               p.regDate,
+               p.updateDate,
+               p.title,
+               p.body,
+               b.code AS boardCode,
+               b.name AS boardName
+        FROM post p
+                 JOIN board b ON p.boardId = b.id
+        WHERE b.code = #{boardCode}
+        ORDER BY p.regDate DESC
+            LIMIT #{limit}
     </select>
 
 </mapper>

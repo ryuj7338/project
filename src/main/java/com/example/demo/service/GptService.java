@@ -22,43 +22,85 @@ public class GptService {
     @Autowired
     private GptApi gptApi;
 
+    public List<GptAnswer> getAnswersByMemberAndCategory(int memberId, String category) {
+        return gptAnswerRepository.findByMemberIdAndCategoryOrderByRegDateDesc(memberId, category);
+    }
 
     public String ask(String prompt, String category) {
-        String basePrompt = "";
+        if (prompt == null) prompt = "";
+        if (category == null) category = "";
+
+        String systemPrompt = """
+                너는 경호 및 보안 분야 전문가이자, 면접/자소서 첨삭 코치 역할을 하는 GPT입니다.
+                사용자에게 정확하고 실용적인 답변을 제공합니다.
+                """;
+
+        String userPrompt;
 
         if ("면접".equals(category)) {
-            if (prompt.contains("면접 질문") || prompt.contains("면접 도와줘")) {
-                basePrompt = """
-                        너는 경호원을 준비하는 사람에게 면접 코치를 해주는 전문가야.
-                        다음은 경호 직무에서 자주 나오는 실제 면접 질문이야. 
-                        아래처럼 5~7개 정도 추천해줘.
-                        - 본인이 경호직에 적합하다고 생각하는 이유는?
-                        - 긴급 상황에서 대처한 경험이 있다면?
-                        """;
+            if (prompt.contains("질문") || prompt.contains("추천")) {
+                userPrompt = "면접 준비 중이야. 경호 관련 질문 5~7개만 추천해줘.";
             } else {
-                basePrompt = """
-                        너는 경호원 면접 피드백을 제공하는 전문가야.
-                        사용자의 답변에 대해 다음 3가지를 기준으로 피드백 해줘.
-                        1. 논리성과 일관성
-                        2. 경호 직무와의 적합성
-                        3. 구체적인 개선 포인트
-                        아래 답변을 평가해줘:
-                        """;
+                userPrompt = "다음은 면접 답변이야: \"%s\"\n논리성, 직무 적합성, 개선점을 기준으로 피드백 줘."
+                        .formatted(prompt);
             }
-        } else if ("자소서".equals(category)) {
-            basePrompt = """
-                    너는 경호 직무에 지원하는 사람들을 위한 자기소개서 코치야.
-                    사용자가 입력한 문장을 자연스럽고 논리적으로 바꾸고,
-                    부족한 점을 설명해줘. 문장을 먼저 고치고 그 아래에 개선 포인트를 적어줘.
-                    아래 문장을 도와줘:
-                    """;
+        } else if ("자기소개서".equals(category)) {
+            userPrompt = "아래 문장은 자기소개서 문장이야:\n\"%s\"\n경호 직무에 어울리게 고쳐주고 이유도 설명해줘."
+                    .formatted(prompt);
+        } else {
+            userPrompt = prompt;
         }
 
-        String finalPrompt = basePrompt + "\n\n" + prompt;
+        System.out.println("[GPT 요청] category=" + category);
+        System.out.println("[GPT 요청] userPrompt=" + userPrompt);
 
-        // 실제 GPT 호출 로직으로 연결 (OpenAI API 등)
-        return gptApi.ask(finalPrompt);
+        return gptApi.ask(systemPrompt, userPrompt);
     }
+
+
+//    public String ask(String prompt, String category) {
+//        // GPT의 고정 역할 부여
+//        String systemPrompt = """
+//                    너는 경호 및 보안 분야 전문가이자, 면접/자기소개서 첨삭 코치야.
+//                    너의 역할은 다음과 같아:
+//                    1. 경호원, 보안요원, 신변보호사 등 관련 직무와 자격요건에 대해 잘 알고 있어야 해.
+//                    2. 면접 준비나 자기소개서 첨삭이 필요한 사용자에게 논리적이고 구체적인 조언을 줘야 해.
+//                    3. 응답은 명확하고 공손하게, 너무 어려운 전문용어는 피해서 설명해.
+//                """;
+//
+//        String userPrompt = "";
+//
+//        if ("면접".equals(category)) {
+//            if (prompt.contains("면접 질문") || prompt.contains("질문 추천")) {
+//                userPrompt = """
+//                            경호 직무 면접에서 자주 나오는 질문을 5~7개 추천해줘.
+//                            예시를 참고해도 좋아:
+//                            - 경호직에 지원하게 된 동기는?
+//                            - 위기 상황에서 대처한 경험은?
+//                            - 신뢰와 책임감을 증명한 사례는?
+//                        """;
+//            } else {
+//                userPrompt = """
+//                            아래는 사용자의 면접 답변입니다.
+//                            "%s"
+//
+//                            위 답변에 대해 논리성, 직무 적합성, 개선 포인트 3가지를 기준으로 피드백 해줘.
+//                        """.formatted(prompt);
+//            }
+//        } else if ("자기소개서".equals(category)) {
+//            userPrompt = """
+//                        아래 문장은 경호/보안 직무 자기소개서에 들어갈 내용입니다.
+//                        "%s"
+//
+//                        이 문장을 더 자연스럽고 논리적으로 고쳐주고, 왜 그렇게 고쳤는지도 설명해줘.
+//                    """.formatted(prompt);
+//        } else {
+//            // 예외 처리용
+//            userPrompt = prompt;
+//        }
+//
+//        return gptApi.ask(systemPrompt, userPrompt);
+//    }
 
 
     public void save(int memberId, String question, String answer, String category) {

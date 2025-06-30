@@ -20,4 +20,8 @@ public class QualificationService {
     public Qualification findById(int id) {
         return qualificationRepository.findById(id);
     }
+
+    public List<Qualification> getRecentQualifications(int count) {
+        return qualificationRepository.findRecent(count);
+    }
 }

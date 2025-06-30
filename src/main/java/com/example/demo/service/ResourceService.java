@@ -22,12 +22,12 @@ public class ResourceService {
 
 
     public void save(Resource resource) {
-        System.out.println("[DEBUG] save 메서드 시작: resource=" + resource);
+
         try {
             resourceRepository.insertResource(resource);
-            System.out.println("[DEBUG] save 메서드 성공, 저장 후 id: " + resource.getId());
+
         } catch (Exception e) {
-            System.err.println("[ERROR] save 메서드 예외 발생: " + e.getMessage());
+
             e.printStackTrace();
             throw e;
         }
@@ -49,7 +49,7 @@ public class ResourceService {
     public List<Resource> getListByPostId(int postId) {
         List<Resource> resources = resourceRepository.getListByPostId(postId);
         for (Resource r : resources) {
-            System.out.println("DB 조회 Resource: savedName=" + r.getSavedName() + ", originalName=" + r.getOriginalName());
+
         }
         return resources;
     }
@@ -88,9 +88,9 @@ public class ResourceService {
 
 
     public boolean existsBySavedNameContains(String savedName) {
-        System.out.println("[ResourceService] existsBySavedNameContains 호출: " + savedName);
+
         boolean exists = resourceRepository.existsBySavedNameContains(savedName);
-        System.out.println("[ResourceService] existsBySavedNameContains 결과: " + exists);
+
         return exists;
     }
 
@@ -116,5 +116,24 @@ public class ResourceService {
 
     public boolean existsBySavedNameAndAuto(String savedName, boolean auto) {
         return resourceRepository.existsBySavedNameAndAuto(savedName, auto);
+    }
+
+    public List<Resource> getRecentResources(int limit) {
+        return resourceRepository.findRecent(limit);
+    }
+
+    public List<Resource> getResourcesByPostId(int postId) {
+        return resourceRepository.getListByPostId(postId);
+    }
+
+
+    public List<Resource> extractMatchedFileInfos(List<Resource> autoResources, String body) {
+        if (autoResources == null || autoResources.isEmpty() || body == null) {
+            return List.of();
+        }
+
+        return autoResources.stream()
+                .filter(resource -> body.contains(resource.getSavedName()))
+                .collect(Collectors.toList());
     }
 }

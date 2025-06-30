@@ -5,11 +5,15 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,18 +31,19 @@ public class NewsService {
 
         WebDriver driver = new ChromeDriver(options);
 
+        driver.manage().timeouts().pageLoadTimeout(Duration.ofSeconds(5));
 
         List<News> newsList = new ArrayList<>();
+
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(5));
 
         for (int page = 1; page <= numPages; page++) {
             int start = (page - 1) * 10 + 1;
             String url = "https://search.naver.com/search.naver?where=news&query=" + query + "&start=" + start;
             driver.get(url);
 
-            Thread.sleep(1000);
-
-            Thread.sleep(2000);
-
+            wait.until(ExpectedConditions.presenceOfElementLocated(
+                    By.cssSelector("div.sds-comps-base-layout")));
 
             Document doc = Jsoup.parse(driver.getPageSource());
 

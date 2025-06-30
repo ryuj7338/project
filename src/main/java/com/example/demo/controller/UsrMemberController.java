@@ -106,7 +106,7 @@ public class UsrMemberController {
 
         Member member = memberService.getMemberById((int) joinRd.getData1());
 
-        return Ut.jsReplace(joinRd.getResultCode(), joinRd.getMsg(), "../member/login");
+        return Ut.jsReplace(joinRd.getResultCode(), joinRd.getMsg(), "../home/main");
     }
 
     @RequestMapping("/usr/member/myPage")
@@ -205,4 +205,10 @@ public class UsrMemberController {
 
         return ResultData.from("S-1", "사용 가능한 아이디입니다.", "loginId", loginId);
     }
+    @RequestMapping("/usr/member/findLoginPw")
+    public String showFindLoginPw() {
+        return "usr/member/findLoginPw";
+    }
+
+
 }

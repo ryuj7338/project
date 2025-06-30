@@ -9,6 +9,8 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.io.FileInputStream;
@@ -133,6 +135,11 @@ public class JobPostingService {
 
     public List<String> findTitlesByKeyword(String keyword) {
         return jobPostingRepository.findTitlesByKeyword(keyword);
+    }
+
+    public List<JobPosting> getRecentJobPostings(int count) {
+        Pageable pageable = PageRequest.of(0, count);
+        return jobPostingRepository.findRecent(pageable);
     }
 
     public JobPosting getById(int id) {

@@ -5,36 +5,36 @@
 
 <mapper namespace="com.example.demo.repository.ResourceRepository">
 
-<!--    <insert id="insertResource" parameterType="Resource">-->
-<!--        INSERT INTO resources-->
-<!--        (postId, boardId, memberId, title, body,-->
-<!--         pdf, pptx, hwp, word, xlsx, zip, image, docx,-->
-<!--         regDate, updateDate)-->
-<!--        VALUES-->
-<!--            (#{postId}, #{boardId}, #{memberId}, #{title}, #{body},-->
-<!--             #{pdf}, #{pptx}, #{hwp}, #{word}, #{xlsx}, #{zip}, #{image}, #{docx},-->
-<!--             NOW(), NOW())-->
-<!--    </insert>-->
+    <!--    <insert id="insertResource" parameterType="Resource">-->
+    <!--        INSERT INTO resources-->
+    <!--        (postId, boardId, memberId, title, body,-->
+    <!--         pdf, pptx, hwp, word, xlsx, zip, image, docx,-->
+    <!--         regDate, updateDate)-->
+    <!--        VALUES-->
+    <!--            (#{postId}, #{boardId}, #{memberId}, #{title}, #{body},-->
+    <!--             #{pdf}, #{pptx}, #{hwp}, #{word}, #{xlsx}, #{zip}, #{image}, #{docx},-->
+    <!--             NOW(), NOW())-->
+    <!--    </insert>-->
 
     <resultMap id="ResourceResultMap" type="com.example.demo.vo.Resource">
-        <id property="id" column="id" />
-        <result property="postId" column="postId" />
-        <result property="memberId" column="memberId" />
-        <result property="boardId" column="boardId" />
-        <result property="regDate" column="regDate" />
-        <result property="updateDate" column="updateDate" />
-        <result property="title" column="title" />
-        <result property="body" column="body" />
-        <result property="image" column="image" />
-        <result property="pdf" column="pdf" />
-        <result property="zip" column="zip" />
-        <result property="hwp" column="hwp" />
-        <result property="word" column="word" />
-        <result property="xlsx" column="xlsx" />
-        <result property="pptx" column="pptx" />
-        <result property="docx" column="docx" />
-        <result property="originalName" column="original_name" />
-        <result property="savedName" column="saved_name" />
+        <id property="id" column="id"/>
+        <result property="postId" column="postId"/>
+        <result property="memberId" column="memberId"/>
+        <result property="boardId" column="boardId"/>
+        <result property="regDate" column="regDate"/>
+        <result property="updateDate" column="updateDate"/>
+        <result property="title" column="title"/>
+        <result property="body" column="body"/>
+        <result property="image" column="image"/>
+        <result property="pdf" column="pdf"/>
+        <result property="zip" column="zip"/>
+        <result property="hwp" column="hwp"/>
+        <result property="word" column="word"/>
+        <result property="xlsx" column="xlsx"/>
+        <result property="pptx" column="pptx"/>
+        <result property="docx" column="docx"/>
+        <result property="originalName" column="original_name"/>
+        <result property="savedName" column="saved_name"/>
 
     </resultMap>
 
@@ -42,53 +42,59 @@
     <update id="updateResource" parameterType="Resource">
         UPDATE resources
         SET updateDate = NOW(),
-            pdf = #{pdf},
-            pptx = #{pptx},
-            hwp = #{hwp},
-            word = #{word},
-            xlsx = #{xlsx},
-            zip = #{zip},
-            image = #{image},
-            docx = #{docx}
+            pdf        = #{pdf},
+            pptx       = #{pptx},
+            hwp        = #{hwp},
+            word       = #{word},
+            xlsx       = #{xlsx},
+            zip        = #{zip},
+            image      = #{image},
+            docx       = #{docx}
         WHERE postId = #{postId}
     </update>
 
     <delete id="deleteResource">
-        DELETE FROM resources WHERE id = #{id}
+        DELETE
+        FROM resources
+        WHERE id = #{id}
     </delete>
 
     <select id="getById" parameterType="int" resultMap="ResourceResultMap">
-        SELECT * FROM resources WHERE id = #{id}
+        SELECT *
+        FROM resources
+        WHERE id = #{id}
     </select>
 
 
-    <select id="getByPostId" resultMap="ResourceResultMap" resultType="com.example.demo.vo.Resource" fetchSize="1" >
-        SELECT * FROM resources WHERE postId = #{postId} LIMIT 1
+    <select id="getByPostId" resultMap="ResourceResultMap" resultType="com.example.demo.vo.Resource" fetchSize="1">
+        SELECT *
+        FROM resources
+        WHERE postId = #{postId} LIMIT 1
     </select>
 
     <insert id="save" parameterType="com.example.demo.vo.Resource">
         INSERT INTO resources
             (postId, original_name, saved_name, regDate)
-        VALUES
-            (#{postId}, #{originalName}, #{savedName}, NOW())
+        VALUES (#{postId}, #{originalName}, #{savedName}, NOW())
     </insert>
 
     <insert id="insertResource" parameterType="com.example.demo.vo.Resource" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO resources
-        (postId, memberId, boardId, regDate, updateDate, title, body, image, pdf, zip, hwp, word, xlsx, pptx, docx, original_name, saved_name, auto)
-        VALUES
-            (#{postId}, #{memberId}, #{boardId}, NOW(), NOW(), #{title}, #{body}, #{image}, #{pdf}, #{zip}, #{hwp}, #{word}, #{xlsx}, #{pptx}, #{docx}, #{originalName}, #{savedName}, #{auto})
+        (postId, memberId, boardId, regDate, updateDate, title, body, image, pdf, zip, hwp, word, xlsx, pptx, docx,
+         original_name, saved_name, auto)
+        VALUES (#{postId}, #{memberId}, #{boardId}, NOW(), NOW(), #{title}, #{body}, #{image}, #{pdf}, #{zip}, #{hwp},
+                #{word}, #{xlsx}, #{pptx}, #{docx}, #{originalName}, #{savedName}, #{auto})
     </insert>
 
 
     <select id="getListByPostId" resultMap="ResourceResultMap">
-        SELECT * FROM resources WHERE postId = #{postId}
+        SELECT *
+        FROM resources
+        WHERE postId = #{postId}
     </select>
 
     <select id="existsBySavedNameContains" resultType="boolean" parameterType="string">
-        SELECT EXISTS (
-            SELECT 1 FROM resources WHERE saved_name LIKE CONCAT('%', #{savedName}, '%')
-        )
+        SELECT EXISTS (SELECT 1 FROM resources WHERE saved_name LIKE CONCAT('%', #{savedName}, '%'))
     </select>
 
     <select id="findByPostIdAndAuto" parameterType="map" resultMap="ResourceResultMap">
@@ -99,12 +105,33 @@
     </select>
 
     <select id="existsBySavedNameAndAuto" resultType="boolean" parameterType="map">
-        SELECT EXISTS (
-            SELECT 1 FROM resources
-            WHERE saved_name = #{savedName}
-              AND auto = #{auto}
-        )
+        SELECT EXISTS (SELECT 1
+                       FROM resources
+                       WHERE saved_name = #{savedName}
+                         AND auto = #{auto})
     </select>
-
+    <select id="findRecent" resultType="Resource" parameterType="int">
+        SELECT id,
+               memberId,
+               boardId,
+               regDate,
+               updateDate,
+               title,
+               body,
+               image,
+               pdf,
+               zip,
+               hwp,
+               word,
+               xlsx,
+               pptx,
+               docx,
+               postId,
+               original_name,
+               saved_name
+        FROM resources
+        ORDER BY regDate DESC
+            LIMIT #{limit}
+    </select>
 
 </mapper>

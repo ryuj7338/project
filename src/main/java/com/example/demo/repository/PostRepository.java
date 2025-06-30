@@ -66,4 +66,6 @@ public interface PostRepository {
     Post getById(int id);
 
     int getLikeCount(int relId);
+
+    List<Post> findRecentByBoardCode(String boardCode, int limit);
 }

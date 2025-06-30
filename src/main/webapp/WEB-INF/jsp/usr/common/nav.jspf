@@ -1,0 +1,178 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+
+<c:set var="headerClass" value="bg-white text-black"/>
+<c:set var="logoColorClass" value="text-indigo-800"/>
+
+<c:if test="${pageColor eq 'dark'}">
+    <c:set var="headerClass" value="bg-gray-800 text-white"/>
+    <c:set var="logoColorClass" value="text-white"/>
+</c:if>
+
+<header class="${headerClass} border-b border-gray-200 relative z-50">
+    <div class="w-full flex items-center justify-between h-16">
+        <!-- 로고 -->
+        <a href="/" class="ml-2 px-4 ${logoColorClass} font-bold text-xl">Guardium</a>
+
+        <!-- ─── 메뉴 영역 ─── -->
+        <div class="flex-1">
+            <nav id="topNav"
+                 class="main-menu max-w-screen-xl mx-auto px-6 grid grid-cols-5 gap-4 font-semibold justify-items-center ransition-transform duration-300 ease-in-out origin-center">
+                <div class="group" data-index="0"><a href="${ctx}/usr/post/introduce">경호 소개</a></div>
+                <div class="group" data-index="1"><a href="${ctx}/usr/law/list">경호 정보</a></div>
+                <div class="group" data-index="2"><a href="${ctx}/usr/job/list">취업 지원</a></div>
+                <div class="group" data-index="3"><a href="${ctx}/usr/post/list?boardId=5">학습자료</a></div>
+                <div class="group" data-index="4"><a href="${ctx}/usr/post/list?boardId=1">커뮤니티</a></div>
+            </nav>
+        </div>
+        <!-- 우측 아이콘 (common.js 처리) -->
+        <div class="flex items-center space-x-6 mr-6">
+            <div id="alertBtn" class="relative text-current cursor-pointer">
+                <i class="fa-regular fa-bell fa-lg"></i>
+                <span id="alertBadge"
+                      class="absolute -top-2.5 right-0 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white hidden transform translate-x-1/2 -translate-y-1/2">
+                </span>
+            </div>
+            <!-- 로그인된 상태 -->
+            <c:if test="${rq.isLogined}">
+                <a href="/usr/member/myPage" class="text-current hover:text-current">
+                    <i class="fa-solid fa-user fa-lg"></i>
+                </a>
+                <a href="/usr/member/doLogout" class="text-current hover:text-current">
+                    <i class="fa-solid fa-right-from-bracket fa-lg"></i>
+                </a>
+            </c:if>
+
+            <!-- 비로그인 상태 -->
+            <c:if test="${not rq.isLogined}">
+                <a href="${ctx}/usr/member/login" class="text-current hover:text-gray-900">
+                    <i class="fa-solid fa-right-to-bracket fa-lg"></i>
+                </a>
+                <a href="${ctx}/usr/member/join" class="text-current hover:text-gray-900">
+                    <i class="fa-solid fa-user-plus fa-lg"></i>
+                </a>
+            </c:if>
+
+
+            <div id="alertDropdown"
+                 class="absolute right-0 bg-white rounded-md shadow-lg overflow-auto z-50 border border-gray-300"
+                 style="top:100%; width:300px; max-height:600px; display:none;">
+                <ul id="alertList"
+                    class="flex flex-col justify-center items-center min-h-[160px] divide-y divide-gray-200 p-0 m-0 list-none">
+                    <!-- AJAX로 알림 항목이 추가됩니다 -->
+                </ul>
+                <div class="sticky bottom-0 bg-white border-t border-gray-200 text-center py-1">
+                    <a href="javascript:void(0)" id="showAllNotifications"
+                       class="text-blue-600 text-sm font-medium hover:underline hover:text-blue-800">
+                        전체 알림 보기
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 메가 메뉴 (절대 위치, display:none 으로 숨김) -->
+    <div id="megaMenu"
+         class="absolute inset-x-0 top-full bg-white border-t border-gray-200 shadow-lg text-black"
+         style="display:none;">
+        <div class="max-w-screen-xl mx-auto px-6">
+            <div class="grid grid-cols-5 gap-4 py-6">
+                <div class="mega-group rounded-md px-4 py-2 transition-colors" data-index="0">
+
+                    <a href="${ctx}/usr/post/introduce" class="block py-1">경호원이란</a>
+                    <a href="${ctx}/usr/post/requirements" class="block py-1">자격 요건</a>
+                    <a href="${ctx}/usr/qualification/list" class="block py-1">자격증 정보</a>
+                </div>
+                <div class="mega-group rounded-md px-4 py-2 transition-colors" data-index="1">
+
+                    <a href="${ctx}/usr/news/list" class="block py-1">뉴스</a>
+                    <a href="${ctx}/usr/law/list" class="block py-1">법률</a>
+                    <a href="${ctx}/usr/post/company" class="block py-1">경호/보안업체</a>
+                </div>
+                <div class="mega-group rounded-md px-4 py-2 transition-colors" data-index="2">
+
+                    <a href="${ctx}/usr/gpt/interview" class="block py-1">면접 코칭</a>
+                    <a href="${ctx}/usr/gpt/resume" class="block py-1">자기소개서</a>
+                    <a href="${ctx}/usr/job/list" class="block py-1">채용 공고</a>
+                </div>
+                <div class="mega-group rounded-md px-4 py-2 transition-colors" data-index="3">
+
+                    <a href="${ctx}/usr/post/list?boardId=5" class="block py-1">기출문제</a>
+                </div>
+                <div class="mega-group rounded-md px-4 py-2 transition-colors" data-index="4">
+
+                    <a href="${ctx}/usr/post/list?boardId=1" class="block py-1">질문 게시판</a>
+                    <a href="${ctx}/usr/post/list?boardId=2" class="block py-1">정보 공유</a>
+                    <a href="${ctx}/usr/post/list?boardId=3" class="block py-1">합격 후기</a>
+                    <a href="${ctx}/usr/post/list?boardId=4" class="block py-1">자유 게시판</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<style>
+    #topNav {
+        transform-origin: center; /* 가운데를 기준으로 압축 */
+        transform: scaleX(0.6); /* gap만 0.6배로 좁히고 */
+        transition: transform 0.3s ease;
+    }
+
+    /* .group(메뉴 아이템) 안쪽은 역스케일로 복원 */
+    #topNav .group {
+        transform-origin: center;
+        transform: scaleX(calc(1 / 0.6)); /* = 1.6666… */
+        transition: transform 0.3s ease;
+    }
+
+    /* ── 2) expanded 상태: 모두 원래대로 ── */
+    #topNav.expanded {
+        transform: translateX(-4.5rem) scaleX(1);
+    }
+
+    #topNav.expanded .group {
+        transform: scaleX(1);
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const nav = document.getElementById('topNav');
+        const items = nav.querySelectorAll('.group');
+        const megaMenu = document.getElementById('megaMenu');
+        const megaGroups = megaMenu.querySelectorAll('.mega-group');
+        let hideTimer, lastIdx = 0;
+
+        // 1) .group 요소에만 mouseenter → show(idx)
+        items.forEach((it, i) => {
+            it.addEventListener('mouseenter', () => {
+                clearTimeout(hideTimer);
+                lastIdx = i;
+                megaMenu.style.display = 'block';
+                nav.classList.add('expanded');
+                megaMenu.classList.add('shifted');
+                megaGroups.forEach((g, j) => {
+                    g.classList.toggle('bg-gray-50', j === i);
+                });
+            });
+        });
+
+        // 2) nav 전체를 벗어나면 200ms 뒤 hide()
+        nav.addEventListener('mouseleave', () => {
+            hideTimer = setTimeout(() => {
+                megaMenu.style.display = 'none';
+                nav.classList.remove('expanded');
+                megaMenu.classList.remove('shifted');
+            }, 200);
+        });
+
+        // 3) megaMenu 로 진입하면 hide 취소, 벗어나면 hide
+        megaMenu.addEventListener('mouseenter', () => clearTimeout(hideTimer));
+        megaMenu.addEventListener('mouseleave', () => {
+            hideTimer = setTimeout(() => {
+                megaMenu.style.display = 'none';
+                nav.classList.remove('expanded');
+            }, 200);
+        });
+    });
+</script>

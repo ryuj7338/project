@@ -23,8 +23,7 @@ public class AutoUploadService {
 
     @PostConstruct
     public void init() {
-        System.out.println("[DEBUG] @PostConstruct 호출됨");
-        System.out.println("[DEBUG] 주입된 uploadDir: " + uploadDir);
+
         autoUpload(); // 자동 실행
     }
 

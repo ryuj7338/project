@@ -2,23 +2,19 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
 
+<c:set var="pageColor" value="dark"/>
 <%@ include file="../common/head.jspf" %>
+<%@ include file="../common/nav.jspf" %>
 <%@ include file="../common/toastUiEditorLib.jspf" %>
 
-<!-- Toast UI Viewer CSS/JS -->
 <link rel="stylesheet" href="https://uicdn.toast.com/editor/latest/toastui-editor.min.css"/>
 <script src="https://uicdn.toast.com/editor/latest/toastui-editor-all.min.js"></script>
-
-<!-- FontAwesome & jQuery -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 
 <c:set var="pageTitle" value="게시글 상세보기"/>
-
-
 <c:url var="incUrl" value="/usr/post/doIncreaseHitCountRd"/>
 
-<!-- 게시글, 좋아요, 조회수 증가 스크립트 -->
 <script>
     const currentPostId = ${post.id}; // 반드시 맨 위에서 전역 선언
 
@@ -92,153 +88,125 @@
     }
 </script>
 
-<!-- 본문 영역 -->
-<section class="mt-8 px-4">
-    <table border="1" cellspacing="0" cellpadding="5" style="width:100%;border-collapse:collapse;">
-        <tr>
-            <th>게시판 번호</th>
-            <td>${post.boardId}</td>
-        </tr>
-        <tr>
-            <th>글 번호</th>
-            <td>${post.id}</td>
-        </tr>
-        <tr>
-            <th>작성일</th>
-            <td>${post.regDate}</td>
-        </tr>
-        <tr>
-            <th>수정일</th>
-            <td>${post.updateDate}</td>
-        </tr>
-        <tr>
-            <th>작성자</th>
-            <td>${post.extra__writer}</td>
-        </tr>
-        <tr>
-            <th>조회수</th>
-            <td><span class="post-detail__hit-count">${post.hit}</span></td>
-        </tr>
-        <tr>
-            <th>좋아요</th>
-            <td>
-                <button id="likeButton" class="btn btn-outline btn-success">
-                    <c:choose>
-                        <c:when test="${isAlreadyAddLikeRp}"><i class="fas fa-heart text-red-500"></i></c:when>
-                        <c:otherwise><i class="far fa-heart"></i></c:otherwise>
-                    </c:choose>
-                    <span id="likeCount">${post.like}</span>
-                </button>
-            </td>
-        </tr>
-        <tr>
-            <th>제목</th>
-            <td>${post.title}</td>
-        </tr>
-        <tr>
-            <th>내용</th>
-            <td>
-                <div id="viewer"></div>
-                <textarea id="viewerContent" style="display:none;">
-          <c:out value="${filteredBody}" escapeXml="false"/>
-        </textarea>
-            </td>
-        </tr>
-    </table>
-    <div class="mt-4">
-        <button onclick="history.back()">뒤로가기</button>
-        <c:if test="${post.userCanModify}"><a href="/usr/post/modify?id=${post.id}">수정</a></c:if>
-        <c:if test="${post.userCanDelete}"><a href="/usr/post/doDelete?id=${post.id}">삭제</a></c:if>
+
+<body class="bg-gray-100 text-black min-h-screen flex flex-col">
+
+<main class="flex-grow px-4 py-8">
+    <div class="max-w-4xl mx-auto bg-white shadow rounded-lg p-6">
+        <h1 class="text-2xl font-bold mb-2">${post.title}</h1>
+        <div class="text-sm text-gray-600 mb-4">
+            작성자: ${post.extra__writer} | 등록일: ${post.regDate} |
+            조회수: <span class="post-detail__hit-count">${post.hit}</span>
+        </div>
+
+        <div class="mb-4">
+            <button id="likeButton" class="text-red-500 text-lg">
+                <c:choose>
+                    <c:when test="${isAlreadyAddLikeRp}">
+                        <i class="fas fa-heart"></i>
+                    </c:when>
+                    <c:otherwise>
+                        <i class="far fa-heart"></i>
+                    </c:otherwise>
+                </c:choose>
+                <span id="likeCount">${post.like}</span>
+            </button>
+        </div>
+
+        <div id="viewer" class="border-t pt-4 mt-4"></div>
+        <textarea id="viewerContent" style="display:none;">
+<c:out value="${filteredBody}" escapeXml="false"/>
+    </textarea>
+        <c:if test="${not empty resourceList}">
+            <div class="max-w-4xl mx-auto mt-6 bg-gray-100 p-4 rounded shadow">
+                <h2 class="text-lg font-semibold mb-2">첨부파일</h2>
+                <ul class="list-disc list-inside text-blue-700">
+                    <c:forEach var="file" items="${resourceList}">
+                        <li>
+                            <a href="/file/download?path=${file.savedName}&original=${file.originalName}" download>
+                                    ${file.originalName}
+                            </a>
+                        </li>
+                    </c:forEach>
+                </ul>
+            </div>
+        </c:if>
+
+        <div class="mt-6 flex justify-between">
+            <button onclick="history.back()" class="text-blue-600 hover:underline">뒤로가기</button>
+            <div class="space-x-4">
+                <c:if test="${post.userCanModify}">
+                    <a href="/usr/post/modify?id=${post.id}" class="text-yellow-600 hover:underline">수정</a>
+                </c:if>
+                <c:if test="${post.userCanDelete}">
+                    <a href="/usr/post/doDelete?id=${post.id}" class="text-red-600 hover:underline">삭제</a>
+                </c:if>
+            </div>
+        </div>
     </div>
-</section>
 
-<!-- 댓글 작성 폼 -->
-<section class="mt-8 px-4">
-    <c:if test="${rq.isLogined()}">
-        <form id="commentForm" action="/usr/comment/doWrite" method="POST" onsubmit="return (function(f){
-      f.body.value=f.body.value.trim();
-      if(f.body.value.length<3){alert('3글자 이상 입력하세요');f.body.focus();return false;}
-      return true;
-    })(this);">
-            <input type="hidden" name="relTypeCode" value="post"/>
-            <input type="hidden" name="relId" value="${post.id}"/>
-            <table border="1" cellspacing="0" cellpadding="5" style="width:100%;border-collapse:collapse;">
-                <tr>
-                    <th>댓글 입력</th>
-                    <td><textarea name="body" placeholder="내용을 입력하세요"></textarea></td>
-                </tr>
-                <tr>
-                    <td colspan="2">
-                        <button>작성</button>
-                    </td>
-                </tr>
-            </table>
-        </form>
-    </c:if>
-    <c:if test="${!rq.isLogined()}">댓글 작성을 위해 <a href="../member/login">로그인</a>이 필요합니다</c:if>
-</section>
+    <!-- 댓글 영역 -->
+    <div class="max-w-4xl mx-auto mt-8 bg-white shadow rounded-lg p-6">
+        <h2 class="text-lg font-semibold mb-4">댓글</h2>
 
-<!-- 댓글 리스트 -->
-<section class="mt-8 px-4">
-    <table border="1" cellspacing="0" cellpadding="5" style="width:100%;border-collapse:collapse;">
-        <thead>
-        <tr>
-            <th>작성일</th>
-            <th>작성자</th>
-            <th>내용</th>
-            <th>좋아요</th>
-            <th>수정</th>
-            <th>삭제/답글</th>
-        </tr>
-        </thead>
-        <tbody id="comments-container">
-        <c:forEach var="c" items="${comments}">
-            <tr class="reply-row ${c.parentId != 0 ? 'reply-child' : ''}" data-comment-id="${c.id}"
-                data-parent-id="${c.parentId}">
-                <td>${c.regDate}</td>
-                <td>${c.extra__writer}</td>
-                <td class="comment-body-cell">
-                    <c:if test="${fn:trim(c.parentId) ne '0'}">
-                        <span class="reply-arrow">↳</span>
-                    </c:if>
-                    <span id="comment-${c.id}">${c.body}</span>
-                    <form id="modify-form-${c.id}" style="display:none;">
-                        <input type="text" name="reply-text-${c.id}" value="${c.body}"/>
-                        <button type="button" onclick="doModifyReply(${c.id})">저장</button>
+        <c:if test="${rq.isLogined()}">
+            <form id="commentForm" method="POST" class="space-y-2">
+                <input type="hidden" name="relTypeCode" value="post"/>
+                <input type="hidden" name="relId" value="${post.id}"/>
+                <textarea name="body" class="w-full border p-2 rounded" placeholder="댓글을 입력하세요" required></textarea>
+                <button class="bg-blue-500 text-white px-4 py-1 rounded">작성</button>
+            </form>
+        </c:if>
+        <c:if test="${!rq.isLogined()}">
+            <p>댓글 작성을 위해 <a href="/usr/member/login" class="text-blue-600 underline">로그인</a>이 필요합니다.</p>
+        </c:if>
+
+        <div id="comments-container" class="mt-6">
+            <c:forEach var="c" items="${comments}">
+                <div class="border-t pt-4 mt-4 ${c.parentId != 0 ? 'pl-6' : ''}">
+                    <div class="text-sm text-gray-600 mb-1">
+                            ${c.extra__writer} | ${c.regDate}
+                    </div>
+                    <div class="flex justify-between">
+                        <div>
+                            <c:if test="${c.parentId != 0}">
+                                <span class="text-gray-400 mr-1">↳</span>
+                            </c:if>
+                            <span id="comment-${c.id}">${c.body}</span>
+                        </div>
+                        <div class="flex space-x-2 text-sm text-gray-500">
+                            <button class="comment-like-btn" data-rel-id="${c.id}">
+                                <c:choose>
+                                    <c:when test="${c.alreadyLiked}">
+                                        <i class="fas fa-heart text-red-500"></i>
+                                    </c:when>
+                                    <c:otherwise>
+                                        <i class="far fa-heart"></i>
+                                    </c:otherwise>
+                                </c:choose>
+                                <span class="like-count">${c.like}</span>
+                            </button>
+                            <c:if test="${c.userCanModify}">
+                                <button onclick="toggleModifybtn(${c.id})">수정</button>
+                            </c:if>
+                            <c:if test="${c.userCanDelete}">
+                                <a href="/usr/comment/doDelete?id=${c.id}&postId=${post.id}"
+                                   onclick="return confirm('삭제하시겠습니까?')">삭제</a>
+                            </c:if>
+                            <button class="reply-btn" data-parent-id="${c.id}">답글</button>
+                        </div>
+                    </div>
+                    <form id="modify-form-${c.id}" style="display:none;" class="mt-2">
+                        <input type="text" name="reply-text-${c.id}" value="${c.body}" class="border p-1 w-full"/>
+                        <button type="button" onclick="doModifyReply(${c.id})" class="text-blue-600 mt-1">저장</button>
                     </form>
-                </td>
-                <td>
-                    <button class="comment-like-btn" data-rel-id="${c.id}">
-                <span class="heart">
-                    <c:choose>
-                        <c:when test="${c.alreadyLiked}">
-                            <i class="fas fa-heart text-red-500"></i>
-                        </c:when>
-                        <c:otherwise>
-                            <i class="far fa-heart"></i>
-                        </c:otherwise>
-                    </c:choose>
-                </span>
-                        <span class="like-count">${c.like}</span>
-                    </button>
-                </td>
-                <td>
-                    <c:if test="${c.userCanModify}">
-                        <button onclick="toggleModifybtn(${c.id})">수정</button>
-                    </c:if>
-                </td>
-                <td>
-                    <c:if test="${c.userCanDelete}">
-                        <a href="/usr/comment/doDelete?id=${c.id}&postId=${post.id}"
-                           onclick="return confirm('삭제하시겠습니까?')">삭제</a>
-                    </c:if>
-                    <button type="button" class="reply-btn" data-parent-id="${c.id}">답글</button>
-                </td>
-            </tr>
-        </c:forEach>
-        </tbody>
-    </table>
-</section>
+                </div>
+            </c:forEach>
+        </div>
+    </div>
+</main>
+
+<%@ include file="../common/foot.jspf" %>
 
 <!-- 대댓글 삽입 & 좋아요 스크립트 -->
 <script>
@@ -285,8 +253,7 @@
     $(document).on("click", ".reply-btn", function () {
         $(".reply-form-container").remove(); // 기존 폼 제거
         const parentId = $(this).data("parent-id");
-
-        const html = '' +
+        const html =
             '<div class="reply-form-container" style="margin-top: 6px;">' +
             '<form class="reply-form" data-parent-id="' + parentId + '">' +
             '<textarea name="body" rows="2" placeholder="답글을 입력하세요" required></textarea>' +
@@ -295,8 +262,8 @@
             '</form>' +
             '</div>';
 
-        // 댓글 내용(td.comment-body-cell) 안으로 삽입
-        $(this).closest("tr").find("td.comment-body-cell").append(html);
+        // div 구조에 맞게 삽입
+        $(this).closest('.border-t').append(html);
     });
 
     // 답글 취소
@@ -307,7 +274,6 @@
     // 대댓글 등록
     $(document).on("submit", ".reply-form", function (e) {
         e.preventDefault();
-
         const $f = $(this);
         const parentId = $f.data("parent-id");
         const body = $f.find("textarea[name='body']").val().trim();
@@ -330,45 +296,29 @@
 
             const c = res.data1;
             const writer = c.extra__writer || "익명";
-            const isMine = (c.memberId === loginedMemberId);
-            const likeCount = c.likeCount || 0;
 
-            let modifyBtn = '';
-            if (isMine) {
-                modifyBtn = '<button onclick="toggleModifybtn(' + c.id + ')">수정</button>';
-            }
-
-            const row = '' +
-                '<tr class="reply-row reply-child" data-comment-id="' + c.id + '" data-parent-id="' + c.parentId + '">' +
-                '<td>' + (c.regDate ? c.regDate.substring(0, 10) : '') + '</td>' +
-                '<td>' + writer + '</td>' +
-                '<td class="comment-body-cell">' +
-                '<span class="reply-arrow">↳</span>' +  // 화살표 추가
-                '<span id="comment-' + c.id + '">' + c.body + '</span>' +
-                '<form id="modify-form-' + c.id + '" style="display:none;">' +
-                '<input type="text" name="reply-text-' + c.id + '" value="' + c.body + '" />' +
-                '<button type="button" onclick="doModifyReply(' + c.id + ')">저장</button>' +
-                '</form>' +
-                '</td>' +
-                '<td>' +
-                '<button class="comment-like-btn" data-rel-id="' + c.id + '">' +
-                '<span class="heart"><i class="far fa-heart"></i></span>' +
-                '<span class="like-count">' + likeCount + '</span>' +
-                '</button>' +
-                '</td>' +
-                '<td>' + modifyBtn + '</td>' +
-                '<td>' +
-                '<button class="reply-btn" data-parent-id="' + c.id + '">답글</button>' +
-                '</td>' +
-                '</tr>';
-
-
-            $('tr[data-comment-id="' + parentId + '"]').after(row);
+            // 새 대댓글 div를 생성하여 부모 댓글 아래에 삽입
+            const $parentCommentDiv = $('#comment-' + parentId).closest('.border-t');
+            $parentCommentDiv.after(
+                '<div class="border-t pt-4 mt-4 pl-6">' +
+                '<div class="text-sm text-gray-600 mb-1">' +
+                writer + ' | ' + (c.regDate ? c.regDate : '') +
+                '</div>' +
+                '<div class="flex justify-between">' +
+                '<div><span class="text-gray-400 mr-1">↳</span>' +
+                '<span id="comment-' + c.id + '">' + c.body + '</span></div>' +
+                '<div class="flex space-x-2 text-sm text-gray-500">' +
+                // 좋아요/수정/삭제/답글 버튼들... (필요에 따라 추가)
+                '</div>' +
+                '</div>' +
+                '</div>'
+            );
             $f.closest(".reply-form-container").remove();
         }, "json").fail(function () {
             alert("등록 중 오류");
         });
     });
+
 
     // 최상단 댓글 등록
     $("#commentForm").on("submit", function (e) {
@@ -410,6 +360,4 @@
         margin-right: 4px;
     }
 </style>
-
-
-<%@ include file="../common/foot.jspf" %>
+</body>

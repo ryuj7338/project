@@ -108,45 +108,56 @@ public class UsrPostController {
         return Ut.jsReplace(userCanModifyRd.getResultCode(), userCanModifyRd.getMsg(), "../post/detail?id=" + id);
     }
 
+    // import org.springframework.web.bind.annotation.GetMapping;
+
     @RequestMapping("/usr/post/doDelete")
     @ResponseBody
-    public String doDelete(HttpServletRequest req, int id) {
+    public String doDelete(HttpServletRequest req,
+                           @RequestParam int id) {
+
 
         Rq rq = (Rq) req.getAttribute("rq");
 
         Post post = postService.getPostById(id);
-
         if (post == null) {
             return Ut.jsHistoryBack("F-1", Ut.f("%d번 게시글은 없습니다.", id));
         }
 
-        ResultData userCanDeleteRd = postService.userCanDelete(rq.getLoginedMemberId(), post);
-
-        if (userCanDeleteRd.isFail()) {
-            return Ut.jsHistoryBack(userCanDeleteRd.getResultCode(), userCanDeleteRd.getMsg());
-        }
-
-        if (userCanDeleteRd.isSuccess()) {
-            postService.deletePost(id);
+        ResultData rd = postService.userCanDelete(rq.getLoginedMemberId(), post);
+        if (rd.isFail()) {
+            return Ut.jsHistoryBack(rd.getResultCode(), rd.getMsg());
         }
 
         postService.deletePost(id);
 
-        return Ut.jsReplace(userCanDeleteRd.getResultCode(), userCanDeleteRd.getMsg(), "../post/list");
+        String listUrl = req.getContextPath() + "/usr/post/list?boardId=" + post.getBoardId();
+
+        return Ut.jsReplace(
+                rd.getResultCode(),
+                rd.getMsg(),
+                listUrl
+        );
     }
 
-    @RequestMapping("/usr/post/write")
-    public String showWrite(@RequestParam int boardId, HttpServletRequest req, Model model) {
+
+    @GetMapping("/usr/post/write")
+    public String showWrite(HttpServletRequest req,
+                            Model model,
+                            @RequestParam int boardId) {
 
         Rq rq = (Rq) req.getAttribute("rq");
 
-        if (boardId == 5 && !rq.getIsAdmin()) {
-            return rq.historyBackOnView("관리자 권한이 필요합니다.");
+        Board board = boardService.getBoardById(boardId);
+        if (board == null) {
+            return rq.historyBackOnView("존재하지 않는 게시판입니다.");
         }
 
         model.addAttribute("boardId", boardId);
-        return "/usr/post/write";
+        model.addAttribute("board", board);
+
+        return "usr/post/write";
     }
+
 
     @RequestMapping("/usr/post/doWrite")
     @ResponseBody
@@ -246,7 +257,7 @@ public class UsrPostController {
         post.setBody(finalBody.toString());
         postService.update(post);
 
-        return Ut.jsReplace("S-1", "게시물이 작성되었습니다.", "/usr/post/detail?id=" + post.getId());
+        return Ut.jsReplace("S-1", "게시물이 작성되었습니다.", "/usr/post/list?boardId=" + post.getBoardId());
     }
 
 
@@ -264,15 +275,17 @@ public class UsrPostController {
         }
 
         List<Comment> comments = commentService.getForPrintComments(loginedMemberId, "post", id);
-
-
-        for(Comment comment : comments) {
+        for (Comment comment : comments) {
             comment.setUserCanDelete(comment.getMemberId() == loginedMemberId);
             comment.setUserCanModify(comment.getMemberId() == loginedMemberId);
         }
 
-        // 🔁 이제는 하나의 리스트만 사용
         List<Resource> resourceList = resourceService.getFilesByPostId(id);
+
+        // ✅ 자동 첨부파일 중 본문에 사용된 파일만 추출
+        List<Resource> autoResources = resourceService.getResourcesByPostId(0);
+        List<Resource> matchedFileInfos = resourceService.extractMatchedFileInfos(autoResources, post.getBody());
+        model.addAttribute("matchedFileInfos", matchedFileInfos);
 
         String filteredBody = removeDownloadLinks(post.getBody());
 
@@ -311,7 +324,11 @@ public class UsrPostController {
 
 
     @RequestMapping("/usr/post/list")
-    public String showList(HttpServletRequest req, Model model, @RequestParam(defaultValue = "0") int boardId, @RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "") String searchKeyword, @RequestParam(defaultValue = "title") String searchType) {
+    public String showList(HttpServletRequest req, Model model,
+                           @RequestParam(defaultValue = "0") int boardId,
+                           @RequestParam(defaultValue = "1") int page,
+                           @RequestParam(defaultValue = "") String searchKeyword,
+                           @RequestParam(defaultValue = "title") String searchType) {
 
         Rq rq = (Rq) req.getAttribute("rq");
 
@@ -321,48 +338,94 @@ public class UsrPostController {
             return rq.historyBackOnView("존재하지 않는 게시판입니다.");
         }
 
-
         int postsCount = postService.getPostCount(boardId, searchKeyword, searchType);
         int itemsInAPage = 10;
-
         int pagesCount = (int) Math.ceil(postsCount / (double) itemsInAPage);
 
+        // ✅ 페이징 처리된 리스트만 사용
         List<Post> posts = postService.getForPosts(boardId, itemsInAPage, page, searchKeyword, searchType);
-        posts = postService.getPostsByBoardId(boardId);
+
+        // 페이지 블록 계산
+        int pageBlockSize = 10;
+        int currentBlock = (int) Math.ceil((double) page / pageBlockSize);
+        int startPage = (currentBlock - 1) * pageBlockSize + 1;
+        int endPage = Math.min(startPage + pageBlockSize - 1, pagesCount);
 
         model.addAttribute("searchKeyword", searchKeyword);
         model.addAttribute("searchType", searchType);
         model.addAttribute("pagesCount", pagesCount);
         model.addAttribute("postsCount", postsCount);
-        model.addAttribute("posts", posts);
+        model.addAttribute("posts", posts); // ✅ 수정된 posts
         model.addAttribute("boardId", boardId);
         model.addAttribute("board", board);
         model.addAttribute("page", page);
+        model.addAttribute("startPage", startPage);
+        model.addAttribute("endPage", endPage);
+        model.addAttribute("hasPrev", startPage > 1);
+        model.addAttribute("hasNext", endPage < pagesCount);
+        model.addAttribute("prevPage", startPage - 1);
+        model.addAttribute("nextPage", endPage + 1);
 
         return "usr/post/list";
     }
 
     @RequestMapping("/usr/news/list")
-    public String newsList(HttpServletRequest req, Model model, @RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "7") int boardId) {
+    public String newsList(HttpServletRequest req, Model model,
+                           @RequestParam(defaultValue = "1") int page,
+                           @RequestParam(defaultValue = "7") int boardId) {
 
         Rq rq = (Rq) req.getAttribute("rq");
-
         Board board = boardService.getBoardById(boardId);
 
         try {
-            List<News> allNews = newsService.crawlNews("경호", 5);
+            // “경호” 뉴스 3건, “보안” 뉴스 3건 크롤링
+            List<News> guardNews = newsService.crawlNews("경호", 3);
+            List<News> securityNews = newsService.crawlNews("보안", 3);
 
+            // 둘을 합치고, 날짜 내림차순 정렬 (필요시)
+            List<News> allNews = new ArrayList<>();
+            allNews.addAll(guardNews);
+            allNews.addAll(securityNews);
+            allNews.sort(Comparator.comparing(News::getDate).reversed());
+
+            // 페이징 설정
             int itemsInAPage = 5;
-            int totalNewsCount = allNews.size();
-            int pagesCount = (int) Math.ceil((double) totalNewsCount / itemsInAPage);
+            int totalCount = allNews.size();
+            int pagesCount = (int) Math.ceil((double) totalCount / itemsInAPage);
 
+            // 최소 1, 최대 pagesCount 사이로 page 값을 조정
+            if (pagesCount == 0) {
+                pagesCount = 1;
+            }
+            page = Math.max(1, Math.min(page, pagesCount));
+
+            // 블록 페이징 계산 (기존 코드)
+            int pageBlockSize = 4;
+            int currentBlock = (int) Math.ceil((double) page / pageBlockSize);
+            int startPage = (currentBlock - 1) * pageBlockSize + 1;
+            int endPage = Math.min(startPage + pageBlockSize - 1, pagesCount);
+
+            // 실제 리스트 인덱스 계산
             int fromIndex = (page - 1) * itemsInAPage;
-            int toIndex = Math.min(fromIndex + itemsInAPage, totalNewsCount);
+            int toIndex = Math.min(fromIndex + itemsInAPage, totalCount);
+
+            // fromIndex 가 음수거나, toIndex 가 totalCount 보다 큰 경우 방어
+            fromIndex = Math.max(0, fromIndex);
+            toIndex = Math.max(fromIndex, toIndex);
+
+            // 안전하게 서브리스트 추출
             List<News> pagedNews = allNews.subList(fromIndex, toIndex);
 
+            // 모델에 담기
             model.addAttribute("newsList", pagedNews);
             model.addAttribute("pagesCount", pagesCount);
             model.addAttribute("page", page);
+            model.addAttribute("startPage", startPage);
+            model.addAttribute("endPage", endPage);
+            model.addAttribute("hasPrev", startPage > 1);
+            model.addAttribute("hasNext", endPage < pagesCount);
+            model.addAttribute("prevPage", startPage - 1);
+            model.addAttribute("nextPage", endPage + 1);
             model.addAttribute("board", board);
             model.addAttribute("boardId", boardId);
 
@@ -371,7 +434,7 @@ public class UsrPostController {
             return rq.historyBackOnView("뉴스 데이터를 불러오는데 실패했습니다.");
         }
 
-        return "/usr/news/newslist";
+        return "usr/news/newslist";
     }
 
 
@@ -422,15 +485,37 @@ public class UsrPostController {
         int numOfRows = 10;
         int totalCount = allLaws.size();
         int pagesCount = (int) Math.ceil((double) totalCount / numOfRows);
+
+        // 페이지 유효값 클램프
+        page = Math.max(1, Math.min(page, pagesCount == 0 ? 1 : pagesCount));
+
+        // 한 블록에 보여줄 페이지 수
+        int pageBlockSize = 3;
+        // 현재 블록 (1-based)
+        int currentBlock = (int) Math.ceil((double) page / pageBlockSize);
+        // 블록의 시작/끝 페이지
+        int startPage = (currentBlock - 1) * pageBlockSize + 1;
+        int endPage = Math.min(startPage + pageBlockSize - 1, pagesCount);
+
+        // 리스트 잘라내기
         int fromIndex = Math.min((page - 1) * numOfRows, totalCount);
         int toIndex = Math.min(fromIndex + numOfRows, totalCount);
         List<Map<String, String>> pagedLaws = allLaws.subList(fromIndex, toIndex);
 
+        // 모델에 담기
         model.addAttribute("lawList", pagedLaws);
         model.addAttribute("pageNo", page);
         model.addAttribute("pagesCount", pagesCount);
         model.addAttribute("numOfRows", numOfRows);
         model.addAttribute("keyword", keyword);
+
+        // 블록 페이징 정보
+        model.addAttribute("startPage", startPage);
+        model.addAttribute("endPage", endPage);
+        model.addAttribute("hasPrev", startPage > 1);
+        model.addAttribute("hasNext", endPage < pagesCount);
+        model.addAttribute("prevPage", startPage - 1);
+        model.addAttribute("nextPage", endPage + 1);
 
         return "/usr/law/lawlist";
     }
