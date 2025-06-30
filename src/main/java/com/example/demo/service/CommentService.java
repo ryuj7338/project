@@ -51,7 +51,6 @@ public class CommentService {
 
         Comment comment = commentRepository.getComment(newId);
 
-
         if (relTypeCode.equals("post")) {
             // 일반 댓글 (게시글에 대한 댓글)
             Post post = postRepository.getPostById(relId);
