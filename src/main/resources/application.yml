@@ -30,8 +30,8 @@ mybatis:
 custom:
   uploadDirPath: C:/Users/rjh73/IdeaProjects/project/src/main/resources/static/uploadFiles
 
-openai:
-  api-key:
+#openai:
+#  api-key:
 
 
 
