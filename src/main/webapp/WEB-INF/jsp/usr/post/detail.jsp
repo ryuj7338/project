@@ -297,7 +297,7 @@
             const c = res.data1;
             const writer = c.extra__writer || "익명";
 
-            // 새 대댓글 div를 생성하여 부모 댓글 아래에 삽입
+
             const $parentCommentDiv = $('#comment-' + parentId).closest('.border-t');
             $parentCommentDiv.after(
                 '<div class="border-t pt-4 mt-4 pl-6">' +
@@ -308,7 +308,7 @@
                 '<div><span class="text-gray-400 mr-1">↳</span>' +
                 '<span id="comment-' + c.id + '">' + c.body + '</span></div>' +
                 '<div class="flex space-x-2 text-sm text-gray-500">' +
-                // 좋아요/수정/삭제/답글 버튼들... (필요에 따라 추가)
+
                 '</div>' +
                 '</div>' +
                 '</div>'
